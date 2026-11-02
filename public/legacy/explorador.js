@@ -597,14 +597,14 @@
       if (!window.MAPAS) {
         await new Promise((ok, mal) => {
           const s = document.createElement("script");
-          s.src = "mapas.js?v=14"; s.onload = ok; s.onerror = mal;
+          s.src = "/legacy/mapas.js?v=14"; s.onload = ok; s.onerror = mal;
           document.body.appendChild(s);
         });
       }
       if (!window.MONITOR_MAPAS) {
         await new Promise((ok, mal) => {
           const s = document.createElement("script");
-          s.src = "monitor-mapas.js?v=1"; s.onload = ok; s.onerror = mal;
+          s.src = "/legacy/monitor-mapas.js?v=1"; s.onload = ok; s.onerror = mal;
           document.body.appendChild(s);
         });
       }

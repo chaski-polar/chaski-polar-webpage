@@ -7,6 +7,7 @@ type LegacyPageProps = {
   html: string
   stylesheet: string
   scripts: string[]
+  bodyClass?: string
 }
 
 function bodyMarkup(html: string) {
@@ -15,7 +16,7 @@ function bodyMarkup(html: string) {
   return parsed.body.innerHTML
 }
 
-function LegacyPage({ html, stylesheet, scripts }: LegacyPageProps) {
+function LegacyPage({ html, stylesheet, scripts, bodyClass = '' }: LegacyPageProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const markup = useMemo(() => bodyMarkup(html), [html])
@@ -23,6 +24,9 @@ function LegacyPage({ html, stylesheet, scripts }: LegacyPageProps) {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
+
+    const previousBodyClass = document.body.className
+    document.body.className = bodyClass
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
@@ -58,12 +62,13 @@ function LegacyPage({ html, stylesheet, scripts }: LegacyPageProps) {
 
     return () => {
       cancelled = true
+      document.body.className = previousBodyClass
       link.remove()
       loadedScripts.forEach((script) => script.remove())
       document.querySelectorAll('[data-legacy-asset="true"]').forEach((node) => node.remove())
       root.replaceChildren()
     }
-  }, [scripts, stylesheet])
+  }, [bodyClass, scripts, stylesheet])
 
   return (
     <div className="legacy-page" ref={rootRef}>
@@ -106,7 +111,7 @@ function App() {
   }, [])
 
   if (path === '/juego' || path === '/juego.html') {
-    return <LegacyPage html={gameHtml} stylesheet="juego.css" scripts={gameScripts} />
+    return <LegacyPage html={gameHtml} stylesheet="juego.css" scripts={gameScripts} bodyClass="juego" />
   }
 
   return <LegacyPage html={explorerHtml} stylesheet="estilos.css" scripts={explorerScripts} />
