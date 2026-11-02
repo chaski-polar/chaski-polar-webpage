@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Del hielo a la anchoveta — juego</title>
+<meta name="description" content="Juego pixel con datos reales: lee señales satelitales de la Antártida y del Perú y predice cómo le fue a la pesca cada año.">
+<meta name="theme-color" content="#0a1a33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css?v=8">
+<link rel="stylesheet" href="juego.css?v=9">
+</head>
+<body class="juego">
+<a class="saltar" href="#juego">Saltar al juego</a>
+<header class="barra">
+  <a class="marca" href="index.html" aria-label="Mar Frío, inicio">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="#63cde8" stroke-width="2"/><path d="M5 18c4-3 7 3 11 0s7 3 11 0" fill="none" stroke="#3fc28c" stroke-width="2.2" stroke-linecap="round"/><path d="M9 11l7-5 7 5" fill="none" stroke="#eaf3f5" stroke-width="2" stroke-linejoin="round"/></svg>
+    <span>Mar Frío</span>
+  </a>
+  <nav class="nav" aria-label="Secciones">
+    <a href="index.html">Explorar</a>
+    <a href="juego.html" aria-current="page">Jugar</a>
+    <button class="btn-sonido" type="button" id="sonido" aria-pressed="false" title="Activar o silenciar los sonidos 8-bit"><img alt="" id="sonido-ico"><span id="sonido-txt">Sonido: no</span></button>
+  </nav>
+</header>
+
+<main id="juego" class="juego-main">
+  <!-- INICIO -->
+  <section class="pantalla inicio" id="p-inicio" aria-labelledby="t-inicio">
+    <div>
+      <p class="etiqueta-pix">Misión satelital, 1999–2024</p>
+      <h1 id="t-inicio">Del <span class="hielo">hielo</span> a la <span class="verde">anchoveta</span></h1>
+      <p class="lead">Trabajas vigilando el mar desde el espacio. Cada ronda es un año real entre 1999 y 2024. Con pocas horas de satélite tienes que adivinar cómo le fue a la pesca peruana.</p>
+      <ol class="pasos">
+        <li><span><strong>Mira señales.</strong> Hay cuatro de la Antártida y tres de la costa del Perú. Cada una cuesta 1 hora de satélite y tienes 14 horas para 8 años.</span></li>
+        <li><span><strong>Decide.</strong> ¿La pesca subió o bajó respecto al año anterior? Si eliges “con certeza” ganas más, pero también pierdes más.</span></li>
+        <li><span><strong>Compara con lo que pasó.</strong> Verás el dato real de la FAO y qué señales acertaron.</span></li>
+      </ol>
+      <form id="form-inicio">
+        <fieldset>
+          <legend>¿Qué quieres predecir?</legend>
+          <div class="especies">
+            <label class="especie"><input type="radio" name="especie" value="anchoveta" checked><span><img alt="" data-icono="anchoveta"><span class="nom">Anchoveta<small>pesca del Perú, en toneladas</small></span></span></label>
+            <label class="especie"><input type="radio" name="especie" value="concha"><span><img alt="" data-icono="concha"><span class="nom">Concha de abanico<small>cosecha del Perú, en toneladas</small></span></span></label>
+          </div>
+        </fieldset>
+        <button class="btn btn-claro" type="submit">Empezar la expedición ▶</button>
+        <p class="record" id="record"></p>
+        <p class="teclas-ayuda solo-teclado">Con teclado: <kbd>1</kbd>–<kbd>7</kbd> miran señales, <kbd>S</kbd> o <kbd>B</kbd> eligen subió o bajó, <kbd>D</kbd> o <kbd>C</kbd> la seguridad y <kbd>Enter</kbd> confirma.</p>
+      </form>
+    </div>
+    <figure class="hangar px-caja" style="margin:0">
+      <p class="etiqueta-pix">Tu barco de investigación</p>
+      <canvas id="voxel-inicio" width="160" height="112" role="img" aria-label="Barco de investigación girando sobre el mar, entre manchas verdes de fitoplancton"></canvas>
+      <figcaption><p>El fitoplancton, en verde, es el comienzo de la cadena: lo comen el kril en la Antártida y la anchoveta frente al Perú.</p></figcaption>
+    </figure>
+  </section>
+
+  <!-- RONDA -->
+  <section class="pantalla ronda" id="p-ronda" hidden aria-labelledby="t-anio">
+    <div class="hud px-caja">
+      <div class="anio" id="t-anio">2015</div>
+      <div class="dato">Ronda <b><span id="n-ronda">1</span>/8</b></div>
+      <div class="dato">Puntos <b id="n-puntos">0</b></div>
+      <div class="dato">Horas <b id="n-horas">14</b><span class="horas" id="horas" aria-hidden="true"></span></div>
+    </div>
+
+    <div class="ronda-grid">
+      <div class="col-escena">
+        <div class="escena-marco px-caja" id="escena-marco">
+          <canvas id="escena" width="320" height="180" role="img" aria-label="Corte del mar desde la costa del Perú hasta la Antártida. Cada recuadro con dibujo y número es una señal que puedes mirar, puesta en el lugar del mar que mide."></canvas>
+        </div>
+        <div class="guia-caja" id="guia" hidden><p id="guia-txt"></p><button class="btn" type="button" id="guia-saltar">Saltar guía</button></div>
+        <p class="pista">Toca un recuadro del dibujo (las que tienen <b>?</b> aún no las miras) o una tarjeta para mandar el satélite. <span class="solo-teclado">También puedes usar las teclas <kbd>1</kbd>–<kbd>7</kbd>.</span></p>
+        <details class="leyenda px-caja" id="leyenda"><summary>¿Qué es cada dibujo?</summary><ul id="leyenda-lista"></ul></details>
+        <p class="vh" aria-live="polite" id="anuncio"></p>
+      </div>
+
+      <div class="col-panel">
+        <div class="grupo antartida">
+          <h2>Antártida</h2>
+          <p>Península Antártica e isla Rey Jorge, donde está la Base Machu Picchu del Perú.</p>
+          <div class="senales" id="senales-antartida"></div>
+        </div>
+        <div class="grupo peru">
+          <h2>Costa del Perú</h2>
+          <p>Mar frente a Chimbote y la franja costera donde se mide El Niño.</p>
+          <div class="senales" id="senales-peru"></div>
+        </div>
+
+        <div class="decision px-caja" id="decision">
+          <h2 id="pregunta">¿Cómo le fue a la anchoveta?</h2>
+          <div class="opciones" role="group" aria-label="Tu predicción">
+            <button class="btn opcion" type="button" data-dir="sube" aria-pressed="false"><span><span class="flecha" aria-hidden="true">▲</span> Subió</span><kbd>S</kbd></button>
+            <button class="btn opcion" type="button" data-dir="baja" aria-pressed="false"><span><span class="flecha" aria-hidden="true">▼</span> Bajó</span><kbd>B</kbd></button>
+          </div>
+          <div class="seguridad" role="group" aria-label="Qué tan seguro es tu pronóstico">
+            <span>Seguridad:</span>
+            <button class="btn" type="button" data-seg="dudas" aria-pressed="true">Con dudas (+50 / −20) <kbd>D</kbd></button>
+            <button class="btn" type="button" data-seg="certeza" aria-pressed="false">Con certeza (+100 / −70) <kbd>C</kbd></button>
+          </div>
+          <button class="btn btn-claro" type="button" id="confirmar" disabled><span>Confirmar pronóstico</span><kbd>Enter</kbd></button>
+        </div>
+
+        <div class="revelacion px-caja" id="revelacion" hidden aria-live="polite">
+          <div class="titulo">
+            <h2 id="r-titulo">Bajó</h2>
+            <span class="puntos-ronda" id="r-puntos"></span>
+          </div>
+          <div class="comparar" id="r-comparar"></div>
+          <div class="cadena" id="r-cadena"></div>
+          <div class="explicacion" id="r-explicacion"></div>
+          <button class="btn btn-claro" type="button" id="siguiente"><span>Siguiente año</span><kbd>Enter</kbd></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL -->
+  <section class="pantalla final" id="p-final" hidden aria-labelledby="t-final">
+    <div class="cabeza px-caja">
+      <div class="final-voxel"><canvas id="voxel-final" width="160" height="112" role="img" aria-label="Iceberg girando sobre el mar, rodeado de fitoplancton"></canvas></div>
+      <div>
+        <p class="etiqueta-pix">Puntaje final</p>
+        <div class="total" id="f-total">0</div>
+        <h2 id="t-final">Terminaste la expedición</h2>
+        <div class="rango" id="f-rango"></div>
+        <p class="resumen" id="f-resumen"></p>
+      </div>
+    </div>
+
+    <div class="leccion px-caja">
+      <div>
+        <h3>¿Qué señales sirven de verdad?</h3>
+        <p id="f-leccion"></p>
+        <p>Una barra hacia la derecha quiere decir que, cuando esa señal sube, la pesca suele subir. Hacia la izquierda, que suele bajar. Una barra corta significa que la señal casi no ayuda. En verde, las señales de la costa del Perú; en celeste, las de la Antártida.</p>
+      </div>
+      <div>
+        <div class="ejes-txt" aria-hidden="true"><span></span><span><span>la pesca baja</span><span>la pesca sube</span></span><span></span></div>
+        <div class="barras-r" id="f-barras"></div>
+      </div>
+    </div>
+
+    <div class="leccion px-caja" style="grid-template-columns:1fr">
+      <h3>Tus años</h3>
+      <ul class="historial" id="f-historial"></ul>
+    </div>
+
+    <div class="acciones-final">
+      <button class="btn btn-claro" type="button" id="otra-vez">Jugar otra vez ▶</button>
+      <a class="btn" href="index.html">Ver los datos en el globo</a>
+    </div>
+    <p class="cautela">Ojo: estas son asociaciones, no causas probadas. La pesca también depende de cuotas, vedas, precios y del esfuerzo de los barcos, y la cosecha de concha depende de cuánto siembran los productores. Datos: FAO, NOAA, NSIDC y ESA OC-CCI.</p>
+  </section>
+</main>
+
+<script src="datos.js?v=8"></script>
+<script src="comun.js?v=8"></script>
+<script src="juego-sprites.js?v=2"></script>
+<script src="juego-pixel.js?v=5"></script>
+<script src="juego-escena.js?v=5"></script>
+<script src="juego.js?v=22"></script>
+</body>
+</html>

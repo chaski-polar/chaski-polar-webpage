@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mar Frío — explorador</title>
+<meta name="description" content="Explorador de datos satelitales: fitoplancton antártico y ecosistemas marinos del Perú, 1998–2025.">
+<meta name="theme-color" content="#071e33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css?v=13">
+<style>
+  /* ---------- escenario: globo grande + relato al lado ---------- */
+  .barra-explorar { background: rgba(7, 30, 51, 0.94); border-bottom: 1px solid rgba(36, 80, 122, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .titulo-barra { margin: 0 auto 0 18px; font-family: var(--serif); font-size: 1.12rem; font-weight: 400; color: var(--niebla); letter-spacing: 0; }
+  .escenario { display: grid; grid-template-columns: minmax(0, 1fr) clamp(320px, 31vw, 430px); height: 100vh; height: 100svh; min-height: 560px; padding-top: 63px; }
+  .lienzo-globo { position: relative; min-width: 0; overflow: hidden; }
+  #globo { position: absolute; inset: 0 0 96px 0; }
+  #globo canvas { display: block; }
+  .pista {
+    position: absolute; left: 20px; top: 16px; z-index: 4; margin: 0; max-width: 34ch;
+    font-size: .9rem; color: var(--niebla); transition: opacity .6s;
+  }
+  .pista.oculta { opacity: 0; pointer-events: none; }
+
+  .mando {
+    position: absolute; z-index: 6; left: 16px; right: 16px; bottom: max(14px, env(safe-area-inset-bottom));
+    max-width: 880px; margin: 0 auto;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 8px 16px; align-items: center;
+    padding: 12px 16px; border-radius: var(--r-medio);
+    background: rgba(12, 44, 74, 0.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--linea);
+  }
+  .mando label { font-size: .9rem; color: var(--niebla); }
+  .mando .fila { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .mando input[type="range"] { width: 100%; accent-color: var(--frio); }
+  .mes-actual { font-family: var(--serif); font-size: 1.35rem; min-width: 7.2ch; text-align: right; }
+  .leyenda { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; font-size: .82rem; color: var(--niebla); }
+  .leyenda .rampa { height: 7px; }
+  .boton-redondo {
+    width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--linea);
+    background: var(--corriente); color: var(--hielo); cursor: pointer; display: grid; place-items: center; flex: none;
+  }
+  .boton-redondo:hover { border-color: var(--niebla); }
+  .boton-redondo svg { width: 16px; height: 16px; }
+
+  /* relato: texto que cambia según lo que se toca */
+  .relato { position: relative; overflow-y: auto; overscroll-behavior: contain; border-left: 1px solid var(--linea); background: linear-gradient(180deg, rgba(12, 44, 74, 0.55), rgba(7, 30, 51, 0.9)); }
+  .relato-contenido { padding: 26px 26px 32px; animation: entrar .35s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes entrar { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .relato h2 { font-size: clamp(1.6rem, 2.2vw, 2.1rem); margin-bottom: .25em; }
+  .relato h3 { font-size: 1.15rem; margin: 26px 0 10px; }
+  .relato p { color: var(--niebla); }
+  .relato p strong { color: var(--hielo); font-weight: 700; }
+  .relato .region { color: var(--niebla); margin: -2px 0 14px; }
+  .volver { background: none; border: 0; padding: 4px 0; margin: 0 0 12px; color: var(--frio); font: inherit; font-size: .92rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .volver:hover { color: var(--hielo); }
+  .nota-historia { border-left: 3px solid var(--fito); padding: 4px 0 4px 14px; margin: 0 0 18px; }
+  .nota-historia p { color: var(--hielo); margin: 0; }
+  .nota-historia b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.15rem; margin-bottom: 4px; }
+
+  .lista-zonas { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .fila-zona {
+    width: 100%; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+    padding: 9px 10px; border-radius: var(--r-chico); border: 1px solid transparent; background: none; color: var(--hielo);
+    font: inherit; font-size: .95rem; text-align: left; cursor: pointer; transition: background-color .2s, border-color .2s;
+  }
+  .fila-zona:hover { background: rgba(36, 80, 122, 0.35); border-color: var(--linea); }
+  .fila-zona .punto { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(234, 243, 245, .7); }
+  .fila-zona .valor { color: var(--niebla); font-variant-numeric: tabular-nums; }
+  .fila-zona small { display: block; color: var(--tenue); font-size: .8rem; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: inherit; font-size: .9rem; cursor: pointer; padding: 7px 14px; border-radius: 999px;
+    border: 1px solid var(--linea); background: var(--profundo); color: var(--hielo);
+    transition: background-color .2s, border-color .2s, color .2s; touch-action: manipulation;
+  }
+  .chip:hover { border-color: var(--niebla); }
+  .chip[aria-pressed="true"] { background: var(--hielo); color: var(--abismo); border-color: var(--hielo); }
+
+  .historias { display: grid; gap: 8px; }
+  .historia {
+    display: block; width: 100%; text-align: left; font: inherit; cursor: pointer; color: var(--hielo);
+    padding: 12px 14px; border-radius: var(--r-chico); border: 1px solid var(--linea); background: rgba(12, 44, 74, 0.7);
+    transition: border-color .2s, background-color .2s;
+  }
+  .historia:hover { border-color: var(--fito); background: rgba(63, 194, 140, 0.08); }
+  .historia b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.12rem; }
+  .historia span { font-size: .88rem; color: var(--niebla); }
+
+  .cifras { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 14px; }
+  .cifra b { display: block; font-family: var(--serif); font-size: 1.7rem; font-weight: 400; line-height: 1.1; }
+  .cifra span { font-size: .85rem; color: var(--niebla); }
+  .grafico { position: relative; height: 200px; margin-bottom: 6px; }
+  .barras-nut { display: grid; gap: 8px; }
+  .barras-nut div { display: grid; grid-template-columns: 70px 1fr 56px; gap: 8px; align-items: center; font-size: .9rem; }
+  .barras-nut i { display: block; height: 8px; border-radius: 4px; background: var(--fito); }
+  .barras-nut .valor { text-align: right; color: var(--niebla); font-variant-numeric: tabular-nums; }
+  .conexiones { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .conexiones button { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 90px 48px; gap: 10px; align-items: center; background: none; border: 0; padding: 6px 4px; color: var(--hielo); font: inherit; font-size: .92rem; text-align: left; cursor: pointer; border-radius: 6px; }
+  .conexiones button:hover { background: rgba(36, 80, 122, 0.35); }
+  .conexiones .eje { position: relative; height: 8px; border-radius: 4px; background: rgba(36, 80, 122, .45); }
+  .conexiones .eje i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 4px; }
+  .conexiones .r { text-align: right; color: var(--niebla); font-variant-numeric: tabular-nums; }
+  .acciones-relato { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .nota { font-size: .85rem; color: var(--tenue); }
+  .ver-relato { display: none; }
+
+  .tip {
+    background: rgba(7,30,51,.95); border: 1px solid var(--linea); border-radius: 8px;
+    padding: 8px 10px; font-family: var(--sans); font-size: .88rem; color: var(--hielo); max-width: 240px;
+  }
+  .tip b { font-family: var(--serif); font-size: 1.05rem; font-weight: 500; }
+
+  /* ---------- secciones de lectura ---------- */
+  main { position: relative; z-index: 2; }
+  .seccion { padding: clamp(64px, 10vw, 120px) clamp(16px, 4vw, 56px); max-width: 1180px; margin: 0 auto; }
+  .pregunta { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: clamp(24px, 5vw, 72px); align-items: start; }
+  .pregunta blockquote {
+    margin: 0; font-family: var(--serif); font-style: italic; font-size: clamp(1.4rem, 2.4vw, 1.9rem); line-height: 1.3;
+    color: var(--hielo); border-left: 3px solid var(--frio); padding-left: 22px;
+  }
+  .pregunta .cuerpo p { color: var(--niebla); max-width: 62ch; }
+  .pregunta .cuerpo strong { color: var(--hielo); }
+
+  .hallazgo {
+    display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); gap: clamp(20px, 4vw, 56px);
+    align-items: center; padding: clamp(36px, 6vw, 64px) 0; border-top: 1px solid var(--linea);
+  }
+  .hallazgo:nth-of-type(even) { grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr); }
+  .hallazgo:nth-of-type(even) .texto { order: 2; }
+  .hallazgo .texto p { color: var(--niebla); max-width: 52ch; }
+  .hallazgo .r { font-family: var(--serif); font-size: 2.8rem; line-height: 1; margin: 6px 0 14px; color: var(--hielo); }
+  .hallazgo .r small { font-family: var(--sans); font-size: .9rem; color: var(--niebla); display: block; margin-top: 6px; }
+  .lienzo { position: relative; height: clamp(260px, 32vw, 360px); }
+  .encabezado-seccion { max-width: 64ch; margin-bottom: 18px; }
+  .encabezado-seccion p { color: var(--niebla); }
+
+  /* ---------- monitor integrado desde data_treatment ---------- */
+  .monitor { border: 1px solid var(--linea); border-radius: 22px; padding: clamp(22px, 4vw, 38px); background: linear-gradient(145deg, rgba(19,60,97,.92), rgba(7,30,51,.92)); }
+  .monitor-cabecera { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 22px; }
+  .monitor-cabecera h2 { margin-bottom: 8px; }
+  .monitor-cabecera p { color: var(--niebla); max-width: 66ch; margin-bottom: 0; }
+  .monitor-meta { color: var(--tenue); font-size: .84rem; white-space: nowrap; }
+  .monitor-controles { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 20px; }
+  .monitor-controles label { display: grid; gap: 5px; color: var(--niebla); font-size: .85rem; }
+  .monitor-controles select { min-width: 190px; }
+  .monitor-estado { margin: 0 0 14px; color: var(--niebla); font-size: .9rem; }
+  .monitor-grafico { position: relative; height: clamp(280px, 36vw, 390px); }
+  .monitor-notas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+  .monitor-nota { padding: 12px 14px; border: 1px solid var(--linea); border-radius: var(--r-chico); background: rgba(7,30,51,.55); }
+  .monitor-nota b { display: block; font-family: var(--serif); font-size: 1.25rem; font-weight: 500; }
+  .monitor-nota span { color: var(--niebla); font-size: .82rem; }
+  .monitor-aviso { margin: 18px 0 0; padding: 12px 14px; border-left: 3px solid var(--nino); background: rgba(240,138,75,.08); color: var(--niebla); font-size: .88rem; }
+  .monitor-aviso strong { color: var(--hielo); }
+  @media (max-width: 700px) {
+    .monitor-cabecera { display: block; }
+    .monitor-meta { display: block; margin-top: 8px; }
+    .monitor-controles label, .monitor-controles select { width: 100%; }
+    .monitor-notas { grid-template-columns: 1fr; }
+  }
+
+  .llamada {
+    position: relative; overflow: hidden; border-radius: 22px; padding: clamp(32px, 6vw, 64px);
+    background: var(--profundo); border: 1px solid var(--linea);
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: center;
+  }
+  .llamada p { color: var(--niebla); max-width: 50ch; }
+  .llamada .cardumen { width: 100%; height: auto; }
+
+  table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  .fuentes th, .fuentes td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+  .fuentes th { color: var(--niebla); font-weight: 400; }
+  .fuentes td:first-child { color: var(--hielo); }
+  .tabla-envoltura { overflow-x: auto; }
+
+  footer { padding: 40px clamp(16px, 4vw, 56px) 60px; color: var(--tenue); font-size: .9rem; max-width: 1180px; margin: 0 auto; }
+
+  /* ---------- v3: mapa satelital, línea de tiempo, recorrido, comparación ---------- */
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .mando { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "var mes" "tiempo tiempo" "ley ley"; gap: 6px 16px; padding: 10px 16px 8px; }
+  .mando .var { grid-area: var; gap: 10px; flex-wrap: wrap; }
+  .mando .tiempo { grid-area: tiempo; }
+  .mando .mes-actual { grid-area: mes; }
+  .mando .leyenda { grid-area: ley; }
+  #globo { bottom: 150px; }
+  .interruptor {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px;
+    border: 1px solid var(--linea); background: var(--abismo); color: var(--niebla); font: inherit; font-size: .86rem; cursor: pointer;
+    white-space: nowrap; transition: color .2s, border-color .2s; touch-action: manipulation;
+  }
+  .interruptor:hover { color: var(--hielo); border-color: var(--niebla); }
+  .interruptor .perilla { position: relative; width: 28px; height: 16px; border-radius: 8px; background: var(--linea); transition: background-color .2s; flex: none; }
+  .interruptor .perilla::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--hielo); transition: transform .2s; }
+  .interruptor[aria-pressed="true"] { color: var(--hielo); }
+  .interruptor[aria-pressed="true"] .perilla { background: var(--fito); }
+  .interruptor[aria-pressed="true"] .perilla::after { transform: translateX(12px); }
+  .interruptor[disabled] { opacity: .45; cursor: not-allowed; }
+  .interruptor[hidden] { display: none; }
+
+  .pista-tiempo { position: relative; flex: 1; min-width: 0; padding-top: 40px; }
+  #franja-nino { position: absolute; left: 0; top: 20px; width: 100%; height: 20px; pointer-events: none; }
+  .pista-tiempo input[type="range"] { position: relative; display: block; width: 100%; margin: 0; height: 26px; background: transparent; }
+  .eventos { position: absolute; left: 0; right: 0; top: 0; height: 19px; }
+  .evento {
+    position: absolute; top: 0; transform: translateX(-50%); padding: 0 7px; border-radius: 999px;
+    border: 1px solid rgba(240, 138, 75, .7); background: rgba(7, 30, 51, .9); color: var(--nino);
+    font: inherit; font-size: .74rem; line-height: 1.4; cursor: pointer; font-variant-numeric: tabular-nums; touch-action: manipulation;
+    transition: background-color .2s, color .2s;
+  }
+  .evento:hover, .evento[aria-current="true"] { background: var(--nino); color: var(--abismo); }
+
+  .ley-marcas { position: relative; height: 15px; font-size: .72rem; color: var(--niebla); font-variant-numeric: tabular-nums; }
+  .ley-marcas span { position: absolute; top: 2px; transform: translateX(-50%); white-space: nowrap; }
+  .ley-marcas:empty { display: none; }
+
+  .lectura {
+    position: absolute; z-index: 5; left: 0; top: 0; pointer-events: none;
+    background: rgba(7, 30, 51, .92); border: 1px solid var(--linea); border-radius: 8px; padding: 6px 9px;
+    font-size: .82rem; line-height: 1.35; color: var(--hielo); white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .lectura small { display: block; color: var(--niebla); font-size: .76rem; }
+  .estado-mapa { position: absolute; right: 18px; top: 16px; z-index: 4; margin: 0; font-size: .82rem; color: var(--niebla); }
+
+  .recorrido-cta {
+    display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: center; width: 100%; text-align: left; cursor: pointer;
+    padding: 16px 18px; margin: 6px 0 4px; border-radius: var(--r-medio); border: 1px solid rgba(63, 194, 140, .6);
+    background: linear-gradient(120deg, rgba(63, 194, 140, .16), rgba(99, 205, 232, .06)); color: var(--hielo); font: inherit;
+    transition: border-color .2s;
+  }
+  .recorrido-cta:hover { border-color: var(--fito); }
+  .recorrido-cta b { font-family: var(--serif); font-weight: 500; font-size: 1.25rem; }
+  .recorrido-cta span { grid-column: 1; font-size: .9rem; color: var(--niebla); }
+  .recorrido-cta svg { grid-row: 1 / 3; grid-column: 2; width: 34px; height: 34px; }
+  .pasos { display: flex; gap: 4px; margin: 0 0 16px; padding: 0; list-style: none; }
+  .pasos li { flex: 1; height: 4px; border-radius: 2px; background: var(--linea); }
+  .pasos li.hecho { background: var(--fito); }
+  .paso-num { font-size: .85rem; color: var(--niebla); margin: 0 0 4px; }
+  .nav-pasos { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .dato-clave { margin: 14px 0 16px; padding: 14px 16px; border-radius: var(--r-chico); background: rgba(7, 30, 51, .55); border: 1px solid var(--linea); }
+  .dato-clave b { display: block; font-family: var(--serif); font-size: 1.9rem; font-weight: 400; line-height: 1.1; }
+  .dato-clave span { font-size: .88rem; color: var(--niebla); }
+
+  .comparar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 8px; }
+  .comparar figure { margin: 0; min-width: 0; }
+  .comparar canvas { width: 100%; height: auto; border-radius: var(--r-chico); border: 1px solid var(--linea); background: #0a2540; display: block; }
+  .comparar figcaption { font-size: .85rem; color: var(--niebla); margin-top: 6px; }
+  .comparar figcaption b { display: block; color: var(--hielo); font-weight: 700; }
+  .selectores { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .selectores label { display: grid; gap: 4px; font-size: .85rem; color: var(--niebla); }
+  .selectores select { width: 100%; min-width: 0; }
+  .selectores .ancho { grid-column: 1 / -1; }
+
+  /* ---------- v4: atlas en dos vistas ---------- */
+  .selector-vista { position: absolute; z-index: 6; left: 16px; top: 14px; max-width: min(440px, calc(100% - 32px)); }
+  .vistas { display: inline-flex; padding: 3px; gap: 3px; border-radius: 12px; background: rgba(7, 30, 51, .88); border: 1px solid var(--linea); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .vistas button {
+    display: grid; gap: 1px; text-align: left; padding: 6px 14px 7px; border: 0; border-radius: 9px; background: none; color: var(--niebla);
+    font: inherit; cursor: pointer; touch-action: manipulation; transition: background-color .2s, color .2s;
+  }
+  .vistas button b { font-size: .95rem; color: var(--hielo); }
+  .vistas button small { font-size: .74rem; line-height: 1.2; }
+  .vistas button:hover { background: rgba(36, 80, 122, .45); }
+  .vistas button[aria-pressed="true"] { background: var(--hielo); color: var(--profundo); }
+  .vistas button[aria-pressed="true"] b { color: var(--abismo); }
+  .vistas button:focus-visible { outline: 3px solid var(--frio); outline-offset: 1px; }
+  .estilos-mapa { display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: .78rem; color: var(--niebla); }
+  .estilos-mapa[hidden] { display: none; }
+  .estilos-mapa span { margin-right: 2px; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+  .estilos-mapa button { font: inherit; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--linea); background: rgba(7, 30, 51, .88); color: var(--hielo); cursor: pointer; }
+  .estilos-mapa button:hover { background: rgba(36, 80, 122, .6); }
+  .estilos-mapa button[aria-pressed="true"] { background: var(--hielo); color: var(--abismo); }
+  .estilos-mapa button:focus-visible { outline: 3px solid var(--frio); outline-offset: 1px; }
+  .vista-nota { margin: 5px 2px 0; font-size: .8rem; line-height: 1.35; color: var(--niebla); text-shadow: 0 1px 3px rgba(0,0,0,.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .selector-vista .pista { position: static; margin: 2px 2px 0; font-size: .8rem; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+  /* pantallas bajas (laptops de 674 a 760 px de alto): mando más compacto para que el globo gane altura */
+  @media (max-height: 760px) and (min-width: 901px) {
+    .mando { padding: 6px 14px 4px; gap: 2px 14px; }
+    .mes-actual { font-size: 1.15rem; }
+    .pista-tiempo { padding-top: 32px; }
+    .eventos { height: 17px; }
+    .evento { font-size: .7rem; line-height: 1.3; }
+    #franja-nino { top: 17px; height: 15px; }
+    .pista-tiempo input[type="range"] { height: 22px; }
+    .boton-redondo { width: 34px; height: 34px; }
+    .leyenda { font-size: .76rem; }
+    .ley-marcas { height: 13px; font-size: .68rem; }
+    .vistas button { padding: 4px 12px 5px; }
+  }
+  .lectura b { display: block; }
+  .tag-nasa { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; background: #0b3d91; color: #fff; font-size: .7rem; font-weight: 700; letter-spacing: .04em; vertical-align: 1px; }
+  .siguiente-paso { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--frio); background: rgba(12, 44, 74, .6); border-radius: 0 var(--r-chico) var(--r-chico) 0; color: var(--niebla); max-width: 72ch; }
+  .siguiente-paso strong { color: var(--hielo); }
+
+  @media (max-width: 900px) {
+    .pregunta, .hallazgo, .hallazgo:nth-of-type(even), .llamada { grid-template-columns: 1fr; }
+    .hallazgo:nth-of-type(even) .texto { order: 0; }
+    .escenario { display: block; height: auto; min-height: 0; }
+    .lienzo-globo { height: 74svh; min-height: 480px; }
+    .relato { border-left: 0; border-top: 1px solid var(--linea); overflow: visible; scroll-margin-top: 64px; }
+    .titulo-barra { display: none; }
+    .ver-relato { display: inline-flex; position: absolute; z-index: 7; left: 50%; transform: translateX(-50%); bottom: 162px; padding: 9px 16px; font-size: .92rem; white-space: nowrap; max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; background: var(--hielo); color: var(--abismo); border-color: var(--hielo); }
+    .ver-relato[hidden] { display: none; }
+  }
+  @media (max-width: 640px) {
+    .mando { grid-template-columns: minmax(0, 1fr); grid-template-areas: "var" "mes" "tiempo" "ley"; padding: 10px 12px 6px; left: 8px; right: 8px; gap: 4px; }
+    .mando .var { gap: 8px; }
+    .mando .var label { display: none; }
+    .mando .var select { flex: 1; min-width: 0; }
+    .mes-actual { text-align: left; font-size: 1.1rem; }
+    .evento { font-size: .68rem; padding: 0 5px; }
+    .leyenda { font-size: .72rem; gap: 6px; }
+    #globo { bottom: 210px; }
+    .ver-relato { bottom: 222px; }
+    .relato-contenido { padding: 22px 16px 28px; }
+    .selector-vista { left: 8px; top: 8px; max-width: calc(100% - 16px); }
+    .leyenda { grid-template-columns: 1fr 1fr; gap: 2px 8px; }
+    .leyenda .ley-escala { grid-column: 1 / -1; grid-row: 1; }
+    #ley-max { text-align: right; }
+    .vistas button { padding: 5px 10px 6px; }
+    .vistas button small { font-size: .7rem; }
+    .vista-nota { font-size: .74rem; }
+    .pista { display: none; }
+  }
+</style>
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+
+<header class="barra barra-explorar">
+  <a class="marca" href="index.html" aria-label="Mar Frío, inicio">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="#63cde8" stroke-width="2"/><path d="M5 18c4-3 7 3 11 0s7 3 11 0" fill="none" stroke="#3fc28c" stroke-width="2.2" stroke-linecap="round"/><path d="M9 11l7-5 7 5" fill="none" stroke="#eaf3f5" stroke-width="2" stroke-linejoin="round"/></svg>
+    <span>Mar Frío</span>
+  </a>
+  <h1 class="titulo-barra">Del hielo antártico al mar peruano</h1>
+  <nav class="nav" aria-label="Secciones">
+    <a href="index.html" aria-current="page">Explorar</a>
+    <a href="#contenido">Hallazgos</a>
+    <a href="juego.html">Jugar</a>
+  </nav>
+</header>
+
+<section class="escenario" aria-label="Explorador del globo">
+  <div class="lienzo-globo">
+    <div id="globo" role="img" aria-label="Globo terrestre con las zonas de estudio del Perú y la Antártida coloreadas según el dato del mes elegido"></div>
+    <div class="selector-vista">
+      <div class="vistas" role="group" aria-label="Nivel de detalle del globo">
+        <button type="button" data-vista="simple" aria-pressed="true"><b>Simple</b><small>zonas y conexiones</small></button>
+        <button type="button" data-vista="detallada" aria-pressed="false"><b>Detallada</b><small>relieve y mapa del satélite</small></button>
+      </div>
+      <p class="vista-nota" id="vista-nota" aria-live="polite"></p>
+      <div class="estilos-mapa" id="estilos-mapa" role="group" aria-label="Estilo del mapa del satélite" hidden><span>Mapa:</span><button type="button" data-estilo="bandas" aria-pressed="true">Bandas</button><button type="button" data-estilo="celdas" aria-pressed="false">Celdas</button><button type="button" data-estilo="suave" aria-pressed="false">Suave</button></div>
+      <p class="pista" id="pista">Arrastra para girar. Toca una zona, una corriente o el mar.</p>
+    </div>
+    <button class="btn ver-relato" type="button" id="ver-relato" hidden>Ver los datos</button>
+    <div class="lectura" id="lectura" aria-hidden="true" hidden></div>
+    <div class="mando" role="group" aria-label="Controles del globo">
+      <div class="fila var">
+        <label for="variable">Dato</label>
+        <select id="variable"></select>
+      </div>
+      <div class="fila tiempo">
+        <button class="boton-redondo" id="reproducir" type="button" aria-label="Reproducir la animación por meses">
+          <svg viewBox="0 0 16 16" aria-hidden="true" id="icono-play"><path d="M4 2l10 6-10 6z" fill="currentColor"/></svg>
+        </button>
+        <div class="pista-tiempo">
+          <div class="eventos" id="eventos" role="group" aria-label="Saltar a un evento de El Niño"></div>
+          <canvas id="franja-nino" aria-hidden="true"></canvas>
+          <input type="range" id="mes" min="0" max="0" step="1" aria-label="Mes" aria-describedby="franja-txt">
+          <span class="sr" id="franja-txt">Detrás del deslizador, las barras naranjas marcan los meses en que el mar frente al norte del Perú (Niño 1+2) estuvo más cálido que lo normal.</span>
+        </div>
+      </div>
+      <div class="mes-actual num" id="mes-txt">—</div>
+      <div class="leyenda" aria-hidden="true">
+        <span id="ley-min">menos que lo normal</span>
+        <div class="ley-escala"><div class="rampa" id="ley-rampa"></div><div class="ley-marcas" id="ley-marcas"></div></div>
+        <span id="ley-max">más que lo normal</span>
+      </div>
+    </div>
+  </div>
+  <aside class="relato" id="relato" aria-live="polite" aria-label="Lo que muestra el globo"></aside>
+</section>
+
+<main id="contenido">
+  <section class="seccion pregunta">
+    <blockquote>¿Cómo se asocian los cambios del fitoplancton antártico con la vida marina del Perú?</blockquote>
+    <div class="cuerpo">
+      <p>El <strong>fitoplancton</strong> son algas microscópicas que flotan en el mar. Son la base de la cadena: las come el zooplancton, al zooplancton lo come la anchoveta y a la anchoveta, las aves, los lobos marinos y la pesca.</p>
+      <p>Los satélites miden el fitoplancton por el color del agua: más verde quiere decir más <strong>clorofila</strong>. Juntamos 27 años de esas mediciones para cinco zonas del Perú y dos de la Antártida, más temperatura, turbidez, viento, hielo marino, nutrientes y la pesca de cada año.</p>
+      <p>La idea es buscar <strong>asociaciones</strong>. Que dos cosas cambien juntas no prueba que una cause a la otra, y una pesca más baja tampoco significa que la especie desaparezca.</p>
+    </div>
+  </section>
+
+  <section class="seccion" aria-labelledby="t-hallazgos">
+    <div class="encabezado-seccion">
+      <h2 id="t-hallazgos">Lo que muestran los datos</h2>
+      <p>Cuatro resultados calculados con las series de esta página (1998–2024). El número grande es la correlación <em>r</em>: va de −1 a 1, y cerca de 0 significa que no hay relación lineal.</p>
+    </div>
+
+    <article class="hallazgo">
+      <div class="texto">
+        <h3>La costa manda: El Niño frente al Perú</h3>
+        <div class="r num" id="r1">—<small>temperatura de Niño 1+2 frente a la pesca de anchoveta</small></div>
+        <p>Cuando el mar frente al Perú se calienta (barras naranjas), sube menos agua fría y rica en nutrientes, hay menos fitoplancton y la pesca de anchoveta cae. Se ve en 1998, 2015–2016 y 2023.</p>
+      </div>
+      <div class="lienzo"><canvas id="g1" aria-label="Gráfico: anomalía de temperatura Niño 1+2 en barras y pesca de anchoveta del Perú en línea, 1998 a 2024"></canvas></div>
+    </article>
+
+    <article class="hallazgo">
+      <div class="texto">
+        <h3>La Antártida va a su propio ritmo</h3>
+        <div class="r num" id="r2">—<small>fitoplancton de Rey Jorge frente al de Chimbote</small></div>
+        <p>Los años con mucho fitoplancton en la isla Rey Jorge no coinciden con los del Perú. En 2023 la Antártida tuvo un pico y el Perú, por El Niño, una caída. Si hay un vínculo, no es directo ni del mismo año.</p>
+      </div>
+      <div class="lienzo"><canvas id="g2" aria-label="Gráfico: anomalía de clorofila en Rey Jorge y en Chimbote, 1998 a 2024"></canvas></div>
+    </article>
+
+    <article class="hallazgo">
+      <div class="texto">
+        <h3>El hielo marino antártico se desplomó desde 2016</h3>
+        <div class="r num" id="r3">—<small>millones de km² por debajo de lo normal en 2023</small></div>
+        <p>El hielo que rodea la Antártida fue estable o creció hasta 2015 y luego cayó a mínimos históricos. Bajo ese hielo vive el krill, la base de la cadena antártica. La pesca de krill (línea) depende más de los barcos y las cuotas que del hielo.</p>
+      </div>
+      <div class="lienzo"><canvas id="g3" aria-label="Gráfico: anomalía anual de la extensión del hielo marino antártico y pesca mundial de krill, 1998 a 2024"></canvas></div>
+    </article>
+
+    <article class="hallazgo">
+      <div class="texto">
+        <h3>Mucho nitrato, poco fitoplancton</h3>
+        <div class="r num" id="r4">—<small>veces más nitrato en Rey Jorge que en Chimbote</small></div>
+        <p>El agua antártica tiene muchísimos nutrientes y aun así menos fitoplancton que la costa peruana. Allí falta hierro y luz en invierno. Frente al Perú el viento hace subir agua profunda con nutrientes y hay sol todo el año.</p>
+      </div>
+      <div class="lienzo"><canvas id="g4" aria-label="Gráfico de barras: nitrato en superficie y clorofila promedio por zona"></canvas></div>
+    </article>
+  </section>
+
+  <section class="seccion">
+    <div class="monitor" id="monitor" aria-labelledby="t-monitor">
+      <div class="monitor-cabecera">
+        <div>
+          <h2 id="t-monitor">Monitor de condiciones</h2>
+          <p>Explora la señal ambiental mensual que alimenta los experimentos A y B: temperatura, clorofila, nutrientes, Niño 1+2 y biomasa observada en cruceros.</p>
+        </div>
+        <span class="monitor-meta" id="monitor-periodo">Cargando periodo…</span>
+      </div>
+      <div class="monitor-controles" role="group" aria-label="Filtros del monitor">
+        <label>Variable <select id="monitor-variable"></select></label>
+        <label>Escala <select id="monitor-escala"><option value="absolute">Valores</option><option value="anomaly">Anomalía frente al promedio mensual</option></select></label>
+      </div>
+      <p class="monitor-estado" id="monitor-estado" aria-live="polite"></p>
+      <div class="monitor-grafico"><canvas id="monitor-chart" aria-label="Serie mensual del monitor ambiental"></canvas></div>
+      <div class="monitor-notas" aria-label="Resumen del monitor">
+        <div class="monitor-nota"><b id="monitor-ultimo">—</b><span>último valor disponible</span></div>
+        <div class="monitor-nota"><b id="monitor-observados">—</b><span>meses con biomasa observada</span></div>
+        <div class="monitor-nota"><b id="monitor-nino">—</b><span>Niño 1+2 en el último mes</span></div>
+      </div>
+      <p class="monitor-aviso"><strong>Cómo leerlo:</strong> las variables ambientales provienen de reanálisis/modelos y OC-CCI; la biomasa solo aparece durante intervalos de crucero IMARPE. Este monitor describe asociaciones y cobertura de datos, no es una alerta ni una predicción pesquera.</p>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="llamada">
+      <div>
+        <h2>¿Puedes predecir la pesca leyendo satélites?</h2>
+        <p>Cada ronda es un año real entre 1999 y 2024. Tienes pocas horas de satélite para mirar señales de la Antártida y del Perú. Con eso decides si la anchoveta subió o bajó. Al final verás qué señales te sirvieron de verdad.</p>
+        <a class="btn btn-claro" href="juego.html">Empezar el juego</a>
+      </div>
+      <svg class="cardumen" viewBox="0 0 320 160" aria-hidden="true">
+        <defs><linearGradient id="gc" x1="0" x2="1"><stop offset="0" stop-color="#2c5aa0"/><stop offset=".5" stop-color="#1d9a8a"/><stop offset="1" stop-color="#7fcf4a"/></linearGradient></defs>
+        <g fill="url(#gc)" opacity=".9" id="peces"></g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="seccion" aria-labelledby="t-fuentes">
+    <div class="encabezado-seccion">
+      <h2 id="t-fuentes">Fuentes de datos</h2>
+      <p>Todo es de acceso libre y se descargó sin cuenta. Las zonas son cajas de latitud y longitud, y cada valor mensual es la mediana de los píxeles del satélite dentro de la caja. Los mapas del globo cubren del ecuador a los 70° S, entre los 92° y los 52° O.</p>
+    </div>
+    <div class="tabla-envoltura">
+    <table class="fuentes">
+      <thead><tr><th scope="col">Dato</th><th scope="col">Fuente</th><th scope="col">Periodo</th></tr></thead>
+      <tbody>
+        <tr><td>Clorofila-a (fitoplancton)<span class="tag-nasa" title="Incluye sensores de la NASA">NASA</span></td><td><a href="https://climate.esa.int/en/projects/ocean-colour/">ESA Ocean Colour CCI v6</a>, vía ERDDAP de NOAA NEFSC. Mezcla varios satélites, entre ellos SeaWiFS y MODIS-Aqua de la NASA</td><td class="num">1998–2026</td></tr>
+        <tr><td>Mapa de clorofila sobre el globo (celdas de 0,5°)<span class="tag-nasa" title="Incluye sensores de la NASA">NASA</span></td><td>ESA Ocean Colour CCI v6 (<code>occci_V6_monthly_4km</code>), vía <a href="https://comet.nefsc.noaa.gov/erddap/griddap/occci_V6_monthly_4km.html">ERDDAP de NOAA NEFSC</a>; media geométrica de 4 puntos por celda</td><td class="num">1998–2025</td></tr>
+        <tr><td>Mapa de temperatura sobre el globo (celdas de 1°)</td><td>NOAA Coral Reef Watch v3.1 (<code>CRW_sst_v3_1_monthly</code>), vía <a href="https://oceanwatch.pifsc.noaa.gov/erddap/griddap/CRW_sst_v3_1_monthly.html">NOAA OceanWatch</a>; anomalía frente a 1998–2020</td><td class="num">1998–2025</td></tr>
+        <tr><td>Turbidez del agua (Kd490)</td><td>ESA Ocean Colour CCI v6, vía <a href="https://oceanwatch.pifsc.noaa.gov/erddap/">NOAA OceanWatch</a></td><td class="num">1998–2026</td></tr>
+        <tr><td>Temperatura del mar</td><td>NOAA Coral Reef Watch v3.1 (OceanWatch)</td><td class="num">1985–2025</td></tr>
+        <tr><td>Salinidad</td><td>Satélite SMOS de la ESA (OceanWatch)</td><td class="num">2010–2025</td></tr>
+        <tr><td>Corrientes y nivel del mar<span class="tag-nasa" title="OSCAR es un producto de la NASA">NASA</span></td><td>OSCAR (NASA/ESR) y NOAA/NESDIS (OceanWatch)</td><td class="num">1993–2018</td></tr>
+        <tr><td>Viento sobre el mar</td><td>CCMP v2 de Remote Sensing Systems (OceanWatch)</td><td class="num">1993–2018</td></tr>
+        <tr><td>Aire en la Base Machu Picchu y la costa<span class="tag-nasa">NASA</span></td><td><a href="https://power.larc.nasa.gov/">NASA POWER</a> (MERRA-2 y CERES)</td><td class="num">1984–2024</td></tr>
+        <tr><td>Nitrato, fosfato y silicato</td><td><a href="https://www.ncei.noaa.gov/access/world-ocean-atlas-2023/">World Ocean Atlas 2023</a>, NOAA NCEI (promedio histórico)</td><td class="num">1955–2022</td></tr>
+        <tr><td>Hielo marino antártico</td><td><a href="https://nsidc.org/data/g02135">NSIDC Sea Ice Index G02135</a></td><td class="num">1979–2025</td></tr>
+        <tr><td>El Niño costero (Niño 1+2) y vientos antárticos (SAM)</td><td><a href="https://psl.noaa.gov/data/climateindices/">NOAA PSL</a></td><td class="num">1948–2026</td></tr>
+        <tr><td>Pesca de anchoveta, concha de abanico, krill y otras</td><td><a href="https://www.fao.org/fishery/en/collection/global_production">FAO Global Production 2026.1</a></td><td class="num">1950–2024</td></tr>
+        <tr><td>Atlas del globo</td><td>Países de <a href="https://www.naturalearthdata.com/">Natural Earth</a> (1:110 m) y mapa de alturas de <a href="https://github.com/vasturiano/three-globe">three-globe</a>, pintados en bandas planas</td><td>—</td></tr>
+        <tr><td>Referencias para contar El Niño</td><td><a href="https://science.nasa.gov/earth/earth-observatory/">NASA Earth Observatory</a> y <a href="https://svs.gsfc.nasa.gov/12176">NASA Scientific Visualization Studio</a></td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="siguiente-paso"><strong>Siguiente paso posible:</strong> la misión <strong>PACE</strong> de la NASA (sensor OCI, con datos desde febrero de 2024) mide la clorofila y además distingue tipos de fitoplancton. Sus datos piden una cuenta gratuita de NASA Earthdata, por eso todavía no están aquí.</p>
+  </section>
+</main>
+
+<footer>
+  Borrador de idea para el equipo de NASA Space Apps Challenge 2026. Sirve para decidir el enfoque; no es el proyecto final.
+</footer>
+
+<script src="vendor/globe.gl.min.js"></script>
+<script src="vendor/chart.umd.min.js"></script>
+<script src="img/earth-topology.js"></script>
+<script src="datos.js?v=13"></script>
+<script src="comun.js?v=13"></script>
+<script src="paises.js"></script>
+<script src="atlas.js?v=5"></script>
+<script src="monitor-data.js"></script>
+<script src="monitor-mapas.js"></script>
+<script src="explorador.js?v=30"></script>
+<script src="monitor.js?v=1"></script>
+</body>
+</html>
