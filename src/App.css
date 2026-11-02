@@ -30,6 +30,21 @@
 .mes-actual { font-family: var(--serif); font-size: 1.35rem; min-width: 7.2ch; text-align: right; }
 .leyenda { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; font-size: .82rem; color: var(--niebla); }
 .leyenda .rampa { height: 7px; }
+.zonas-inferior { grid-column: 1 / -1; display: flex; gap: 6px; overflow-x: auto; padding: 2px 0; scrollbar-width: thin; }
+.zona-punto { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 5px 8px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--niebla); font: inherit; font-size: .78rem; cursor: pointer; white-space: nowrap; }
+.zona-punto:hover, .zona-punto[aria-pressed=true] { color: var(--hielo); background: rgba(63, 194, 140, .12); border-color: var(--fito); }
+.zona-punto .punto, .fila-zona .punto { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--fito); border: 1px solid rgba(234, 243, 245, .7); }
+.lista-zonas { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.fila-zona { width: 100%; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: var(--r-chico); border: 1px solid transparent; background: none; color: var(--hielo); font: inherit; font-size: .95rem; text-align: left; cursor: pointer; }
+.fila-zona:hover, .fila-zona[aria-pressed=true] { background: rgba(36, 80, 122, .35); border-color: var(--fito); }
+.fila-zona small { display: block; color: var(--tenue); font-size: .8rem; }
+.fila-zona .valor { color: var(--niebla); }
+.relato h3 { font-size: 1.15rem; margin: 26px 0 10px; }
+.relato .region { color: var(--niebla); margin: -2px 0 14px; }
+.barras-nut { display: grid; gap: 8px; }
+.barras-nut div { display: grid; grid-template-columns: 70px 1fr 56px; gap: 8px; align-items: center; font-size: .9rem; }
+.barras-nut i { display: block; height: 8px; border-radius: 4px; background: var(--fito); }
+.barras-nut .valor { text-align: right; color: var(--niebla); font-variant-numeric: tabular-nums; }
 .relato { position: relative; overflow-y: auto; border-left: 1px solid var(--linea); background: linear-gradient(180deg, rgba(12, 44, 74, .55), rgba(7, 30, 51, .9)); }
 .relato-contenido { padding: 26px 26px 32px; animation: entrar .35s cubic-bezier(.2, .8, .2, 1); }
 .relato h2 { font-size: clamp(1.6rem, 2.2vw, 2.1rem); margin-bottom: .25em; }
