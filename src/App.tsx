@@ -1,19 +1,25 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import './estilos.css'
+import GlobePanel from './GlobePanel'
 
 type LegacyWindow = Window & { DATOS?: any; Globe?: any; MONITOR_DATA?: any }
-type GlobeVariable = 'clorofila' | 'temperatura' | 'hielo'
-type GlobePoint = { nombre: string; region: string; lat: number; lon: number; value: number; key: string }
 
 const runtimeScripts = ['/assets/vendor/globe.gl.min.js', '/assets/data/datos.js?v=14', '/assets/data/monitor-data.js?v=1']
 let runtimePromise: Promise<void> | null = null
 
 function loadScript(src: string) {
   return new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`)
+    if (existing) {
+      if (existing.dataset.loaded === 'true') return resolve()
+      existing.addEventListener('load', () => resolve(), { once: true })
+      existing.addEventListener('error', () => reject(new Error(`No se pudo cargar ${src}`)), { once: true })
+      return
+    }
     const script = document.createElement('script')
     script.src = src
-    script.onload = () => resolve()
+    script.onload = () => { script.dataset.loaded = 'true'; resolve() }
     script.onerror = () => reject(new Error(`No se pudo cargar ${src}`))
     document.body.appendChild(script)
   })
@@ -64,6 +70,7 @@ function Header() {
   return <><a className="saltar" href="#contenido">Saltar al contenido</a><header className="barra barra-explorar"><a className="marca" href="/" aria-label="Mar Frío, inicio"><span aria-hidden="true">◌</span><span>Mar Frío</span></a><h1 className="titulo-barra">Del hielo antártico al mar peruano</h1><nav className="nav" aria-label="Secciones"><a href="/" aria-current="page">Explorar</a><a href="#hallazgos">Hallazgos</a><a href="/juego.html">Jugar</a></nav></header></>
 }
 
+/*
 function GlobeView() {
   const ref = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
@@ -132,11 +139,21 @@ function GlobeView() {
   }
   const selectedValue = selectedZone ? valueFor(selectedZone) : null
   const selectedNutrients = selectedZone ? data?.nutrientes?.[selectedZone] : null
+  const predictionRows = usePredictionData(ready)
+  const selectedSeries = selectedZone ? data?.series?.[selectedZone] : null
+  const powerZoneMap: Record<string, string> = { antartida_peninsula: 'antartida_peninsula_centro', peru_centro_norte_chimbote: 'peru_chimbote', peru_centro_callao: 'peru_callao', peru_norte_paita_sechura: 'peru_paita_sechura', peru_sur_pisco: 'peru_pisco', peru_sur_ilo: 'peru_ilo' }
+  const powerSeries = selectedZone ? data?.power?.sitios?.[powerZoneMap[selectedZone]] : null
+  const powerIndex = month + 168
+  const annualYear = 1998 + Math.floor(month / 12)
+  const annualPrediction = data?.juego?.find((row: any) => row.anio === annualYear)
   const nutrientMean = (values: number[] | undefined) => values?.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null
   const formatValue = (value: number | null) => value == null || !Number.isFinite(value) ? 'sin dato' : value.toFixed(2)
 
-  return <section className="escenario" aria-label="Explorador del globo"><div className="lienzo-globo"><div ref={ref} id="globo" role="img" aria-label="Globo terrestre con las zonas de estudio" />{!ready && <p className="globe-status">Cargando el atlas y las zonas de estudio…</p>}<div className="mando" role="group" aria-label="Controles del globo"><label className="fila var">Dato <select value={variable} onChange={(e) => setVariable(e.target.value as GlobeVariable)}><option value="clorofila">Fitoplancton (clorofila-a)</option><option value="temperatura">Temperatura del mar</option><option value="hielo">Hielo marino antártico</option></select></label><label className="fila tiempo">Mes <input type="range" min="0" max="395" value={month} onChange={(e) => setMonth(Number(e.target.value))} /></label><span className="mes-actual num">{1998 + Math.floor(month / 12)}-{String((month % 12) + 1).padStart(2, '0')}</span><div className="zonas-inferior" role="group" aria-label="Zonas de estudio">{zoneEntries.map(([key, item]) => <button key={key} className="zona-punto" type="button" aria-pressed={selectedZone === key} onClick={() => setSelectedZone(key)}><span className="punto" />{item.nombre}</button>)}</div><div className="leyenda"><span>menos que lo normal</span><div className="rampa" /><span>más que lo normal</span></div></div></div><aside className="relato"><div className="relato-contenido"><h2>{zone ? zone.nombre : label}</h2>{zone ? <><p className="region">{zone.region} · {1998 + Math.floor(month / 12)}-{String((month % 12) + 1).padStart(2, '0')}</p><div className="cifras"><div className="cifra"><b className="num">{formatValue(selectedValue)}</b><span>{variable === 'clorofila' ? 'mg/m³ de clorofila-a' : variable === 'temperatura' ? '°C de temperatura superficial' : 'M km² de anomalía de hielo'}</span></div><div className="cifra"><b className="num">{selectedValue == null ? '—' : selectedValue >= 0 ? '+' : ''}{formatValue(selectedValue)}</b><span>valor en el mes seleccionado</span></div></div><p>El punto resaltado en el globo y en la barra inferior corresponde a esta zona.</p><h3>Las 7 zonas</h3><ul className="lista-zonas">{zoneEntries.map(([key, item]) => <li key={key}><button className="fila-zona" type="button" aria-pressed={selectedZone === key} onClick={() => setSelectedZone(key)}><span className="punto" /><span>{item.nombre}<small>{item.region}</small></span><span className="valor num">{formatValue(valueFor(key))}</span></button></li>)}</ul><h3>Nutrientes de superficie</h3><div className="barras-nut">{(['nitrato', 'fosfato', 'silicato'] as const).map((nutrient) => <div key={nutrient}><span>{nutrient}</span><i style={{ width: `${Math.min(100, (nutrientMean(selectedNutrients?.[nutrient]) || 0) / 30 * 100)}%` }} /><span className="valor num">{formatValue(nutrientMean(selectedNutrients?.[nutrient]))}</span></div>)}</div></> : <><h2>{label}</h2><p>Explora las zonas del Perú y la Antártida y compara sus señales ambientales mes a mes.</p><p>Selecciona un punto en el globo, en la barra inferior o en esta lista para ver sus datos.</p><h3>Las 7 zonas</h3><ul className="lista-zonas">{zoneEntries.map(([key, item]) => <li key={key}><button className="fila-zona" type="button" onClick={() => setSelectedZone(key)}><span className="punto" /><span>{item.nombre}<small>{item.region}</small></span><span className="valor num">{formatValue(valueFor(key))}</span></button></li>)}</ul></>}</div></aside></section>
+  return <section className="escenario" aria-label="Explorador del globo"><div className="lienzo-globo"><div ref={ref} id="globo" role="img" aria-label="Globo terrestre con las zonas de estudio" />{!ready && <p className="globe-status">Cargando el atlas y las zonas de estudio…</p>}<div className="mando" role="group" aria-label="Controles del globo"><label className="fila var">Dato <select value={variable} onChange={(e) => setVariable(e.target.value as GlobeVariable)}><option value="clorofila">Fitoplancton (clorofila-a)</option><option value="temperatura">Temperatura del mar</option><option value="hielo">Hielo marino antártico</option></select></label><label className="fila tiempo">Mes <input type="range" min="0" max="395" value={month} onChange={(e) => setMonth(Number(e.target.value))} /></label><span className="mes-actual num">{annualYear}-{String((month % 12) + 1).padStart(2, '0')}</span><div className="zonas-inferior" role="group" aria-label="Zonas de estudio">{zoneEntries.map(([key, item]) => <button key={key} className="zona-punto" type="button" aria-pressed={selectedZone === key} onClick={() => setSelectedZone(key)}><span className="punto" />{item.nombre}</button>)}</div><div className="leyenda"><span>menos que lo normal</span><div className="rampa" /><span>más que lo normal</span></div></div></div></div><aside className="relato"><div className="relato-contenido"><h2>{zone ? zone.nombre : label}</h2>{zone ? <><p className="region">{zone.region} · {annualYear}-{String((month % 12) + 1).padStart(2, '0')}</p><div className="cifras"><div className="cifra"><b className="num">{formatValue(selectedValue)}</b><span>{variable === 'clorofila' ? 'mg/m³ de clorofila-a' : variable === 'temperatura' ? '°C de temperatura superficial' : 'M km² de anomalía de hielo'}</span></div><div className="cifra"><b className="num">{selectedValue == null ? '—' : selectedValue >= 0 ? '+' : ''}{formatValue(selectedValue)}</b><span>valor en el mes seleccionado</span></div></div><p>El punto resaltado en el globo y en la barra inferior corresponde a esta zona.</p><h3>Las 7 zonas</h3><ul className="lista-zonas">{zoneEntries.map(([key, item]) => <li key={key}><button className="fila-zona" type="button" aria-pressed={selectedZone === key} onClick={() => setSelectedZone(key)}><span className="punto" /><span>{item.nombre}<small>{item.region}</small></span><span className="valor num">{formatValue(valueFor(key))}</span></button></li>)}</ul><h3>Dataset mensual completo</h3><div className="metric-grid">{Object.entries(selectedSeries || {}).map(([key, values]: [string, any]) => <div className="metric-row" key={key}><span>{seriesLabels[key] || key}</span><b className="num">{formatValue(values?.[month])}</b></div>)}</div><h3>Nutrientes de superficie</h3><div className="barras-nut">{(['nitrato', 'fosfato', 'silicato'] as const).map((nutrient) => <div key={nutrient}><span>{nutrient}</span><i style={{ width: `${Math.min(100, (nutrientMean(selectedNutrients?.[nutrient]) || 0) / 30 * 100)}%` }} /><span className="valor num">{formatValue(nutrientMean(selectedNutrients?.[nutrient]))}</span></div>)}</div><h3>Índices y señales globales</h3><div className="metric-grid">{(['nino12', 'sam', 'hielo', 'hielo_anom'] as const).map((key) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{formatValue(data?.indices?.[key]?.[month])}</b></div>)}</div>{powerSeries && <><h3>Datos POWER</h3><div className="metric-grid">{Object.entries(powerSeries).map(([key, values]: [string, any]) => <div className="metric-row" key={key}><span>{powerLabels[key] || key}</span><b className="num">{formatValue(values?.[powerIndex])}</b></div>)}</div></>}<h3>Señal anual y predicción histórica</h3>{annualPrediction ? <div className="prediction-grid">{Object.entries(annualPrediction).filter(([key]) => key !== 'anio').map(([key, value]) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{typeof value === 'number' ? value.toFixed(2) : String(value)}</b></div>)}</div> : <p className="nota">No hay registro anual para {annualYear}.</p>}<h3>Predicción de escenarios</h3>{predictionRows.length ? <div className="prediction-table">{predictionRows.map((row, index) => <div className="prediction-card" key={`${row.scenario}-${row.horizon_month}-${index}`}><b>{String(row.scenario)} · mes {String(row.horizon_month)}</b><span>ICEN: {formatValue(Number(row.icen))}</span><span>{predictionLabels.prediction_a_icen_t}: {formatValue(Number(row.prediction_a_icen_t))}</span><span>{predictionLabels.prediction_b3_t}: {formatValue(Number(row.prediction_b3_t))}</span><span>{predictionLabels.c_a_dynamic}: {formatValue(Number(row.c_a_dynamic))}</span></div>)}</div> : <p className="nota">Cargando escenarios…</p>}</> : <><h2>{label}</h2><p>Explora las zonas del Perú y la Antártida y compara sus señales ambientales mes a mes.</p><p>Selecciona un punto en el globo, en la barra inferior o en esta lista para ver sus datos.</p><h3>Las 7 zonas</h3><ul className="lista-zonas">{zoneEntries.map(([key, item]) => <li key={key}><button className="fila-zona" type="button" onClick={() => setSelectedZone(key)}><span className="punto" /><span>{item.nombre}<small>{item.region}</small></span><span className="valor num">{formatValue(valueFor(key))}</span></button></li>)}</ul></>}</div></aside></section>
 }
+
+*/
+function GlobeView() { return <GlobePanel /> }
 
 function ChartPanel({ title, text, kind }: { title: string; text: string; kind: 'coast' | 'antarctica' | 'ice' | 'nutrients' }) {
   const ready = useRuntime()

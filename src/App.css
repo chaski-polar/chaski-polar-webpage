@@ -20,6 +20,7 @@
 .barra-explorar { background: rgba(7, 30, 51, .94); border-bottom: 1px solid rgba(36, 80, 122, .7); backdrop-filter: blur(8px); }
 .titulo-barra { margin: 0 auto 0 18px; font-family: var(--serif); font-size: 1.12rem; font-weight: 400; color: var(--niebla); }
 .escenario { display: grid; grid-template-columns: minmax(0, 1fr) clamp(320px, 31vw, 430px); height: 100svh; min-height: 560px; padding-top: 63px; }
+.escenario > div:not(.lienzo-globo) { display: contents; }
 .lienzo-globo { position: relative; min-width: 0; overflow: hidden; }
 #globo { position: absolute; inset: 0 0 96px; }
 #globo canvas { display: block; }
@@ -45,6 +46,13 @@
 .barras-nut div { display: grid; grid-template-columns: 70px 1fr 56px; gap: 8px; align-items: center; font-size: .9rem; }
 .barras-nut i { display: block; height: 8px; border-radius: 4px; background: var(--fito); }
 .barras-nut .valor { text-align: right; color: var(--niebla); font-variant-numeric: tabular-nums; }
+.metric-grid { display: grid; gap: 2px; }
+.metric-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid rgba(36, 80, 122, .45); color: var(--niebla); font-size: .84rem; }
+.metric-row b { color: var(--hielo); font-weight: 400; text-align: right; }
+.prediction-table { display: grid; gap: 5px; max-height: 360px; overflow-y: auto; }
+.prediction-card { border: 1px solid var(--linea); border-radius: var(--r-chico); background: rgba(12, 44, 74, .5); padding: 8px 10px; color: var(--niebla); font-size: .78rem; }
+.prediction-card summary { cursor: pointer; color: var(--hielo); font-weight: 700; }
+.prediction-card[open] summary { margin-bottom: 6px; }
 .relato { position: relative; overflow-y: auto; border-left: 1px solid var(--linea); background: linear-gradient(180deg, rgba(12, 44, 74, .55), rgba(7, 30, 51, .9)); }
 .relato-contenido { padding: 26px 26px 32px; animation: entrar .35s cubic-bezier(.2, .8, .2, 1); }
 .relato h2 { font-size: clamp(1.6rem, 2.2vw, 2.1rem); margin-bottom: .25em; }

@@ -1,0 +1,33 @@
+{
+  "horizon_months": 6,
+  "period": {
+    "start": "2026-09-01",
+    "end": "2027-02-01"
+  },
+  "scenarios": [
+    "weak",
+    "central",
+    "intense"
+  ],
+  "central_icen_path": [
+    3.8,
+    4.0,
+    3.7,
+    3.2,
+    2.8,
+    2.3
+  ],
+  "scenario_multipliers": {
+    "weak": 0.7,
+    "central": 1.0,
+    "intense": 1.2
+  },
+  "last_observed_environment_month": "2026-08-01",
+  "c_initial_state_date": "2026-08-01",
+  "warnings": [
+    "Todas las filas son escenarios, no observaciones futuras.",
+    "Las variables ambientales futuras se construyen con climatologia mensual y pendientes historicas frente a ICEN.",
+    "El Niño central sigue una trayectoria fuerte asumida para septiembre 2026–febrero 2027; actualizarla cuando haya un pronostico operativo nuevo.",
+    "C usa el estado F/Z mas reciente disponible y A inicial de A-ICEN; sus salidas son simulacion exploratoria."
+  ]
+}
