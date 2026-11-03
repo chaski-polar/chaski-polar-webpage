@@ -16,7 +16,7 @@ export type ProjectData = {
   zonas: Record<string, Zone>
   series: Record<string, Series>
   nutrientes?: Record<string, Record<string, number[]>>
-  indices?: Record<string, NumericValue[] | number>
+  indices?: Record<string, NumericValue[] | number | string>
   power?: { inicio?: string; sitios?: Record<string, Series> }
   pesca?: Record<string, number[] | number>
   juego?: Array<Record<string, number>>
