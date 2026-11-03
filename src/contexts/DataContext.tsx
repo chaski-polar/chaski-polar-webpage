@@ -14,20 +14,37 @@ type DataContextValue = {
 const DataContext = createContext<DataContextValue | null>(null)
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<Omit<DataContextValue, 'reload'>>({ data: null, monitor: null, predictions: [], loading: true, error: null })
+  const [state, setState] = useState<Omit<DataContextValue, 'reload'>>({
+    data: null,
+    monitor: null,
+    predictions: [],
+    loading: true, error: null
+  })
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
     let active = true
-    setState((current) => ({ ...current, loading: true, error: null }))
+    setState((current) => ({
+      ...current,
+      loading: true,
+      error: null
+    }))
+
     Promise.all([loadRuntimeData(), loadPredictions()])
-      .then(([runtime, predictions]) => { if (active) setState({ ...runtime, predictions, loading: false, error: null }) })
+      .then(([runtime, predictions]) => {
+        if (active) setState({ ...runtime, predictions, loading: false, error: null })
+      })
       .catch((error: unknown) => { if (active) setState((current) => ({ ...current, loading: false, error: error instanceof Error ? error : new Error('No se pudieron cargar los datos') })) })
+
     return () => { active = false }
   }, [version])
 
   const value = useMemo(() => ({ ...state, reload: () => setVersion((current) => current + 1) }), [state])
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>
+  return (
+    <DataContext.Provider value={value}>
+      {children}
+    </DataContext.Provider>
+  )
 }
 
 export function useData() {
