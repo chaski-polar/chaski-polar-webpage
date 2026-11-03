@@ -42,6 +42,21 @@ export function predictionValueFor(predictions: PredictionRow[], variable: Explo
   return null
 }
 
+export function timelineSeries(data: ProjectData, predictions: PredictionRow[], variable: ExplorerVariable) {
+  const zoneKeys = Object.keys(data.series)
+  const historicalLength = zoneKeys.length ? data.series[zoneKeys[0]]?.[variable]?.length || 0 : 0
+  const max = timelineMax(data, predictions)
+  return Array.from({ length: max + 1 }, (_, month) => {
+    const values = variable === 'hielo'
+      ? [Array.isArray(data.indices?.hielo) ? data.indices.hielo[month] : null]
+      : zoneKeys.map((key) => data.series[key]?.[variable]?.[month] ?? null)
+    const valid = values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
+    const historical = month < historicalLength && valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : null
+    const prediction = predictionValueFor(predictions, variable, getMonthLabel(data, month))
+    return { month, value: historical ?? prediction }
+  }).filter((point) => point.value != null)
+}
+
 export function formatValue(value: unknown, digits = 2) {
   return typeof value === 'number' && Number.isFinite(value) ? value.toLocaleString('es-PE', { maximumFractionDigits: digits }) : 'sin dato'
 }

@@ -1,22 +1,17 @@
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import Globe from 'react-globe.gl'
 import { useData } from '../../../contexts/DataContext'
 import type { PredictionRow } from '../../../data/types'
-import { formatValue, getMonthLabel, predictionValueFor, timelineMax, valueFor, variableLabels, variableUnits } from '../model'
+import { formatValue, getMonthLabel, predictionValueFor, valueFor, variableLabels, variableUnits } from '../model'
 import { useExplorerStore, type ExplorerVariable } from '../store'
 import { useLegacyAtlas } from '../hooks/useLegacyAtlas'
-
-const variableOptions: Array<{ value: ExplorerVariable; label: string }> = [
-  { value: 'clorofila_mg_m3', label: 'Fitoplancton (clorofila-a)' },
-  { value: 'temperatura_superficial_C', label: 'Temperatura del mar' },
-  { value: 'hielo', label: 'Hielo marino antártico' },
-]
+import { GlobeViewToggle } from './GlobeViewToggle'
+import { TimelinePanel } from './TimelinePanel'
 
 export default function GlobePanel() {
   const { data, predictions } = useData()
-  const globeRef = useRef<any>(null)
-  useLegacyAtlas(globeRef)
-  const { variable, month, selectedZone, setVariable, setMonth, setSelectedZone } = useExplorerStore()
+  const { variable, month, selectedZone, view, setSelectedZone, setView } = useExplorerStore()
+  const illustratedUrl = useLegacyAtlas()
 
   const zones = useMemo(() => data ? Object.entries(data.zonas) : [], [data])
   const monthLabel = data ? getMonthLabel(data, month) : '—'
@@ -26,22 +21,19 @@ export default function GlobePanel() {
     key,
     measurement: valueFor(data!, key, variable, month) ?? futureValue ?? 0,
   })), [data, futureValue, month, variable, zones])
-  const max = Math.max(...points.map((point) => Math.abs(point.measurement)), 1)
   const selected = selectedZone ? data?.zonas[selectedZone] : null
   const selectedSeries = selectedZone ? data?.series[selectedZone] : null
   const selectedNutrients = selectedZone ? data?.nutrientes?.[selectedZone] : null
-  const maxMonth = timelineMax(data!, predictions)
 
   if (!data) return <section className="escenario"><div className="lienzo-globo"><p className="globe-status">Cargando el atlas y las zonas de estudio…</p></div></section>
 
   return <section className="escenario" aria-label="Explorador del globo">
     <div className="lienzo-globo">
       <Globe
-        ref={globeRef}
         width={undefined}
         height={undefined}
         backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="/assets/globe/earth-blue-marble.jpg"
+        globeImageUrl={view === 'illustrated' ? illustratedUrl ?? '/assets/globe/earth-blue-marble.jpg' : '/assets/globe/earth-blue-marble.jpg'}
         showAtmosphere
         atmosphereColor="#4a8fbf"
         atmosphereAltitude={0.14}
@@ -49,18 +41,13 @@ export default function GlobePanel() {
         pointLat="lat"
         pointLng="lon"
         pointLabel={(point: any) => `<b>${point.nombre}</b><br/>${point.region}<br/>${variableLabels[variable]}: ${formatValue(point.measurement)}`}
-        pointColor={(point: any) => point.key === selectedZone ? '#eaf3f5' : variable === 'temperatura_superficial_C' ? `hsl(${205 - Math.round(Math.abs(point.measurement) / max * 165)} 78% 62%)` : `hsl(${165 - Math.round(Math.abs(point.measurement) / max * 110)} 62% 56%)`}
+        pointColor={(point: any) => point.key === selectedZone ? '#eaf3f5' : '#3fc28c'}
         pointRadius={(point: any) => point.key === selectedZone ? 1.2 : 0.7}
         pointAltitude={(point: any) => point.key === selectedZone ? 0.045 : 0.02}
         onPointClick={(point: any) => setSelectedZone(point.key)}
       />
-      <div className="mando" role="group" aria-label="Controles del globo">
-        <label className="fila var">Dato<select value={variable} onChange={(event) => setVariable(event.target.value as ExplorerVariable)}>{variableOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-        <label className="fila tiempo">Mes<input type="range" min="0" max={maxMonth} value={Math.min(month, maxMonth)} onChange={(event) => setMonth(Number(event.target.value))} /></label>
-        <span className="mes-actual num">{monthLabel}{futureValue != null ? ' · escenario central' : ''}</span>
-        <div className="zonas-inferior" role="group" aria-label="Zonas de estudio">{zones.map(([key, zone]) => <button key={key} className="zona-punto" type="button" aria-pressed={selectedZone === key} onClick={() => setSelectedZone(key)}><span className="punto" />{zone.nombre}</button>)}</div>
-        <div className="leyenda"><span>menos que lo normal</span><div className="rampa" /><span>más que lo normal</span></div>
-      </div>
+      <div className="globe-toolbar"><GlobeViewToggle value={view} onChange={setView} /><p>{view === 'illustrated' ? 'Zonas y conexiones del sistema marino.' : 'Vista satelital base; las capas de variables llegarán después.'}</p></div>
+      <TimelinePanel data={data} predictions={predictions} />
     </div>
     <aside className="relato"><div className="relato-contenido">
       {selected ? <ZoneDetails data={data} zoneKey={selectedZone!} month={month} variable={variable} series={selectedSeries ?? undefined} nutrients={selectedNutrients ?? undefined} predictions={predictions} onBack={() => setSelectedZone(null)} /> : <ZoneIndex zones={zones} month={month} variable={variable} data={data} onSelect={setSelectedZone} />}
