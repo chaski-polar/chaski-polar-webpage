@@ -1,9 +1,40 @@
 @import "tailwindcss";
 
+@theme {
+  --color-ocean-950: #071e33;
+  --color-ocean-900: #0c2c4a;
+  --color-ocean-800: #133c61;
+  --color-ocean-700: #24507a;
+  --color-ice-100: #eaf3f5;
+  --color-ice-300: #a3bccb;
+  --color-ice-500: #6f8ea3;
+  --color-phytoplankton: #3fc28c;
+  --color-nino: #f08a4b;
+  --color-current: #63cde8;
+  --font-display: "Newsreader", Georgia, serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --radius-card: 14px;
+  --radius-pill: 999px;
+}
+
+@layer components {
+  .app-header { @apply fixed inset-x-0 top-0 z-30 flex items-center justify-between gap-4 px-4 py-3 pointer-events-none sm:px-8; background: linear-gradient(180deg, rgb(7 30 51 / .94), rgb(7 30 51 / 0)); }
+  .app-header > * { @apply pointer-events-auto; }
+  .app-brand { @apply flex items-center gap-2 no-underline text-ice-100; font-family: var(--font-display); font-size: 1.3rem; }
+  .app-nav { @apply flex gap-1; }
+  .app-nav a { @apply rounded-pill px-3 py-1.5 no-underline text-ice-300 transition-colors; }
+  .app-nav a:hover { @apply text-ice-100; background-color: rgb(36 80 122 / .45); }
+  .app-nav a[aria-current="page"] { @apply border border-ocean-700 bg-ocean-800 text-ice-100; }
+  .data-state { @apply grid min-h-screen place-content-center gap-2 bg-ocean-950 p-8 text-center text-ice-100; }
+  .button-primary { @apply inline-flex items-center justify-center gap-2 rounded-pill border border-ocean-700 bg-ocean-800 px-5 py-3 font-bold text-ice-100 no-underline transition-colors transition-transform; }
+  .button-primary:hover { @apply bg-ocean-700; }
+  .button-primary:active { @apply scale-95; }
+}
+
 :root {
-  font-family: system-ui, sans-serif;
-  color: #17212b;
-  background: #fff;
+  font-family: var(--font-body);
+  color: var(--color-ice-100);
+  background: var(--color-ocean-950);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -26,4 +57,6 @@ body,
 
 body {
   overflow-x: hidden;
+  background: var(--color-ocean-950);
+  color: var(--color-ice-100);
 }

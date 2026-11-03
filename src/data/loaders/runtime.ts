@@ -32,10 +32,14 @@ export async function loadRuntimeData(): Promise<{ data: ProjectData; monitor: M
 }
 
 export async function loadPredictions(): Promise<PredictionRow[]> {
-  const response = await fetch('/assets/data/prediction/enso_scenarios_monitor.json')
+  const response = await fetch('/assets/data/prediction/enso_scenarios_monitor.csv')
   if (!response.ok) return []
-  const payload: unknown = await response.json()
-  if (Array.isArray(payload)) return payload as PredictionRow[]
-  if (payload && typeof payload === 'object' && 'records' in payload && Array.isArray(payload.records)) return payload.records as PredictionRow[]
-  return []
+  const text = await response.text()
+  const [header, ...lines] = text.trim().split(/\r?\n/).filter(Boolean)
+  if (!header) return []
+  const headers = header.split(',')
+  return lines.map((line) => Object.fromEntries(line.split(',').map((raw, index) => {
+    const numeric = Number(raw)
+    return [headers[index], raw === '' ? null : Number.isNaN(numeric) ? raw : numeric]
+  })))
 }

@@ -1,7 +1,8 @@
 import { useMemo, useRef } from 'react'
 import Globe from 'react-globe.gl'
 import { useData } from '../../../contexts/DataContext'
-import { formatValue, getMonthLabel, valueFor, variableLabels, variableUnits } from '../model'
+import type { PredictionRow } from '../../../data/types'
+import { formatValue, getMonthLabel, predictionValueFor, timelineMax, valueFor, variableLabels, variableUnits } from '../model'
 import { useExplorerStore, type ExplorerVariable } from '../store'
 
 const variableOptions: Array<{ value: ExplorerVariable; label: string }> = [
@@ -16,16 +17,18 @@ export default function GlobePanel() {
   const { variable, month, selectedZone, setVariable, setMonth, setSelectedZone } = useExplorerStore()
 
   const zones = useMemo(() => data ? Object.entries(data.zonas) : [], [data])
+  const monthLabel = data ? getMonthLabel(data, month) : '—'
+  const futureValue = predictionValueFor(predictions, variable, monthLabel)
   const points = useMemo(() => zones.map(([key, zone]) => ({
     ...zone,
     key,
-    measurement: valueFor(data!, key, variable, month) ?? 0,
-  })), [data, month, variable, zones])
+    measurement: valueFor(data!, key, variable, month) ?? futureValue ?? 0,
+  })), [data, futureValue, month, variable, zones])
   const max = Math.max(...points.map((point) => Math.abs(point.measurement)), 1)
   const selected = selectedZone ? data?.zonas[selectedZone] : null
   const selectedSeries = selectedZone ? data?.series[selectedZone] : null
   const selectedNutrients = selectedZone ? data?.nutrientes?.[selectedZone] : null
-  const monthLabel = data ? getMonthLabel(data, month) : '—'
+  const maxMonth = timelineMax(data!, predictions)
 
   if (!data) return <section className="escenario"><div className="lienzo-globo"><p className="globe-status">Cargando el atlas y las zonas de estudio…</p></div></section>
 
@@ -52,8 +55,8 @@ export default function GlobePanel() {
       />
       <div className="mando" role="group" aria-label="Controles del globo">
         <label className="fila var">Dato<select value={variable} onChange={(event) => setVariable(event.target.value as ExplorerVariable)}>{variableOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-        <label className="fila tiempo">Mes<input type="range" min="0" max="395" value={month} onChange={(event) => setMonth(Number(event.target.value))} /></label>
-        <span className="mes-actual num">{monthLabel}</span>
+        <label className="fila tiempo">Mes<input type="range" min="0" max={maxMonth} value={Math.min(month, maxMonth)} onChange={(event) => setMonth(Number(event.target.value))} /></label>
+        <span className="mes-actual num">{monthLabel}{futureValue != null ? ' · escenario central' : ''}</span>
         <div className="zonas-inferior" role="group" aria-label="Zonas de estudio">{zones.map(([key, zone]) => <button key={key} className="zona-punto" type="button" aria-pressed={selectedZone === key} onClick={() => setSelectedZone(key)}><span className="punto" />{zone.nombre}</button>)}</div>
         <div className="leyenda"><span>menos que lo normal</span><div className="rampa" /><span>más que lo normal</span></div>
       </div>
@@ -68,7 +71,8 @@ function ZoneIndex({ zones, data, month, variable, onSelect }: { zones: Array<[s
   return <><h2>Datos del globo</h2><p>Selecciona una zona para consultar sus señales ambientales y pesqueras.</p><h3>Las {zones.length} zonas</h3><ul className="lista-zonas">{zones.map(([key, zone]) => <li key={key}><button className="fila-zona" type="button" onClick={() => onSelect(key)}><span className="punto" /><span>{zone.nombre}<small>{zone.region}</small></span><span className="valor num">{formatValue(valueFor(data, key, variable, month))}</span></button></li>)}</ul></>
 }
 
-function ZoneDetails({ data, zoneKey, month, variable, series, nutrients, predictions, onBack }: { data: any; zoneKey: string; month: number; variable: ExplorerVariable; series?: Record<string, any>; nutrients?: Record<string, number[]>; predictions: Array<Record<string, unknown>>; onBack: () => void }) {
+function ZoneDetails({ data, zoneKey, month, variable, series, nutrients, predictions, onBack }: { data: any; zoneKey: string; month: number; variable: ExplorerVariable; series?: Record<string, any>; nutrients?: Record<string, number[]>; predictions: PredictionRow[]; onBack: () => void }) {
   const zone = data.zonas[zoneKey]
-  return <><button className="volver" type="button" onClick={onBack}>← Volver al resumen</button><h2>{zone.nombre}</h2><p className="region">{zone.region} · {getMonthLabel(data, month)}</p><h3>Dato seleccionado</h3><div className="cifras"><div className="cifra"><b className="num">{formatValue(valueFor(data, zoneKey, variable, month))}</b><span>{variableLabels[variable]} · {variableUnits[variable]}</span></div></div><h3>Dataset mensual</h3><div className="metric-grid">{Object.entries(series || {}).map(([key, values]) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{formatValue((values as any[])?.[month])}</b></div>)}</div><h3>Nutrientes históricos</h3><div className="metric-grid">{Object.entries(nutrients || {}).map(([key, values]) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{formatValue((values as number[]).reduce((sum, value) => sum + value, 0) / (values as number[]).length)}</b></div>)}</div><h3>Escenarios</h3>{predictions.length ? <div className="prediction-table">{predictions.slice(0, 6).map((row, index) => <details className="prediction-card" key={`${String(row.scenario)}-${index}`}><summary>{String(row.scenario || 'Escenario')} · {String(row.date || row.horizon_month || '')}</summary>{Object.entries(row).map(([key, value]) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{typeof value === 'number' ? value.toFixed(2) : value == null ? 'sin dato' : String(value)}</b></div>)}</details>)}</div> : <p className="nota">No hay escenarios disponibles.</p>}</>
+  const selectedValue = valueFor(data, zoneKey, variable, month) ?? predictionValueFor(predictions, variable, getMonthLabel(data, month))
+  return <><button className="volver" type="button" onClick={onBack}>← Volver al resumen</button><h2>{zone.nombre}</h2><p className="region">{zone.region} · {getMonthLabel(data, month)}</p><h3>Dato seleccionado</h3><div className="cifras"><div className="cifra"><b className="num">{formatValue(selectedValue)}</b><span>{variableLabels[variable]} · {variableUnits[variable]}{selectedValue != null && valueFor(data, zoneKey, variable, month) == null ? ' · escenario central' : ''}</span></div></div><h3>Dataset mensual</h3><div className="metric-grid">{Object.entries(series || {}).map(([key, values]) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{formatValue((values as any[])?.[month])}</b></div>)}</div><h3>Nutrientes históricos</h3><div className="metric-grid">{Object.entries(nutrients || {}).map(([key, values]) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{formatValue((values as number[]).reduce((sum, value) => sum + value, 0) / (values as number[]).length)}</b></div>)}</div><h3>Escenarios</h3>{predictions.length ? <div className="prediction-table">{predictions.filter((row) => row.scenario === 'central').slice(0, 6).map((row, index) => <details className="prediction-card" key={`${String(row.scenario)}-${index}`}><summary>{String(row.scenario || 'Escenario')} · {String(row.date || row.horizon_month || '')}</summary>{Object.entries(row).map(([key, value]) => <div className="metric-row" key={key}><span>{key}</span><b className="num">{typeof value === 'number' ? value.toFixed(2) : value == null ? 'sin dato' : String(value)}</b></div>)}</details>)}</div> : <p className="nota">No hay escenarios disponibles.</p>}</>
 }
