@@ -38,5 +38,9 @@ declare global {
   interface Window {
     DATOS?: unknown
     MONITOR_DATA?: unknown
+    PAISES?: unknown
+    ATLAS?: {
+      pintar: (options: { paleta: string; detalle: boolean; ancho: number }) => Promise<HTMLCanvasElement>
+    }
   }
 }

@@ -4,6 +4,7 @@ import { useData } from '../../../contexts/DataContext'
 import type { PredictionRow } from '../../../data/types'
 import { formatValue, getMonthLabel, predictionValueFor, timelineMax, valueFor, variableLabels, variableUnits } from '../model'
 import { useExplorerStore, type ExplorerVariable } from '../store'
+import { useLegacyAtlas } from '../hooks/useLegacyAtlas'
 
 const variableOptions: Array<{ value: ExplorerVariable; label: string }> = [
   { value: 'clorofila_mg_m3', label: 'Fitoplancton (clorofila-a)' },
@@ -14,6 +15,7 @@ const variableOptions: Array<{ value: ExplorerVariable; label: string }> = [
 export default function GlobePanel() {
   const { data, predictions } = useData()
   const globeRef = useRef<any>(null)
+  useLegacyAtlas(globeRef)
   const { variable, month, selectedZone, setVariable, setMonth, setSelectedZone } = useExplorerStore()
 
   const zones = useMemo(() => data ? Object.entries(data.zonas) : [], [data])
@@ -40,10 +42,9 @@ export default function GlobePanel() {
         height={undefined}
         backgroundColor="rgba(0,0,0,0)"
         globeImageUrl="/assets/globe/earth-blue-marble.jpg"
-        bumpImageUrl="/assets/globe/earth-topology.png"
         showAtmosphere
-        atmosphereColor="#63cde8"
-        atmosphereAltitude={0.12}
+        atmosphereColor="#4a8fbf"
+        atmosphereAltitude={0.14}
         pointsData={points}
         pointLat="lat"
         pointLng="lon"
