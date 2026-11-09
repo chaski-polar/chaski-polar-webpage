@@ -1,0 +1,351 @@
+/* Calendario y cálculos sobre los datos: anomalías, colores de cada zona, textos y correlaciones.
+   No toca la página: recibe los datos y responde preguntas sobre ellos. */
+import { SIN_DATO, colorDiverge, colorRampa, tClorofila } from "../../../lib/color";
+import { media, pearson } from "../../../lib/estadistica";
+import { MESES_LARGOS, claveMes, mesesDesde, mesesEntre, nf, signo, type Mes } from "../../../lib/formato";
+import type { DatosExplorador } from "./adaptador";
+import type { CampoEscenario, CampoMonitor, DatosSeries, FilaAnual, FilaEscenario, IdZona, NombreEscenario, RegistroMonitor, Serie, Zona } from "./tipos";
+import type { Variable } from "./variables";
+
+export interface TextoAnomalia {
+  /** "+12 %" */
+  corto: string;
+  /** "12 % más que un mayo normal" */
+  frase: string;
+  valor: number;
+}
+
+export interface EventoNino {
+  anio: number;
+  nombre: string;
+  /** mes del pico de calor */
+  i: number;
+}
+
+export const ZONA_CHIMBOTE: IdZona = "peru_centro_norte_chimbote";
+export const ZONA_REY_JORGE: IdZona = "antartida_rey_jorge";
+export const esPeru = (z: string): boolean => z.startsWith("peru");
+
+const CAMPOS_ESCENARIO = new Set<CampoMonitor>(["sst_c", "sss_psu", "chlorophyll_a_mg_m3", "nitrate_mmol_m3", "phosphate_mmol_m3", "oxygen_ml_l", "phytoplankton_carbon_mg_c_m3", "nino12_anom_c", "icen"]);
+const esCampoEscenario = (c: CampoMonitor): c is CampoEscenario => CAMPOS_ESCENARIO.has(c);
+
+export class Modelo {
+  readonly D: DatosSeries;
+  readonly zonas: Record<IdZona, Zona>;
+  readonly ids: IdZona[];
+  /** calendario completo: desde el inicio de las series hasta el último mes de los escenarios */
+  readonly meses: Mes[];
+  /** primer mes que muestra la página (enero de 1998, inicio de la clorofila satelital) */
+  readonly i0: number;
+  /** último mes con clorofila en alguna zona */
+  readonly ultimoSeries: number;
+  /** último mes observado (series o monitor) */
+  readonly ultimoObservado: number;
+  /** último mes del calendario (incluye escenarios) */
+  readonly ultimo: number;
+  /** primer mes de escenarios de El Niño, si hay */
+  readonly inicioEscenario: number | null;
+  readonly anual: FilaAnual[];
+  readonly avisosEscenario: string[];
+  readonly hayMonitor: boolean;
+
+  private readonly porMesMonitor: Map<string, RegistroMonitor>;
+  private readonly porMesEscenario: Map<string, FilaEscenario>;
+  private readonly cacheClima = new Map<string, (number | null)[]>();
+  private readonly cacheMonitor = new Map<CampoMonitor, Serie>();
+  private readonly cacheR = new Map<string, number | null>();
+  readonly registrosMonitor: RegistroMonitor[];
+  /** Niño 1+2: índice de NOAA, luego el monitor y al final el escenario central */
+  readonly nino: Serie;
+
+  constructor({ series: D, monitor, escenarios }: DatosExplorador) {
+    this.D = D;
+    this.zonas = D.zonas;
+    this.ids = Object.keys(D.zonas) as IdZona[];
+    this.anual = D.juego;
+    this.registrosMonitor = monitor?.records ?? [];
+    this.hayMonitor = this.registrosMonitor.length > 0;
+    this.porMesMonitor = new Map(this.registrosMonitor.map((r) => [r.date.slice(0, 7), r]));
+    this.porMesEscenario = new Map((escenarios?.filas ?? []).map((f) => [`${f.fecha}|${f.escenario}`, f]));
+    this.avisosEscenario = escenarios?.avisos ?? [];
+
+    const primera = this.ids[0] as IdZona;
+    const nSeries = D.series[primera].clorofila_mg_m3?.length ?? 0;
+    const finSeries = nSeries - 1;
+    const finMonitor = monitor ? mesesEntre(D.meses_inicio, monitor.period.end.slice(0, 7)) : -1;
+    const finEscenario = escenarios ? mesesEntre(D.meses_inicio, escenarios.periodo.fin) : -1;
+    this.ultimo = Math.max(finSeries, finMonitor, finEscenario);
+    this.meses = mesesDesde(D.meses_inicio, this.ultimo + 1);
+    this.i0 = Math.max(0, this.idxMes(1998, 0));
+    this.inicioEscenario = escenarios ? mesesEntre(D.meses_inicio, escenarios.periodo.inicio) : null;
+
+    let ultimoSeries = this.i0;
+    for (let i = this.i0; i < nSeries; i++) if (this.ids.some((z) => D.series[z].clorofila_mg_m3?.[i] != null)) ultimoSeries = i;
+    this.ultimoSeries = ultimoSeries;
+    this.ultimoObservado = Math.max(ultimoSeries, Math.min(finMonitor, this.inicioEscenario == null ? finMonitor : this.inicioEscenario - 1));
+
+    // viento: rapidez a partir de sus componentes
+    for (const z of this.ids) {
+      const s = D.series[z], u = s.viento_u_m_s, v = s.viento_v_m_s;
+      if (u && v) s.viento = u.map((x, i) => { const y = v[i]; return x == null || y == null ? null : Math.hypot(x, y); });
+    }
+
+    this.nino = this.meses.map((_, i) => D.indices.nino12[i] ?? this.valorMonitor("nino12_anom_c", i));
+  }
+
+  /* ---------- calendario ---------- */
+  idxMes(anio: number, mes: number): number {
+    const [a0 = 0, m0 = 1] = this.D.meses_inicio.split("-").map(Number);
+    const i = anio * 12 + mes - (a0 * 12 + m0 - 1);
+    return i >= 0 && i <= this.ultimo ? i : -1;
+  }
+  mes(i: number): Mes {
+    return this.meses[i] ?? { anio: 1998, mes: 0 };
+  }
+  esEscenario(i: number): boolean {
+    return this.inicioEscenario != null && i >= this.inicioEscenario;
+  }
+
+  zona(z: IdZona): Zona {
+    return this.zonas[z];
+  }
+  esZona(z: string | null | undefined): z is IdZona {
+    return z != null && z in this.zonas;
+  }
+
+  /* ---------- series ---------- */
+  valorSerie(z: IdZona, id: string, i: number): number | null {
+    return this.D.series[z][id]?.[i] ?? null;
+  }
+  tieneSerie(z: IdZona, id: string): boolean {
+    return (this.D.series[z][id] ?? []).some((x) => x != null);
+  }
+
+  registroMonitor(i: number): RegistroMonitor | undefined {
+    return this.porMesMonitor.get(claveMes(this.mes(i)));
+  }
+  filaEscenario(i: number, escenario: NombreEscenario = "central"): FilaEscenario | undefined {
+    return this.porMesEscenario.get(`${claveMes(this.mes(i))}|${escenario}`);
+  }
+  /** Valor del monitor en un mes; después del último mes observado, el del escenario indicado */
+  valorMonitor(campo: CampoMonitor, i: number, escenario: NombreEscenario = "central"): number | null {
+    const r = this.registroMonitor(i)?.[campo];
+    if (r != null) return r;
+    if (!this.esEscenario(i) || !esCampoEscenario(campo)) return null;
+    return this.filaEscenario(i, escenario)?.[campo] ?? null;
+  }
+  /** Serie completa del monitor (con el escenario central al final) */
+  valoresMonitor(campo: CampoMonitor): Serie {
+    let s = this.cacheMonitor.get(campo);
+    if (!s) { s = this.meses.map((_, i) => this.valorMonitor(campo, i)); this.cacheMonitor.set(campo, s); }
+    return s;
+  }
+  /** Serie de un escenario: solo los meses de escenario (y el último observado, para unir la línea) */
+  serieEscenario(campo: CampoMonitor, escenario: NombreEscenario): Serie {
+    if (this.inicioEscenario == null || !esCampoEscenario(campo)) return this.meses.map(() => null);
+    const inicio = this.inicioEscenario;
+    return this.meses.map((_, i) => (i === inicio - 1 ? this.registroMonitor(i)?.[campo] ?? null : i >= inicio ? this.filaEscenario(i, escenario)?.[campo] ?? null : null));
+  }
+
+  /** Valor del dato en una zona y un mes, o null si esa zona no lo tiene */
+  valorZona(z: IdZona, v: Variable, i: number): number | null {
+    if (v.modo === "monitor") return esPeru(z) ? this.valorMonitor(v.campo, i) : null;
+    if (v.modo === "indice") return esPeru(z) ? null : this.D.indices.hielo[i] ?? null;
+    return this.valorSerie(z, v.id, i);
+  }
+  /** Serie completa de una zona (multiplicada por el factor de la variable) */
+  serieZona(z: IdZona, v: Variable): Serie {
+    const f = v.factor ?? 1;
+    return this.meses.map((_, i) => { const x = this.valorZona(z, v, i); return x == null ? null : x * f; });
+  }
+  tieneDato(z: IdZona | null, v: Variable): boolean {
+    if (v.modo === "monitor") return this.hayMonitor && (z == null || esPeru(z));
+    if (v.modo === "indice") return z == null || !esPeru(z);
+    return z == null || this.tieneSerie(z, v.id);
+  }
+
+  /* ---------- anomalías ---------- */
+  private climatologia(z: IdZona, id: string): (number | null)[] {
+    const k = `${z}|${id}`;
+    let c = this.cacheClima.get(k);
+    if (!c) {
+      const s = this.D.series[z][id] ?? [];
+      c = Array.from({ length: 12 }, (_, m) => media(s.filter((_, i) => this.mes(i).mes === m && i <= this.ultimoSeries)));
+      this.cacheClima.set(k, c);
+    }
+    return c;
+  }
+  private rangoMonitor(campo: CampoMonitor): { min: number; max: number; media: number | null } {
+    const xs = this.valoresMonitor(campo).filter((x): x is number => x != null);
+    return xs.length ? { min: Math.min(...xs), max: Math.max(...xs), media: media(xs) } : { min: 0, max: 0, media: null };
+  }
+
+  /** Anomalía normalizada (cerca de −1 a 1) frente al mes normal de la zona */
+  anomalia(z: IdZona, v: Variable, i: number): number | null {
+    if (v.modo === "monitor") {
+      const x = this.valorZona(z, v, i);
+      if (x == null) return null;
+      const m = this.mes(i).mes, todos = this.valoresMonitor(v.campo);
+      const base = media(todos.filter((_, k) => this.mes(k).mes === m && !this.esEscenario(k)));
+      const { min, max } = this.rangoMonitor(v.campo);
+      return base == null ? null : (x - base) / (max - min || 1);
+    }
+    if (v.modo === "indice") {
+      if (esPeru(z)) return null;
+      const a = this.D.indices.hielo_anom[i];
+      return a == null ? null : a / v.rango;
+    }
+    const x = this.valorSerie(z, v.id, i);
+    if (x == null) return null;
+    if (v.modo === "directo") return x / v.rango;
+    const c = this.climatologia(z, v.id)[this.mes(i).mes];
+    if (c == null) return null;
+    return v.modo === "log" ? Math.log2(x / c) / v.rango : (x - c) / v.rango;
+  }
+
+  anomaliaTxt(z: IdZona, v: Variable, i: number): TextoAnomalia | null {
+    if (v.modo === "monitor") {
+      const x = this.valorZona(z, v, i);
+      if (x == null) return null;
+      const prom = this.rangoMonitor(v.campo).media || 1;
+      const p = ((x - prom) / prom) * 100;
+      const escenario = this.esEscenario(i) ? " (escenario central, no es una observación)" : "";
+      return { corto: `${signo(p)}${nf(0).format(Math.abs(p))} %`, frase: `${nf(v.dec).format(x)} ${v.unidad}; ${nf(0).format(Math.abs(p))} % ${p >= 0 ? "sobre" : "bajo"} el promedio del monitor${escenario}`, valor: p };
+    }
+    if (v.modo === "indice") {
+      const a = esPeru(z) ? null : this.D.indices.hielo_anom[i];
+      if (a == null) return null;
+      return { corto: `${signo(a)}${nf(1).format(Math.abs(a))}`, frase: `${nf(2).format(Math.abs(a))} millones de km² ${a >= 0 ? "por encima" : "por debajo"} de lo normal`, valor: a };
+    }
+    const x = this.valorSerie(z, v.id, i);
+    if (x == null) return null;
+    if (v.modo === "directo") {
+      const d = x * (v.factor ?? 1);
+      return { corto: `${signo(d)}${nf(v.dec).format(Math.abs(d))} ${v.unidad}`, frase: `${nf(v.dec).format(Math.abs(d))} ${v.unidad} ${d >= 0 ? "por encima" : "por debajo"} de lo normal`, valor: d };
+    }
+    const c = this.climatologia(z, v.id)[this.mes(i).mes];
+    if (c == null) return null;
+    const mes = MESES_LARGOS[this.mes(i).mes];
+    if (v.modo === "log") {
+      const p = (x / c - 1) * 100;
+      return { corto: `${signo(p)}${nf(0).format(Math.abs(p))} %`, frase: `${nf(0).format(Math.abs(p))} % ${p >= 0 ? "más" : "menos"} que un ${mes} normal`, valor: p };
+    }
+    const d = x - c;
+    return { corto: `${signo(d)}${nf(v.dec).format(Math.abs(d))} ${v.unidad}`, frase: `${nf(v.dec).format(Math.abs(d))} ${v.unidad} ${d >= 0 ? "sobre" : "bajo"} lo normal para ${mes}`, valor: d };
+  }
+
+  /** Color de la zona en un mes (la misma escala que la leyenda) */
+  colorZona(z: IdZona, v: Variable, i: number, alfa = 0.85): string {
+    if (v.modo === "monitor") {
+      const x = this.valorZona(z, v, i);
+      if (x == null) return esPeru(z) ? SIN_DATO : "rgba(120,140,155,0.2)";
+      const { min, max } = this.rangoMonitor(v.campo);
+      const t = max === min ? 0.5 : (x - min) / (max - min);
+      return v.escala === "rampa" ? colorRampa(t, alfa) : colorDiverge((t - 0.5) * 2, alfa);
+    }
+    if (v.mapa === "clorofila") {
+      const x = this.valorSerie(z, v.id, i);
+      return x == null ? SIN_DATO : colorRampa(tClorofila(x), alfa);
+    }
+    const t = this.anomalia(z, v, i);
+    if (t == null) return v.modo === "indice" && esPeru(z) ? "rgba(120,140,155,0.2)" : SIN_DATO;
+    return v.escala === "rampa" ? colorRampa((t + 1) / 2, alfa) : colorDiverge(t, alfa);
+  }
+
+  valorTxt(v: Variable, x: number): string {
+    return `${nf(v.dec).format(x * (v.factor ?? 1))} ${v.unidad}`;
+  }
+
+  /** Correlación mes a mes de las anomalías de dos zonas */
+  rZonas(a: IdZona, b: IdZona, v: Variable): number | null {
+    const k = [a, b].sort().join("|") + v.id;
+    if (this.cacheR.has(k)) return this.cacheR.get(k) ?? null;
+    const xa: (number | null)[] = [], xb: (number | null)[] = [];
+    for (let i = this.i0; i <= this.ultimoSeries; i++) { xa.push(this.anomalia(a, v, i)); xb.push(this.anomalia(b, v, i)); }
+    const r = pearson(xa, xb);
+    this.cacheR.set(k, r);
+    return r;
+  }
+
+  /** Otras zonas ordenadas por parecido (vacío para datos regionales, que no se comparan entre zonas) */
+  conexionesDe(z: IdZona, v: Variable): { o: IdZona; r: number }[] {
+    if (v.modo === "monitor" || v.modo === "indice") return [];
+    return this.ids.filter((o) => o !== z)
+      .map((o) => ({ o, r: this.rZonas(z, o, v) }))
+      .filter((c): c is { o: IdZona; r: number } => c.r != null)
+      .sort((x, y) => y.r - x.r);
+  }
+
+  /** Mes más alto (sgn = 1) o más bajo (−1) frente a lo normal, en un año o en toda la serie */
+  mesExtremo(z: IdZona, v: Variable, anio: number | null, sgn: 1 | -1): number | null {
+    let mejor: number | null = null, iMejor: number | null = null;
+    for (let i = this.i0; i <= this.ultimo; i++) {
+      if (anio != null && this.mes(i).anio !== anio) continue;
+      const t = this.anomalia(z, v, i);
+      if (t != null && (mejor == null || t * sgn > mejor * sgn)) { mejor = t; iMejor = i; }
+    }
+    return iMejor;
+  }
+
+  /** Promedio de las anomalías de una región en un mes (para la franja de la línea de tiempo) */
+  anomaliaRegional(v: Variable, i: number): number | null {
+    const zonas = v.modo === "indice" ? this.ids.filter((z) => !esPeru(z)).slice(0, 1) : this.ids.filter(esPeru);
+    return media(zonas.map((z) => this.anomalia(z, v, i)));
+  }
+
+  /** Meses de cada El Niño en que el índice Niño 1+2 llegó a su máximo */
+  eventosNino(): EventoNino[] {
+    const eventos = [
+      { anio: 1998, nombre: "El Niño 1997–98" },
+      { anio: 2016, nombre: "El Niño 2015–16" },
+      { anio: 2017, nombre: "El Niño costero 2017" },
+      { anio: 2023, nombre: "El Niño 2023" },
+    ];
+    return eventos.flatMap((e) => {
+      let mejor: number | null = null;
+      for (let i = this.i0; i <= this.ultimoObservado; i++) {
+        const v = this.nino[i];
+        if (this.mes(i).anio === e.anio && v != null && (mejor == null || v > (this.nino[mejor] ?? -Infinity))) mejor = i;
+      }
+      return mejor == null ? [] : [{ ...e, i: mejor }];
+    });
+  }
+
+  /* ---------- resúmenes anuales ---------- */
+  pescaAnio(anio: number, especie: "anchoveta_peru" | "krill_mundo" = "anchoveta_peru"): number | null {
+    return this.D.pesca[especie][anio - this.D.pesca.inicio] ?? null;
+  }
+  mediaMonitorAnio(campo: CampoMonitor, anio: number): number | null {
+    return media(this.registrosMonitor.filter((r) => r.date.startsWith(`${anio}-`)).map((r) => r[campo]));
+  }
+  ultimoMonitor(campo: CampoMonitor): RegistroMonitor | undefined {
+    return [...this.registrosMonitor].reverse().find((r) => r[campo] != null);
+  }
+  /** Año con menos hielo marino antártico (anomalía media) */
+  hieloMinimo(): FilaAnual | null {
+    return this.anual.reduce<FilaAnual | null>((min, j) => (j.hielo != null && (!min || j.hielo < (min.hielo ?? Infinity)) ? j : min), null);
+  }
+  /** Año con más clorofila media frente a una zona */
+  anioMasVerde(z: IdZona): number {
+    let mejor: { anio: number; valor: number } | null = null;
+    for (let anio = 1998; anio <= this.mes(this.ultimoSeries).anio; anio++) {
+      const xs = this.meses.map((m, i) => (m.anio === anio ? this.valorSerie(z, "clorofila_mg_m3", i) : null));
+      const valor = media(xs);
+      if (valor != null && (!mejor || valor > mejor.valor)) mejor = { anio, valor };
+    }
+    return mejor?.anio ?? 2013;
+  }
+}
+
+export const BASE_MACHU_PICCHU = { lat: -62.09, lng: -58.47 };
+
+export function distanciaKm(a: number, b: number, c: number, d: number): number {
+  const R = 6371, rad = Math.PI / 180;
+  const x = Math.sin(((c - a) * rad) / 2) ** 2 + Math.cos(a * rad) * Math.cos(c * rad) * Math.sin(((d - b) * rad) / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+/** Zonas ordenadas por distancia a un punto */
+export function zonasCercanas(m: Modelo, lat: number, lng: number): { z: IdZona; d: number }[] {
+  return m.ids.map((z) => ({ z, d: distanciaKm(lat, lng, m.zona(z).lat, m.zona(z).lon) })).sort((a, b) => a.d - b.d);
+}

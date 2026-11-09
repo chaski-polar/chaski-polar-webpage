@@ -1,30 +1,48 @@
 import { create } from 'zustand'
+import type { Comparacion, MapStyle, Panel, Pov } from './lib/estado'
 
-export type ExplorerVariable = 'clorofila_mg_m3' | 'temperatura_superficial_C' | 'hielo'
-export type GlobeView = 'illustrated' | 'satellite'
+/** id de una de las variables de lib/variables.ts */
+export type ExplorerVariable = string
+/** illustrated: atlas plano con zonas. detailed: relieve y mapa del satélite. satellite: foto de la Tierra con el mapa encima */
+export type GlobeView = 'illustrated' | 'detailed' | 'satellite'
+
+/** Pedido de movimiento de cámara: el globo lo ejecuta cuando cambia el id */
+type CameraRequest = { pov: Pov; ms: number; id: number }
 
 type ExplorerState = {
   variable: ExplorerVariable
   view: GlobeView
   month: number
   playing: boolean
-  selectedZone: string | null
+  panel: Panel
+  mapStyle: MapStyle
+  comparison: Comparacion
+  camera: CameraRequest | null
   setVariable: (variable: ExplorerVariable) => void
   setView: (view: GlobeView) => void
   setMonth: (month: number) => void
   setPlaying: (playing: boolean) => void
-  setSelectedZone: (zone: string | null) => void
+  setPanel: (panel: Panel) => void
+  setMapStyle: (mapStyle: MapStyle) => void
+  setComparison: (comparison: Comparacion) => void
+  flyTo: (pov: Pov, ms?: number) => void
 }
 
 export const useExplorerStore = create<ExplorerState>((set) => ({
   variable: 'clorofila_mg_m3',
   view: 'illustrated',
-  month: 300,
+  month: 364, // mayo de 2023 (las series empiezan en enero de 1993)
   playing: false,
-  selectedZone: null,
+  panel: { tipo: 'general' },
+  mapStyle: 'bandas',
+  comparison: { region: 'peru', mes: 4, a: 'prom', b: 2023 },
+  camera: null,
   setVariable: (variable) => set({ variable }),
   setView: (view) => set({ view }),
   setMonth: (month) => set({ month }),
   setPlaying: (playing) => set({ playing }),
-  setSelectedZone: (selectedZone) => set({ selectedZone }),
+  setPanel: (panel) => set({ panel }),
+  setMapStyle: (mapStyle) => set({ mapStyle }),
+  setComparison: (comparison) => set({ comparison }),
+  flyTo: (pov, ms = 1500) => set((s) => ({ camera: { pov, ms, id: (s.camera?.id ?? 0) + 1 } })),
 }))

@@ -60,3 +60,7 @@ body {
   background: var(--color-ocean-950);
   color: var(--color-ice-100);
 }
+
+/* paso de la portada al explorador: todo en negro hasta que el globo está listo */
+.entrando .data-state { background: #02040a; color: transparent; }
+.entrando .app-header, .entrando .saltar { visibility: hidden; }

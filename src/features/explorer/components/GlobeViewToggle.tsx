@@ -5,9 +5,14 @@ type Props = {
   onChange: (view: GlobeView) => void
 }
 
+const VISTAS: { id: GlobeView; nombre: string; detalle: string }[] = [
+  { id: 'illustrated', nombre: 'Ilustrativa', detalle: 'zonas y conexiones' },
+  { id: 'detailed', nombre: 'Detallada', detalle: 'relieve y mapa del satélite' },
+  { id: 'satellite', nombre: 'Satelital', detalle: 'foto de la Tierra' },
+]
+
 export function GlobeViewToggle({ value, onChange }: Props) {
   return <div className="view-toggle" role="group" aria-label="Vista del globo">
-    <button className={value === 'illustrated' ? 'is-active' : ''} type="button" aria-pressed={value === 'illustrated'} onClick={() => onChange('illustrated')}><b>Ilustrativa</b><small>zonas y conexiones</small></button>
-    <button className={value === 'satellite' ? 'is-active' : ''} type="button" aria-pressed={value === 'satellite'} onClick={() => onChange('satellite')}><b>Satelital</b><small>relieve y superficie</small></button>
+    {VISTAS.map((v) => <button key={v.id} className={value === v.id ? 'is-active' : ''} type="button" aria-pressed={value === v.id} onClick={() => onChange(v.id)}><b>{v.nombre}</b><small>{v.detalle}</small></button>)}
   </div>
 }

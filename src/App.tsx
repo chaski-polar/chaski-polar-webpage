@@ -1,28 +1,27 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import './App.css'
-import './estilos.css'
-import { DataProvider } from './contexts/DataContext'
-import GamePage from './pages/GamePage'
-import HomePage from './pages/HomePage'
-import NotFoundPage from './pages/NotFoundPage'
+
+// cada página se descarga por separado: la portada no carga el globo, los gráficos ni los datos del explorador
+const PortadaPage = lazy(() => import('./pages/PortadaPage'))
+const HomePage = lazy(() => import('./pages/HomePage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/explorer" element={<HomePage />} />
-      <Route path="/juego" element={<GamePage />} />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <Suspense fallback={<div className="data-state"><p>Cargando…</p></div>}>
+      <Routes>
+        <Route path="/" element={<PortadaPage />} />
+        <Route path="/explorer" element={<HomePage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
   )
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <DataProvider>
-        <AppRoutes />
-      </DataProvider>
+      <AppRoutes />
     </BrowserRouter>
   )
 }
