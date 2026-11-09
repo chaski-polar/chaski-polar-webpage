@@ -8,29 +8,33 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-  :root { --fondo:#071a2b; --panel:#0d2b45; --borde:#5fa8d3; --texto:#eaf6ff; --suave:#8fb3cc; --verde:#4fd18b; --rojo:#e4572e; --amarillo:#ffd166; }
+  :root { --fondo:#06121f; --panel:#0d2b45; --borde:#5fa8d3; --texto:#eaf6ff; --suave:#8fb3cc; --verde:#4fd18b; --rojo:#e4572e; --amarillo:#ffd166; }
   * { box-sizing:border-box; }
   html, body { margin:0; height:100%; background:var(--fondo); color:var(--texto); overflow:hidden;
-    font-family:"Press Start 2P", ui-monospace, monospace; font-size:10px; image-rendering:pixelated; }
-  canvas { display:block; margin:0 auto; image-rendering:pixelated; touch-action:none; cursor:crosshair; }
+    font-family:"Press Start 2P", ui-monospace, monospace; font-size:10px; }
+  canvas { image-rendering:pixelated; }
+  #lienzo { display:block; margin:0 auto; touch-action:none; cursor:crosshair; }
   .px { background:var(--panel); border:3px solid var(--borde); box-shadow:3px 3px 0 #02101c; }
-  .hud { position:fixed; top:8px; left:8px; right:8px; display:flex; gap:6px; flex-wrap:wrap; pointer-events:none; }
+  .hud { position:fixed; top:8px; left:8px; display:flex; gap:6px; flex-wrap:wrap; pointer-events:none; max-width:calc(100vw - 16px); }
+  .hud[hidden] { display:none; }
   .hud .px { padding:6px 8px; line-height:1.6; }
   .hud small { color:var(--suave); display:block; font-size:8px; }
   .barra { height:6px; width:90px; background:#163d5c; margin-top:4px; }
   .barra i { display:block; height:100%; background:var(--verde); width:50%; }
-  .aviso { position:fixed; left:50%; transform:translateX(-50%); bottom:44px; padding:8px 12px; pointer-events:none; color:var(--amarillo); text-align:center; max-width:92vw; line-height:1.6; }
+  .aviso { position:fixed; left:50%; transform:translateX(-50%); top:64px; padding:8px 12px; pointer-events:none; color:var(--amarillo); text-align:center; max-width:92vw; line-height:1.6; }
   .aviso[hidden] { display:none; }
   .pie { position:fixed; bottom:6px; left:8px; right:8px; font-size:8px; color:var(--suave); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; pointer-events:none; line-height:1.6; }
-  .capa { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,10,18,.8); padding:12px; }
+  .capa { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,10,18,.72); padding:12px; }
   .capa[hidden] { display:none; }
-  .caja { padding:18px; max-width:600px; width:100%; max-height:94vh; overflow:auto; line-height:1.9; }
-  h1 { font-size:20px; margin:0 0 10px; color:var(--amarillo); } h2 { font-size:13px; margin:0 0 10px; color:var(--amarillo); }
+  .caja { padding:18px; max-width:620px; width:100%; max-height:94vh; overflow:auto; line-height:1.9; }
+  h1 { font-size:24px; margin:0 0 6px; color:var(--amarillo); text-shadow:3px 3px 0 #7a3f1d; } h2 { font-size:13px; margin:0 0 10px; color:var(--amarillo); }
   p, li { font-size:10px; margin:6px 0; } ul { padding-left:18px; margin:6px 0; }
+  .sub { color:var(--suave); font-size:9px; margin-bottom:14px; }
   .anios { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:12px 0; }
   button { font:inherit; color:var(--texto); background:#14476b; border:3px solid var(--borde); box-shadow:3px 3px 0 #02101c; padding:10px; cursor:pointer; text-align:left; line-height:1.7; }
   button:hover, button:focus-visible { background:#1d6396; outline:none; }
   button:active { transform:translate(2px,2px); box-shadow:1px 1px 0 #02101c; }
+  button:disabled { opacity:.5; cursor:default; }
   button small { display:block; color:var(--suave); font-size:8px; }
   .informe { font-family:ui-monospace, Consolas, monospace; font-size:13px; background:#f3ead2; color:#2b2b2b; border:3px solid #8a7a5c; padding:10px 12px; white-space:pre; line-height:1.5; overflow-x:auto; }
   .estrellas { font-size:18px; color:var(--amarillo); margin:8px 0; letter-spacing:4px; }
@@ -39,29 +43,64 @@
   .tecla { display:inline-block; border:2px solid var(--borde); padding:1px 4px; margin:0 2px; background:#0a2234; }
   .leyenda { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center; margin:8px 0; }
   .muestra { width:14px; height:14px; border:2px solid #02101c; }
+  #dialogo { position:fixed; left:50%; transform:translateX(-50%); bottom:30px; width:min(680px, 94vw); display:flex; gap:12px; padding:10px 12px; cursor:pointer; }
+  #dialogo[hidden] { display:none; }
+  #retrato { width:72px; height:72px; flex:none; background:#0a2234; border:3px solid #2b5f85; }
+  #dNombre { color:var(--amarillo); display:block; margin-bottom:6px; }
+  #dTexto { margin:0; line-height:1.8; min-height:54px; }
+  #dialogo small { color:var(--suave); font-size:8px; float:right; }
+  .objetivo { position:fixed; top:8px; right:8px; padding:6px 8px; line-height:1.6; pointer-events:none; max-width:46vw; }
+  .objetivo[hidden] { display:none; }
+  .objetivo small { color:var(--suave); display:block; font-size:8px; }
 </style>
 </head>
 <body>
-<canvas id="lienzo" aria-label="Mapa en pixel art de la costa peruana con el cardumen"></canvas>
+<canvas id="lienzo" aria-label="Juego en pixel art"></canvas>
 
-<div class="hud" aria-live="polite">
+<div class="hud" id="hud" hidden aria-live="polite">
   <div class="px"><small>FECHA</small><span id="hFecha">—</span></div>
   <div class="px"><small>NIÑO 1+2</small><span id="hNino">—</span></div>
   <div class="px"><small>ALIMENTO AQUÍ</small><span id="hChl">—</span></div>
   <div class="px"><small>CARDUMEN</small><span id="hCard">—</span><div class="barra"><i id="hEnergia"></i></div></div>
   <div class="px"><small>FORMACIÓN</small><span id="hModo">DISPERSA</span></div>
 </div>
+<div class="objetivo px" id="objetivo" hidden><small id="oTitulo">OBJETIVO</small><span id="oTexto"></span></div>
 <div class="aviso px" id="aviso" hidden></div>
 <div class="pie">
-  <span>Mover: ratón / dedo / WASD · Espacio: formación · P: pausa · H: ayuda</span>
-  <span>Mar real: clorofila ESA OC-CCI, temperatura NOAA, Niño 1+2 NOAA · Cardumen ilustrativo</span>
+  <span id="pieControles">Ratón / dedo / WASD para moverte</span>
+  <span>Prototipo · Datos del mar: ESA OC-CCI, NOAA · Personajes y cifras de juego ilustrativos</span>
 </div>
 
-<div class="capa" id="inicio">
-  <div class="caja px">
+<div id="dialogo" class="px" hidden role="dialog" aria-live="polite">
+  <canvas id="retrato" width="24" height="24"></canvas>
+  <div style="flex:1"><b id="dNombre"></b><p id="dTexto"></p><small>▶ CLIC / ENTER</small></div>
+</div>
+
+<div class="capa" id="titulo">
+  <div class="caja px" style="text-align:center">
     <h1>CARDUMEN</h1>
-    <p>Eres un cardumen de anchovetas en la costa del Perú. Sobrevive un año completo en un mar que es <b>el real</b>: la comida y la temperatura vienen de satélites.</p>
-    <p>Elige el año:</p>
+    <div class="sub">DE LA ANTÁRTIDA AL MAR PERUANO</div>
+    <p>Recorre la cadena de la vida: fitoplancton, krill y ballena en la Antártida, hasta llegar al Perú y guiar a un cardumen de anchovetas en un mar con datos satelitales reales.</p>
+    <div class="acciones" style="flex-direction:column">
+      <button id="btnAventura" style="text-align:center">▶ EMPEZAR LA AVENTURA</button>
+      <button id="btnDirecto" style="text-align:center">IR DIRECTO AL CARDUMEN</button>
+    </div>
+  </div>
+</div>
+
+<div class="capa" id="transicion" hidden>
+  <div class="caja px">
+    <h2>DOS MARES, DOS MOTORES</h2>
+    <p>La ballena une la Antártida y el Perú: es un viaje real de miles de kilómetros.</p>
+    <p>Pero la anchoveta depende del mar frente a su propia costa: del viento que hace subir agua fría, de la temperatura y de El Niño. Los datos satelitales no muestran que lo que pasa en la Antártida cambie año a año el mar peruano.</p>
+    <div class="acciones"><button id="btnConocerAnchi" style="text-align:center">CONOCER A ANCHI ▶</button></div>
+  </div>
+</div>
+
+<div class="capa" id="inicio" hidden>
+  <div class="caja px">
+    <h2>ELIGE UN AÑO REAL</h2>
+    <p>El mar de cada partida es el de ese año: la comida y la temperatura vienen de satélites.</p>
     <div class="anios" id="anios"></div>
   </div>
 </div>
@@ -71,19 +110,19 @@
     <h2>CÓMO SE JUEGA</h2>
     <p><b>Objetivo:</b> llegar a diciembre con la mayor cantidad de anchovetas posible. Cada mes dura 5 segundos (un año = 1 minuto).</p>
     <ul>
-      <li><b>Mover:</b> el cardumen sigue al puntero (ratón o dedo). También <span class="tecla">W</span><span class="tecla">A</span><span class="tecla">S</span><span class="tecla">D</span> o flechas.</li>
-      <li><b>Comer:</b> nada sobre los puntos verdes. Cada pez tiene energía: si no come, se apaga y muere.</li>
+      <li><b>Mover:</b> el cardumen sigue al puntero (ratón o dedo). También <span class="tecla">W</span><span class="tecla">A</span><span class="tecla">S</span><span class="tecla">D</span> o flechas. La cámara te sigue; arriba a la derecha está el mapa de toda la costa.</li>
+      <li><b>Comer:</b> nada sobre las manchas verdes (fitoplancton). Cada pez tiene energía: si no come, se apaga y muere.</li>
       <li><b>Formación:</b> <span class="tecla">ESPACIO</span> cambia entre <b>dispersa</b> (come más, más expuesta) y <b>compacta</b> (se protege de aves, come menos).</li>
-      <li><b>Aves:</b> primero aparece su sombra; luego se lanzan. Aléjate o compáctate.</li>
-      <li><b>Bolichera:</b> en temporada de pesca un barco recorre la costa central y atrapa a los peces cerca de su red.</li>
+      <li><b>Aves:</b> primero ves su sombra; luego se lanzan en picada. Aléjate o compáctate.</li>
+      <li><b>Bolichera:</b> en temporada de pesca un barco aparece en la costa central y atrapa a los peces dentro de su red amarilla.</li>
     </ul>
     <div class="leyenda">
       <span class="muestra" style="background:#4fd18b"></span><span>Alimento (fitoplancton). Más brillante = más comida.</span>
-      <span class="muestra" style="background:#0e4470"></span><span>Agua fría y normal.</span>
-      <span class="muestra" style="background:#a8423e"></span><span>Agua cálida (El Niño): menos alimento.</span>
+      <span class="muestra" style="background:#1a6aa0"></span><span>Agua fría y normal.</span>
+      <span class="muestra" style="background:#b8463c"></span><span>Agua cálida (El Niño): menos alimento.</span>
     </div>
     <p><b>Consejo:</b> el alimento está pegado a la costa. En años de El Niño el centro (Chimbote, Callao) pierde casi la mitad de su comida: busca las zonas donde todavía hay verde.</p>
-    <div class="acciones"><button id="btnJugar">¡A NADAR! ▶</button></div>
+    <div class="acciones"><button id="btnJugar" style="text-align:center">¡A NADAR! ▶</button></div>
   </div>
 </div>
 
@@ -104,334 +143,696 @@
 <script>
 "use strict";
 const D = window.DATOS_MAR;
-// ---------- configuración
-const LON0 = -86, LON1 = -69, LAT_N = -2.5, LAT_S = -19;
-const PW = 288, PH = Math.round(PW * (LAT_N - LAT_S) / (LON1 - LON0));   // resolución en píxeles reales del juego
-const MES_SEG = 5;
-const NOMBRES_MES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SET","OCT","NOV","DIC"];
-const ANIOS = [
-  { a: 2004, t: "AÑO NORMAL 2004", d: "Mar frío y productivo" },
-  { a: 1998, t: "EL NIÑO 1998", d: "Uno de los más fuertes" },
-  { a: 2017, t: "NIÑO COSTERO 2017", d: "Golpe corto y desigual" },
-  { a: 2023, t: "NIÑO COSTERO 2023", d: "Se canceló la pesca" },
-];
-const COSTA = [[-2.5,-80.9],[-3.4,-80.3],[-4.0,-81.1],[-4.6,-81.3],[-5.1,-81.15],[-5.6,-80.9],[-6.0,-81.15],[-6.4,-80.6],
-  [-6.85,-79.95],[-7.7,-79.45],[-8.2,-79.0],[-9.1,-78.6],[-10.1,-78.15],[-11.1,-77.6],[-12.05,-77.15],[-12.6,-76.65],
-  [-13.1,-76.4],[-13.7,-76.2],[-14.1,-76.3],[-14.8,-75.6],[-15.35,-75.15],[-15.9,-74.4],[-16.2,-73.7],[-16.6,-72.7],
-  [-17.0,-72.0],[-17.65,-71.35],[-18.35,-70.4],[-19.0,-70.3]];
-// paleta limitada
-const MAR = ["#082f55", "#0e4470", "#1d5a86", "#4b4a63", "#7a3f4f", "#a8423e"];   // frío → cálido
-const VERDES = ["#1f6b45", "#2fa86a", "#4fd18b", "#a8f0c0"];
-const TIERRA = "#b49a6a", TIERRA_OSC = "#8a744c", BORDE = "#e8dcb4", PEZ = "#d8ecf6", PEZ_OSC = "#6f97ad";
-const AVE = ["..#.....#..", ".#.#...#.#.", "#...#.#...#", ".....#....."];   // gaviota en pixel art
+const $ = id => document.getElementById(id);
+const VW = 256, VH = 192;                 // resolución en píxeles reales del juego
+const azar = (a, b) => a + Math.random() * (b - a);
+const lim = (v, a, b) => Math.max(a, Math.min(b, v));
 
-// ---------- datos
+// ============================================================ sprites en pixel art
+function spr(filas, pal) {
+  const w = Math.max(...filas.map(f => f.length)), h = filas.length;
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const g = c.getContext("2d");
+  filas.forEach((f, y) => { for (let x = 0; x < f.length; x++) { const col = pal[f[x]]; if (col) { g.fillStyle = col; g.fillRect(x, y, 1, 1); } } });
+  return c;
+}
+function espejo(c) {
+  const f = document.createElement("canvas"); f.width = c.width; f.height = c.height;
+  const g = f.getContext("2d"); g.translate(c.width, 0); g.scale(-1, 1); g.drawImage(c, 0, 0); return f;
+}
+const P = {
+  k: "#0b1320", w: "#f4f7fa", g: "#5b6770", o: "#f39c12", y: "#ffd166", r: "#e4572e",
+};
+const S = {};
+S.anch = spr(["..bbbb.", "tsssssse", "..sbbb.."], { b: "#3f78a3", s: "#dcecf5", t: "#86aec4", e: "#0b1320" });
+S.anchDebil = spr(["..bbbb.", "tsssssse", "..sbbb.."], { b: "#2a4a63", s: "#7f99a8", t: "#5b7484", e: "#0b1320" });
+S.anchI = espejo(S.anch); S.anchDebilI = espejo(S.anchDebil);
+S.anchGrande = spr([
+  "......bbbbbbb.....",
+  "...bbbbbBBBBbbb...",
+  "tt.bBBBBBBBBBBbbb.",
+  "ttsssssssssssssse.",
+  "tt.ssssssssssssss.",
+  "...sssssssssss....",
+  "......sssss.......",
+], { b: "#2d5f86", B: "#3f78a3", s: "#dcecf5", t: "#86aec4", e: "#0b1320" });
+S.ave1 = spr(["g.......g", "ww.....ww", ".wwwkwww.", "...www...", "....o...."], { w: P.w, g: P.g, k: "#333", o: P.o });
+S.ave2 = spr([".........", "...wkw...", ".wwwwwww.", "ww..w..ww", "g...o...g"], { w: P.w, g: P.g, k: "#333", o: P.o });
+S.lumi = spr([
+  "...ggg...",
+  ".ggGGGgg.",
+  "gGGGGGGGg",
+  "gGkGGGkGg",
+  "gGGGGGGGg",
+  "gGGmmmGGg",
+  ".ggGGGgg.",
+  "...ggg...",
+], { g: "#1f6b45", G: "#5fdc96", k: "#0b1320", m: "#1f6b45" });
+S.celula = spr(["..g..", ".gGg.", "gGGGg", ".gGg.", "..g.."], { g: "#1f6b45", G: "#5fdc96" });
+S.krill = spr([
+  ".........aa",
+  "..rrrrrrrk.",
+  "trrRRRRRrr.",
+  "tt.rrrrrr..",
+  "...l.l.l...",
+], { r: "#e8735a", R: "#f6a487", t: "#c4513b", k: "#0b1320", a: "#f8cbb5", l: "#f0a080" });
+S.krillI = espejo(S.krill);
+S.pinguino = spr([
+  "..kkk..",
+  ".kkwkk.",
+  ".kwwwko",
+  "kkwwwkk",
+  "kkwwwkk",
+  ".kwwwk.",
+  "..o.o..",
+], { k: "#14181f", w: "#f4f7fa", o: "#f39c12" });
+S.ballena = spr([
+  "....................BB......",
+  "..........BBBBBBBBBBBBBB....",
+  "T......BBBBBBBBBBBBBBBBBBB..",
+  "TT...BBBBBBBBBBBBBBBBBBBBBB.",
+  ".TTBBBBBBBBBBBBBBBBBBBBkBBBB",
+  "TT...BBvvvvvvvvvvvvvvvvvvvB.",
+  "T......vvvvvvvvvvvvvvvvvv...",
+  "...........WWW.....vvv......",
+  ".............WWWW...........",
+], { B: "#2c3e57", T: "#2c3e57", v: "#c9d6e2", W: "#e8eef3", k: "#0b1320" });
+S.ballenaArriba = spr([
+  "....bbb....",
+  "...bBBBb...",
+  "..bBBBBBb..",
+  "..bBBBBBb..",
+  "WWbBBBBBbWW",
+  "WW.bBBBb.WW",
+  "W..bBBBb..W",
+  "...bBBBb...",
+  "....bBb....",
+  "....bBb....",
+  "....bBb....",
+  ".....b.....",
+  "...ttbtt...",
+  "..tt...tt..",
+], { b: "#1b2a3a", B: "#3a5470", W: "#dfe8ee", t: "#1b2a3a" });
+S.gaia = spr([
+  "...hhhhhh...",
+  "..hhhhhhhh..",
+  ".hhffffffhh.",
+  ".hffeffeffh.",
+  ".hffffffffh.",
+  "..ffmmmmff..",
+  "...ffffff...",
+  "..wwwwwwww..",
+  ".wwwbwwbwww.",
+  ".wwwwwwwwww.",
+], { h: "#5a3b24", f: "#e0b08a", e: "#222", m: "#b5574a", w: "#f0f4f8", b: "#5fa8d3" });
+S.casa = spr(["..r..", ".rrr.", "rrrrr", "wwkww", "wwkww"], { r: "#a8423e", w: "#f0e2c0", k: "#5a3b24" });
+S.nutriente = spr([".c.", "cCc", ".c."], { c: "#4fc3f7", C: "#d4f3ff" });
+const img = src => { const i = new Image(); i.src = src; return i; };
+const IMG = { barco: img("sprites/bolichera.png"), satelite: img("sprites/satelite.png") };
+const listo = i => i.complete && i.naturalWidth > 0;
+const dibujarX = (im, cx_, cy_, e = 2) => p.drawImage(im, Math.round(cx_ - im.width * e / 2), Math.round(cy_ - im.height * e / 2), im.width * e, im.height * e);
+
+// ============================================================ lienzo y texto
+const cv = $("lienzo"), cx = cv.getContext("2d");
+const pc = document.createElement("canvas"); pc.width = VW; pc.height = VH;
+const p = pc.getContext("2d");
+let K = 3;
+function ajustar() {
+  K = Math.max(1, Math.floor(Math.min(window.innerWidth / VW, (window.innerHeight - 24) / VH)));
+  cv.width = VW * K; cv.height = VH * K; cv.style.width = VW * K + "px"; cv.style.height = VH * K + "px";
+}
+window.addEventListener("resize", ajustar); ajustar();
+let textos = [];
+const texto = (t, x, y, color = "#eaf6ff", tam = 1) => textos.push({ t, x, y, color, tam });
+function presentar() {
+  cx.imageSmoothingEnabled = false;
+  cx.drawImage(pc, 0, 0, VW * K, VH * K);
+  for (const o of textos) {
+    cx.font = `${Math.max(7, Math.round(3.4 * K * o.tam))}px "Press Start 2P", monospace`;
+    cx.fillStyle = "rgba(2,10,18,.85)"; cx.fillText(o.t, o.x * K + 1, o.y * K + 1);
+    cx.fillStyle = o.color; cx.fillText(o.t, o.x * K, o.y * K);
+  }
+  textos = [];
+}
+function barra(x, y, w, v, color, etiqueta) {
+  p.fillStyle = "#02101c"; p.fillRect(x - 1, y - 1, w + 2, 6);
+  p.fillStyle = "#163d5c"; p.fillRect(x, y, w, 4);
+  p.fillStyle = color; p.fillRect(x, y, Math.round(w * lim(v, 0, 1)), 4);
+  if (etiqueta) texto(etiqueta, x, y - 2, "#cfe6f5", 0.8);
+}
+
+// ============================================================ entrada
+const teclas = new Set();
+const puntero = { x: VW / 2, y: VH / 2, activo: false };
+function moverPuntero(e) { const r = cv.getBoundingClientRect(); puntero.x = (e.clientX - r.left) / K; puntero.y = (e.clientY - r.top) / K; puntero.activo = true; }
+cv.addEventListener("pointermove", moverPuntero); cv.addEventListener("pointerdown", moverPuntero);
+function direccionTeclas() {
+  let dx = 0, dy = 0;
+  if (teclas.has("w") || teclas.has("arrowup")) dy -= 1;
+  if (teclas.has("s") || teclas.has("arrowdown")) dy += 1;
+  if (teclas.has("a") || teclas.has("arrowleft")) dx -= 1;
+  if (teclas.has("d") || teclas.has("arrowright")) dx += 1;
+  return { dx, dy };
+}
+function avisar(t, seg = 3) { const a = $("aviso"); a.textContent = t; a.hidden = false; avisoT = seg; }
+let avisoT = 0;
+function objetivoTexto(t, titulo = "OBJETIVO") { $("oTitulo").textContent = titulo; $("oTexto").textContent = t; $("objetivo").hidden = !t; }
+
+// ============================================================ diálogos
+const RETRATOS = { LUMI: () => S.lumi, KIRI: () => S.krill, NARA: () => S.ballena, ANCHI: () => S.anchGrande, "DRA. GAIA": () => S.gaia, ORBI: () => (listo(IMG.satelite) ? IMG.satelite : S.nutriente) };
+const dlg = { cola: [], linea: null, n: 0, fin: null };
+function decir(lineas, fin) { dlg.cola = lineas.slice(); dlg.fin = fin || null; siguienteLinea(); }
+function siguienteLinea() {
+  const l = dlg.cola.shift();
+  if (!l) { dlg.linea = null; $("dialogo").hidden = true; const f = dlg.fin; dlg.fin = null; if (f) f(); return; }
+  dlg.linea = l; dlg.n = 0; $("dialogo").hidden = false; $("dNombre").textContent = l.q;
+  const r = $("retrato").getContext("2d"); r.imageSmoothingEnabled = false; r.clearRect(0, 0, 24, 24);
+  const im = RETRATOS[l.q](), w = im.width || im.naturalWidth, h = im.height || im.naturalHeight, e = Math.max(1, Math.floor(22 / Math.max(w, h)));
+  r.drawImage(im, Math.floor((24 - w * e) / 2), Math.floor((24 - h * e) / 2), w * e, h * e);
+}
+function avanzarDialogo() { if (!dlg.linea) return; if (dlg.n < dlg.linea.t.length) dlg.n = dlg.linea.t.length; else siguienteLinea(); }
+$("dialogo").addEventListener("click", avanzarDialogo);
+function actualizarDialogo(dt) { if (!dlg.linea) return; dlg.n = Math.min(dlg.linea.t.length, dlg.n + dt * 45); $("dTexto").textContent = dlg.linea.t.slice(0, Math.floor(dlg.n)); }
+
+// ============================================================ escena 1: Lumi, el fitoplancton
+const GRIETAS = [[30, 62], [112, 150], [196, 232]];
+function luzEn(x, y) {
+  let g = 0.25;
+  for (const [a, b] of GRIETAS) { const m = (a + b) / 2, s = (b - a) / 2 + y * 0.22; const d = Math.abs(x - m - y * 0.18); if (d < s) g = Math.max(g, 1 - d / s * 0.5); }
+  return g * Math.max(0, 1 - (y - 16) / 140);
+}
+const fito = {
+  iniciar() {
+    this.l = { x: 40, y: 70, vx: 0, vy: 0, e: 0.2, nut: 1 }; this.celulas = []; this.nutr = []; this.t = 0; this.fin = false; this.flotantes = [];
+    objetivoTexto("Guía a Lumi a la luz y atrapa nutrientes (celestes). Forma una floración de 8 células.", "1/3 · LUMI EL FITOPLANCTON");
+    $("pieControles").textContent = "Ratón / dedo / WASD: moverse (la corriente también te lleva)";
+    decir([
+      { q: "LUMI", t: "¡Hola! ¿Puedes verme? Soy Lumi, parte del fitoplancton: organismos microscópicos que hacen fotosíntesis." },
+      { q: "LUMI", t: "Necesito luz solar y nutrientes para crecer. Bajo el hielo antártico, la luz entra por las grietas." },
+      { q: "ORBI", t: "¡Hola! Soy ORBI, un satélite. Guía a Lumi hacia la luz y atrapa los nutrientes celestes. Con suficiente energía, ¡se divide!" },
+    ]);
+  },
+  actualizar(dt) {
+    const l = this.l; this.t += dt;
+    const corr = 8 + Math.sin(this.t * 0.5 + l.y * 0.05) * 4;
+    const { dx, dy } = direccionTeclas();
+    let ax = dx * 60, ay = dy * 60;
+    if (puntero.activo && !dx && !dy) { ax = lim((puntero.x - l.x) * 2, -60, 60); ay = lim((puntero.y - l.y) * 2, -60, 60); }
+    l.vx = (l.vx + ax * dt) * 0.92; l.vy = (l.vy + ay * dt) * 0.92;
+    const v = Math.hypot(l.vx, l.vy); if (v > 30) { l.vx *= 30 / v; l.vy *= 30 / v; }
+    l.x += (l.vx + corr) * dt; l.y = lim(l.y + l.vy * dt, 20, VH - 14);
+    if (l.x > VW + 4) l.x -= VW + 8; if (l.x < -4) l.x += VW + 8;
+    if (Math.random() < dt * 3.2) this.nutr.push({ x: azar(0, VW), y: VH - 8, vy: -azar(6, 11) });
+    for (const n of this.nutr) { n.y += n.vy * dt; n.x += corr * 0.6 * dt; if (Math.hypot(n.x - l.x, n.y - l.y) < 10) { n.y = -99; l.nut = Math.min(5, l.nut + 1); } }
+    this.nutr = this.nutr.filter(n => n.y > 18 && n.x < VW + 4);
+    const luz = luzEn(l.x, l.y);
+    if (l.nut > 0.01) { l.e += dt * luz * 0.32; l.nut = Math.max(0, l.nut - dt * 0.2 * luz); } else l.e += dt * luz * 0.03;
+    if (l.e >= 1) { l.e = 0.25; this.celulas.push({ x: l.x, y: l.y }); this.flotantes.push({ x: l.x, y: l.y - 8, t: 1.2, s: "¡DIVISIÓN!" }); }
+    this.celulas.forEach((c, i) => { const obj = i === 0 ? l : this.celulas[i - 1]; c.x += (obj.x - 6 - c.x) * dt * 3; c.y += (obj.y + Math.sin(this.t * 2 + i) * 3 - c.y) * dt * 3; });
+    for (const f of this.flotantes) { f.t -= dt; f.y -= dt * 10; }
+    this.flotantes = this.flotantes.filter(f => f.t > 0);
+    if (this.celulas.length >= 7 && !this.fin) {
+      this.fin = true; objetivoTexto("");
+      const a = D.antartida;
+      decir([
+        { q: "LUMI", t: "¡Somos muchas! Cuando las condiciones son buenas formamos floraciones de fitoplancton." },
+        { q: "ORBI", t: `Desde el espacio estimamos la clorofila por el color del mar. En verano, la Península Antártica tuvo en promedio ${a.chl_verano_media.toFixed(2)} mg/m³ de clorofila (máximo ${a.chl_verano_max.toFixed(2)}), según el satélite OC-CCI.` },
+        { q: "ORBI", t: "Ojo: la clorofila es un indicador, no un conteo de organismos. Y las nubes pueden tapar la vista del satélite." },
+        { q: "LUMI", t: "¡Oh! Algo se acerca entre las partículas..." },
+      ], () => cambiarEscena(krill));
+    }
+  },
+  dibujar() {
+    for (let y = 0; y < VH; y++) { const k = y / VH; p.fillStyle = `rgb(${8 + 10 * (1 - k)|0},${40 + 50 * (1 - k)|0},${70 + 60 * (1 - k)|0})`; p.fillRect(0, y, VW, 1); }
+    const tt = this.t || 0;
+    p.fillStyle = "rgba(220,240,255,0.16)";
+    for (const [a, b] of GRIETAS) for (let y = 16; y < VH; y += 2) { const s = (b - a) / 2 + y * 0.22, m = (a + b) / 2 + y * 0.18 + Math.sin(tt * 1.5 + y * 0.1) * 2; p.fillRect(Math.round(m - s), y, Math.round(s * 2), 1); }
+    // hielo
+    for (let x = 0; x < VW; x++) {
+      const enGrieta = GRIETAS.some(([a, b]) => x >= a && x <= b);
+      const h = enGrieta ? 4 + ((x * 7) % 3) : 14 + ((x * 13) % 5) + Math.round(Math.sin(x * 0.2) * 2);
+      p.fillStyle = "#e9f4fb"; p.fillRect(x, 0, 1, h); p.fillStyle = "#9cc8e0"; p.fillRect(x, h, 1, 2);
+      if ((x * 31) % 17 === 0) { p.fillStyle = "#ffffff"; p.fillRect(x, 1, 1, 1); }
+    }
+    // fondo marino
+    for (let x = 0; x < VW; x += 1) { const h = 6 + Math.round(Math.sin(x * 0.13) * 2 + Math.sin(x * 0.05) * 2); p.fillStyle = "#1a2e3a"; p.fillRect(x, VH - h, 1, h); }
+    for (const n of this.nutr || []) p.drawImage(S.nutriente, Math.round(n.x) - 1, Math.round(n.y) - 1);
+    for (const c of this.celulas || []) dibujarX(S.celula, c.x, c.y, 2);
+    if (this.l) dibujarX(S.lumi, this.l.x, this.l.y + Math.sin(tt * 3) , 2);
+    for (const f of this.flotantes || []) texto(f.s, f.x - 14, f.y, "#ffd166", 0.8);
+    if (this.l) {
+      barra(6, VH - 30, 50, luzEn(this.l.x, this.l.y), "#ffd166", "LUZ");
+      barra(6, VH - 18, 50, this.l.nut / 5, "#4fc3f7", "NUTRIENTES");
+      barra(70, VH - 18, 50, this.l.e, "#5fdc96", "ENERGÍA");
+      texto(`CÉLULAS ${this.celulas.length + 1}/8`, 132, VH - 14, "#eaf6ff", 0.9);
+    }
+  },
+};
+
+// ============================================================ escena 2: Kiri, el krill
+const krill = {
+  iniciar() {
+    this.k = { x: 60, y: 100, vx: 0, vy: 0 }; this.nubes = []; this.ping = []; this.comidos = 0; this.aturdido = 0; this.t = 0; this.fin = false; this.sombra = -80;
+    objetivoTexto("Come 15 manchas de fitoplancton. ¡Esquiva a los pingüinos!", "2/3 · KIRI EL KRILL");
+    decir([
+      { q: "KIRI", t: "¡Hola, Lumi! Soy Kiri, krill antártico. Me alimento de fitoplancton y de algas que crecen bajo el hielo." },
+      { q: "ORBI", t: "El krill es alimento de ballenas, pingüinos y focas. Come 15 manchas verdes, ¡y cuidado con los pingüinos!" },
+    ]);
+  },
+  actualizar(dt) {
+    const k = this.k; this.t += dt; this.aturdido = Math.max(0, this.aturdido - dt);
+    const { dx, dy } = direccionTeclas();
+    let ax = dx * 160, ay = dy * 160;
+    if (puntero.activo && !dx && !dy) { ax = lim((puntero.x - k.x) * 5, -160, 160); ay = lim((puntero.y - k.y) * 5, -160, 160); }
+    if (this.aturdido > 0) { ax *= 0.2; ay *= 0.2; }
+    k.vx = (k.vx + ax * dt) * 0.9; k.vy = (k.vy + ay * dt) * 0.9;
+    const v = Math.hypot(k.vx, k.vy); if (v > 75) { k.vx *= 75 / v; k.vy *= 75 / v; }
+    k.x = lim(k.x + k.vx * dt, 6, VW - 6); k.y = lim(k.y + k.vy * dt, 24, VH - 12);
+    if (Math.random() < dt * 1.4 && this.nubes.length < 9) this.nubes.push({ x: VW + 8, y: azar(28, VH - 20), r: azar(4, 7), f: Math.random() * 6 });
+    for (const n of this.nubes) { n.x -= dt * 14; if (Math.hypot(n.x - k.x, n.y - k.y) < n.r + 7) { n.x = -99; this.comidos++; } }
+    this.nubes = this.nubes.filter(n => n.x > -10);
+    if (Math.random() < dt / 3.2 && this.comidos < 15) this.ping.push({ x: azar(20, VW - 20), y: 10, tx: k.x, ty: k.y, fase: 0 });
+    for (const q of this.ping) {
+      if (q.fase === 0) { const d = Math.hypot(q.tx - q.x, q.ty - q.y); q.x += (q.tx - q.x) / d * 70 * dt; q.y += (q.ty - q.y) / d * 70 * dt; if (d < 3) q.fase = 1; }
+      else q.y -= 60 * dt;
+      if (this.aturdido <= 0 && Math.hypot(q.x - k.x, q.y - k.y) < 10) { this.aturdido = 1.5; this.comidos = Math.max(0, this.comidos - 2); avisar("¡UN PINGÜINO! PIERDES 2"); }
+    }
+    this.ping = this.ping.filter(q => q.y > -10);
+    if (this.comidos >= 15 && !this.fin) {
+      this.fin = true; objetivoTexto("");
+      decir([{ q: "KIRI", t: "¡Estoy lleno! Pero... ¿qué es esa sombra enorme?" }], () => { this.sombraActiva = true; });
+    }
+    if (this.sombraActiva) {
+      this.sombra += dt * 70;
+      if (this.sombra > VW + 40 && !this.dijoNara) {
+        this.dijoNara = true;
+        decir([
+          { q: "NARA", t: "Soy Nara, una ballena jorobada. En el verano austral me alimento de krill en las aguas cercanas a la Antártida." },
+          { q: "NARA", t: "Ahora migraré hacia aguas cálidas del Pacífico para reproducirme. ¡Acompáñame!" },
+        ], () => cambiarEscena(ballena));
+      }
+    }
+  },
+  dibujar() {
+    for (let y = 0; y < VH; y++) { const k = y / VH; p.fillStyle = `rgb(${6 + 8 * (1 - k)|0},${30 + 40 * (1 - k)|0},${58 + 50 * (1 - k)|0})`; p.fillRect(0, y, VW, 1); }
+    const t = this.t || 0;
+    for (let x = 0; x < VW; x++) { const h = 10 + Math.round(Math.sin(x * 0.08) * 3 + Math.sin(x * 0.31) * 1); p.fillStyle = "#e9f4fb"; p.fillRect(x, 0, 1, h); p.fillStyle = "#7fb6d6"; p.fillRect(x, h, 1, 1); }
+    p.fillStyle = "rgba(220,240,255,0.08)";
+    for (let r = 0; r < 4; r++) for (let y = 12; y < VH; y += 2) { const x0 = 20 + r * 70 + y * 0.35 + Math.sin(t + r) * 3; p.fillRect(Math.round(x0), y, 14 + Math.round(y * 0.08), 1); }
+    for (const [bx, bw, bh] of [[40, 26, 30], [168, 34, 40]]) {       // icebergs sumergidos
+      p.fillStyle = "#9cc8e0"; for (let i = 0; i < bh; i++) { const w = Math.round(bw * (1 - i / bh * 0.6)); p.fillRect(bx - Math.round(w / 2) + ((i * 7) % 3) - 1, 12 + i, w, 1); }
+      p.fillStyle = "#c9e4f2"; for (let i = 0; i < bh; i += 3) p.fillRect(bx - 4 + (i % 5), 13 + i, 3, 1);
+    }
+    p.fillStyle = "rgba(232,115,90,.35)";                                // enjambre de krill lejano
+    for (let i = 0; i < 40; i++) { const x = (i * 23.7 + t * 9) % VW, y = 150 + Math.sin(i * 1.7 + t) * 14 + (i % 5) * 3; p.fillRect(Math.round(x), Math.round(y), 2, 1); }
+    for (let i = 0; i < 14; i++) { const x = (i * 37 + t * 6) % VW, y = VH - ((t * 12 + i * 23) % (VH - 20)); p.fillStyle = "rgba(200,235,255,.45)"; p.fillRect(Math.round(x), Math.round(y), 1, 1); }
+    for (const n of this.nubes || []) {
+      p.fillStyle = "rgba(79,209,139,.18)"; p.fillRect(Math.round(n.x - n.r - 2), Math.round(n.y - n.r * 0.7 - 1), Math.round(n.r * 2 + 4), Math.round(n.r * 1.4 + 2));
+      for (let i = 0; i < 7; i++) { const a = i / 7 * 6.28 + n.f + t * 0.3, rr = i === 0 ? 0 : n.r * 0.75; p.drawImage(S.celula, Math.round(n.x + Math.cos(a) * rr) - 2, Math.round(n.y + Math.sin(a) * rr * 0.7) - 2); }
+    }
+    for (const q of this.ping || []) dibujarX(S.pinguino, q.x, q.y, 2);
+    if (this.k && !(this.aturdido > 0 && Math.floor(this.aturdido * 10) % 2)) dibujarX(this.k.vx < 0 ? S.krillI : S.krill, this.k.x, this.k.y, 2);
+    if (this.sombraActiva) { p.globalAlpha = 0.55; p.drawImage(S.ballena, Math.round(this.sombra) - 56, 120, 112, 36); p.globalAlpha = 1; }
+    if (this.k) texto(`KRILL COMIÓ ${this.comidos}/15`, 6, VH - 6, "#eaf6ff", 0.9);
+  },
+};
+
+// ============================================================ escena 3: Nara, la ballena (mapa)
+const M = { lon0: -100, lon1: -66, lat0: -66, lat1: -2, s: 8 };
+M.w = (M.lon1 - M.lon0) * M.s; M.h = (M.lat1 - M.lat0) * M.s;
+const COSTA_SA = [[-2.0,-80.6],[-2.5,-80.9],[-3.4,-80.3],[-4.0,-81.1],[-4.6,-81.3],[-5.1,-81.15],[-5.6,-80.9],[-6.0,-81.15],[-6.4,-80.6],
+  [-6.85,-79.95],[-7.7,-79.45],[-8.2,-79.0],[-9.1,-78.6],[-10.1,-78.15],[-11.1,-77.6],[-12.05,-77.15],[-12.6,-76.65],[-13.1,-76.4],
+  [-13.7,-76.2],[-14.1,-76.3],[-14.8,-75.6],[-15.35,-75.15],[-15.9,-74.4],[-16.2,-73.7],[-16.6,-72.7],[-17.0,-72.0],[-17.65,-71.35],
+  [-18.35,-70.4],[-19.0,-70.3],[-23,-70.5],[-27,-70.9],[-30,-71.5],[-33,-71.7],[-37,-73.4],[-40,-73.8],[-42,-74.0],[-46,-75.5],
+  [-50,-75.5],[-53,-74.0],[-55,-70.0],[-56,-67.5]];
+const PENINSULA = [[-63.2,-57.0],[-63.6,-58.8],[-64.5,-61.5],[-65.3,-63.5],[-66,-65.5],[-66,-60],[-65.2,-60.5],[-64.3,-58.5],[-63.5,-56.3]];
+function lonCostaSA(lat) {
+  if (lat < -56) return 999;
+  for (let i = 0; i < COSTA_SA.length - 1; i++) { const [la, lo] = COSTA_SA[i], [lb, lob] = COSTA_SA[i + 1]; if (lat <= la && lat >= lb) return lo + (lob - lo) * (la - lat) / (la - lb); }
+  return COSTA_SA[0][1];
+}
+function enPoligono(lat, lon, pol) {
+  let dentro = false;
+  for (let i = 0, j = pol.length - 1; i < pol.length; j = i++) {
+    const [ai, oi] = pol[i], [aj, oj] = pol[j];
+    if ((oi > lon) !== (oj > lon) && lat < (aj - ai) * (lon - oi) / (oj - oi) + ai) dentro = !dentro;
+  }
+  return dentro;
+}
+const esTierraSA = (lat, lon) => lon >= lonCostaSA(lat) || enPoligono(lat, lon, PENINSULA) || (Math.abs(lat + 62.1) < 0.25 && Math.abs(lon + 58.6) < 0.7);
+function tempIlustrativa(lat, lon) {    // temperatura superficial ilustrativa (gradiente + lengua fría de Humboldt)
+  let t = 27 - 0.46 * (-lat - 2);
+  const d = lonCostaSA(lat) - lon;
+  if (lat > -45 && d < 12) t -= 5 * Math.exp(-d / 3.5);
+  return Math.max(-1.5, t);
+}
+function rampaTemp(t) {
+  const st = [[-2, [235, 245, 255]], [4, [60, 120, 200]], [12, [40, 170, 210]], [18, [90, 200, 150]], [22, [240, 210, 90]], [27, [230, 110, 60]]];
+  for (let i = 0; i < st.length - 1; i++) if (t <= st[i + 1][0]) { const [a, ca] = st[i], [b, cb] = st[i + 1], f = lim((t - a) / (b - a), 0, 1); return ca.map((v, k) => Math.round(v + (cb[k] - v) * f)); }
+  return st[st.length - 1][1];
+}
+let mapaNat = null, mapaSat = null;
+function construirMapas() {
+  const mk = sat => {
+    const c = document.createElement("canvas"); c.width = M.w; c.height = M.h;
+    const g = c.getContext("2d"), im = g.createImageData(M.w, M.h), d = im.data;
+    for (let y = 0; y < M.h; y++) for (let x = 0; x < M.w; x++) {
+      const lat = M.lat1 - y / M.s, lon = M.lon0 + x / M.s, i = (y * M.w + x) * 4;
+      let rgb;
+      if (esTierraSA(lat, lon)) {
+        const r = (Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0;
+        rgb = lat < -60 ? [236, 242, 247] : lat < -38 ? (r % 7 ? [92, 128, 76] : [70, 104, 60]) : (r % 9 ? [186, 158, 108] : [150, 124, 84]);
+        if (!esTierraSA(lat, lon - 1 / M.s)) rgb = [232, 222, 190];
+      } else {
+        const t = tempIlustrativa(lat, lon);
+        if (sat) rgb = rampaTemp(t);
+        else { const f = lim((t + 2) / 30, 0, 1); rgb = [Math.round(12 + 20 * f), Math.round(50 + 50 * f), Math.round(110 + 40 * f)]; if ((x + y) % 2 && t < 6) rgb = rgb.map(v => v + 8); }
+        if (lat < -62.5 && ((x * 7 + y * 3) % 5 < (lat < -64 ? 4 : 2))) rgb = [225, 238, 248];
+      }
+      d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; d[i + 3] = 255;
+    }
+    g.putImageData(im, 0, 0); return c;
+  };
+  mapaNat = mk(false); mapaSat = mk(true);
+}
+const ballena = {
+  iniciar() {
+    if (!mapaNat) construirMapas();
+    this.b = { lat: -62.3, lon: -66, vlat: 0, vlon: 0, ang: -Math.PI / 2, grasa: 1 }; this.sat = false; this.hitos = new Set(); this.t = 0; this.fin = false;
+    objetivoTexto("Lleva a Nara al norte, hasta el norte del Perú. Primero rodea por el oeste el extremo sur de Sudamérica.", "3/3 · NARA LA BALLENA");
+    $("pieControles").textContent = "Ratón / dedo / WASD: nadar · T: capa satelital de temperatura";
+    decir([
+      { q: "DRA. GAIA", t: "Soy la Dra. Gaia, oceanógrafa. Guía a Nara hacia el norte, siguiendo la costa de Sudamérica." },
+      { q: "DRA. GAIA", t: "Durante la migración las ballenas jorobadas casi no comen: viven de la grasa que acumularon en la Antártida." },
+    ]);
+  },
+  aPx(lat, lon) { return { x: (lon - M.lon0) * M.s, y: (M.lat1 - lat) * M.s }; },
+  camara() { const q = this.aPx(this.b.lat, this.b.lon); return { x: lim(Math.round(q.x - VW / 2), 0, M.w - VW), y: lim(Math.round(q.y - VH / 2), 0, M.h - VH) }; },
+  actualizar(dt) {
+    const b = this.b; this.t += dt;
+    const { dx, dy } = direccionTeclas();
+    let ax = dx, ay = -dy;
+    if (puntero.activo && !dx && !dy) { const c = this.camara(), q = this.aPx(b.lat, b.lon); const ddx = puntero.x + c.x - q.x, ddy = puntero.y + c.y - q.y, n = Math.hypot(ddx, ddy) || 1; if (n > 4) { ax = ddx / n; ay = -ddy / n; } }
+    const enHumboldt = b.lat > -45 && b.lat < -5 && lonCostaSA(b.lat) - b.lon < 3.2;
+    const vmax = (b.grasa > 0 ? 1.8 : 1.0) + (enHumboldt && ay > 0 ? 1.2 : 0);
+    b.vlon = (b.vlon + ax * 3 * dt) * 0.95; b.vlat = (b.vlat + ay * 3 * dt) * 0.95;
+    if (b.lat < -52 && b.lat > -60) b.vlon += 0.4 * dt;      // Corriente Circumpolar hacia el este
+    if (enHumboldt) b.vlat += 0.5 * dt;                         // Humboldt hacia el norte
+    const v = Math.hypot(b.vlon, b.vlat); if (v > vmax) { b.vlon *= vmax / v; b.vlat *= vmax / v; }
+    const nlat = lim(b.lat + b.vlat * dt, M.lat0 + 0.5, M.lat1 - 0.3), nlon = lim(b.lon + b.vlon * dt, M.lon0 + 0.5, M.lon1 - 0.5);
+    if (!esTierraSA(nlat, nlon)) { b.lat = nlat; b.lon = nlon; }
+    else {                                   // se desliza a lo largo de la costa buscando mar hacia el oeste
+      let movido = false;
+      for (let d = 0.05; d <= 1 && !movido; d += 0.05) if (!esTierraSA(nlat, b.lon - d)) { b.lat = nlat; b.lon -= d; b.vlon = Math.min(b.vlon, 0); movido = true; }
+      if (!movido) { b.lon -= 0.1; b.vlon = -0.2; }
+    }
+    if (v > 0.05) b.ang = Math.atan2(-b.vlat, b.vlon);
+    b.grasa = Math.max(0, b.grasa - dt * 0.008);
+    const hito = (lat, id, lineas) => { if (b.lat > lat && !this.hitos.has(id)) { this.hitos.add(id); decir(lineas); } };
+    hito(-59, "acc", [{ q: "DRA. GAIA", t: "Cruzas la Corriente Circumpolar Antártica: rodea la Antártida de oeste a este y te empuja hacia el este." }]);
+    hito(-48, "sat", [{ q: "ORBI", t: "Presiona T para ver una capa satelital de temperatura del mar (ilustrativa): azul es frío, naranja es cálido." }]);
+    hito(-34, "hum", [{ q: "DRA. GAIA", t: "Esta es la Corriente de Humboldt: lleva agua fría hacia el norte, pegada a la costa. Nada cerca de la costa y te impulsará." }]);
+    hito(-15, "aflo", [{ q: "DRA. GAIA", t: "Frente al Perú el viento empuja el agua superficial mar afuera y sube agua fría y rica en nutrientes: el afloramiento." }]);
+    if (b.lat > -6.5 && !this.fin) {
+      this.fin = true; objetivoTexto("");
+      decir([{ q: "NARA", t: "¡Llegamos a aguas cálidas del norte! Mira allá abajo: un cardumen de anchovetas." }], () => { $("transicion").hidden = false; $("btnConocerAnchi").focus(); });
+    }
+  },
+  dibujar() {
+    const c = this.camara(), mapa = this.sat ? mapaSat : mapaNat;
+    p.drawImage(mapa, c.x, c.y, VW, VH, 0, 0, VW, VH);
+    const t = this.t;
+    p.fillStyle = "rgba(255,255,255,.55)";
+    for (let i = 0; i < 40; i++) {             // corrientes animadas
+      const lat = -57 + (i % 5) * 1.2, lon = M.lon0 + ((i * 3.7 + t * 2) % (M.lon1 - M.lon0));
+      const q = this.aPx(lat, lon); const x = q.x - c.x, y = q.y - c.y;
+      if (x > 0 && x < VW && y > 0 && y < VH && !esTierraSA(lat, lon)) { p.fillRect(x, y, 2, 1); p.fillRect(x - 1, y - 1, 1, 1); p.fillRect(x - 1, y + 1, 1, 1); }
+    }
+    for (let i = 0; i < 36; i++) {
+      const lat = -45 + ((i * 1.3 + t * 1.5) % 40), lon = lonCostaSA(lat) - 0.8 - (i % 3) * 0.7;
+      const q = this.aPx(lat, lon); const x = q.x - c.x, y = q.y - c.y;
+      if (x > 0 && x < VW && y > 0 && y < VH) { p.fillRect(x, y, 1, 2); p.fillRect(x - 1, y + 1, 1, 1); p.fillRect(x + 1, y + 1, 1, 1); }
+    }
+    const q = this.aPx(this.b.lat, this.b.lon);
+    p.save(); p.translate(Math.round(q.x - c.x), Math.round(q.y - c.y)); p.rotate(this.b.ang + Math.PI / 2);
+    p.drawImage(S.ballenaArriba, -11, -14, 22, 28); p.restore();
+    barra(6, VH - 10, 60, this.b.grasa, "#f6d08a", "GRASA (ENERGÍA)");
+    texto(`LAT ${this.b.lat.toFixed(1)}°`, VW - 64, VH - 6, "#eaf6ff", 0.85);
+    if (this.sat) texto("CAPA SATELITAL: TEMPERATURA (ILUSTRATIVA)", 4, 22, "#ffd166", 0.75);
+  },
+};
+
+// ============================================================ escena 4: el cardumen
+const LON0 = -86, LON1 = -69, LAT_N = -2.5, LAT_S = -19, SC = 40;      // 40 px por grado
+const WW = (LON1 - LON0) * SC, WH = (LAT_N - LAT_S) * SC;
+const MES_SEG = 5, NOMBRES_MES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SET","OCT","NOV","DIC"];
+const ANIOS = [
+  { a: 2004, t: "AÑO NORMAL 2004", d: "Mar frío y productivo" }, { a: 1998, t: "EL NIÑO 1998", d: "Uno de los más fuertes" },
+  { a: 2017, t: "NIÑO COSTERO 2017", d: "Golpe corto y desigual" }, { a: 2023, t: "NIÑO COSTERO 2023", d: "Se canceló la pesca" },
+];
 const ZLAT = D.zonas.map(z => z.lat);
 for (const k of [2, 3, 4]) { const ult = D.zonas.map(() => null); for (const m of D.meses) m[k] = m[k].map((v, i) => (v == null ? ult[i] : (ult[i] = v))); }
 const porMes = new Map(D.meses.map(m => [m[0], m]));
 function interpZona(vals, lat) {
   if (lat >= ZLAT[0]) return vals[0];
-  for (let i = 0; i < ZLAT.length - 1; i++) if (lat <= ZLAT[i] && lat >= ZLAT[i + 1]) {
-    const a = vals[i], b = vals[i + 1]; if (a == null || b == null) return a ?? b;
-    return a + (b - a) * (ZLAT[i] - lat) / (ZLAT[i] - ZLAT[i + 1]);
-  }
+  for (let i = 0; i < ZLAT.length - 1; i++) if (lat <= ZLAT[i] && lat >= ZLAT[i + 1]) { const a = vals[i], b = vals[i + 1]; if (a == null || b == null) return a ?? b; return a + (b - a) * (ZLAT[i] - lat) / (ZLAT[i] - ZLAT[i + 1]); }
   return vals[vals.length - 1];
 }
-function lonCosta(lat) {
-  for (let i = 0; i < COSTA.length - 1; i++) { const [la, lo] = COSTA[i], [lb, lob] = COSTA[i + 1];
-    if (lat <= la && lat >= lb) return lo + (lob - lo) * (la - lat) / (la - lb); }
-  return lat > COSTA[0][0] ? COSTA[0][1] : COSTA[COSTA.length - 1][1];
-}
+const lonCosta = lat => lonCostaSA(lat);
 const riqueza = chl => Math.min(1.4, Math.max(0.05, Math.log10((chl ?? 0.5) + 0.1) + 0.6));
-const X = lon => Math.round((lon - LON0) / (LON1 - LON0) * PW);
-const Y = lat => Math.round((LAT_N - lat) / (LAT_N - LAT_S) * PH);
-const aLon = x => LON0 + x / PW * (LON1 - LON0);
-const aLat = y => LAT_N - y / PH * (LAT_N - LAT_S);
-
-// ---------- lienzos: uno pequeño (píxeles del juego) y uno ampliado
-const cv = document.getElementById("lienzo"), cx = cv.getContext("2d");
-const px = document.createElement("canvas"); px.width = PW; px.height = PH;
-const p = px.getContext("2d");
-let K = 2;
-function ajustar() {
-  K = Math.max(1, Math.floor(Math.min(window.innerWidth / PW, (window.innerHeight - 20) / PH)));
-  cv.width = PW * K; cv.height = PH * K; cv.style.width = PW * K + "px"; cv.style.height = PH * K + "px";
-  cx.imageSmoothingEnabled = false;
-}
-window.addEventListener("resize", ajustar); ajustar();
-const sprite = n => { const im = new Image(); im.src = `sprites/${n}.png`; return im; };
-const SPR = { barco: sprite("bolichera") };
-
-// fondo de mar (se recalcula solo cuando cambia el mes) con tramado entre niveles de color
-let fondoMes = "", fondo = null;
+const wx = lon => (lon - LON0) * SC, wy = lat => (LAT_N - lat) * SC;
+const MAR = [[10, 50, 92], [18, 78, 128], [26, 106, 160], [86, 84, 110], [140, 70, 80], [184, 70, 60]];
 const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
-function hexRGB(h) { return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); }
-const MAR_RGB = MAR.map(hexRGB);
-function construirFondo(m) {
-  const img = p.createImageData(PW, PH), d = img.data;
-  for (let y = 0; y < PH; y++) {
-    const lat = aLat(y), an = interpZona(m[4], lat) ?? 0;
-    const nivel = Math.max(0, Math.min(MAR.length - 1.001, 1 + (an >= 0 ? an / 0.8 : an / 1.5)));
-    const base = Math.floor(nivel), frac = nivel - base;
-    const lc = X(lonCosta(lat));
-    for (let x = 0; x < PW; x++) {
-      const i = (y * PW + x) * 4;
-      let rgb;
+let mundo = null, mundoMes = "";
+function construirMundo(m) {
+  if (!mundo) { mundo = document.createElement("canvas"); mundo.width = WW; mundo.height = WH; }
+  const g = mundo.getContext("2d"), im = g.createImageData(WW, WH), d = im.data;
+  for (let y = 0; y < WH; y++) {
+    const lat = LAT_N - y / SC, an = interpZona(m[4], lat) ?? 0;
+    const nivel = lim(2 + (an >= 0 ? an / 0.7 : an / 1.2), 0, MAR.length - 1.001), base = Math.floor(nivel), frac = nivel - base;
+    const lc = wx(lonCosta(lat));
+    for (let x = 0; x < WW; x++) {
+      const i = (y * WW + x) * 4; let rgb;
       if (x >= lc) {
-        const borde = x === lc;
-        const ruido = (Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0;
-        rgb = hexRGB(borde ? BORDE : (ruido % 29 === 0 ? TIERRA_OSC : TIERRA));
+        const r = (Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0;
+        rgb = x < lc + 2 ? [240, 228, 196] : r % 23 === 0 ? [150, 124, 84] : r % 41 === 0 ? [214, 190, 140] : [190, 160, 110];
       } else {
         const c = frac > BAYER[y % 4][x % 4] / 16 ? Math.min(base + 1, MAR.length - 1) : base;
-        rgb = MAR_RGB[c];
-        const prof = Math.min(1, (lc - x) / 90);            // mar adentro un poco más oscuro
-        rgb = rgb.map(v => Math.round(v * (1 - 0.25 * prof)));
+        const prof = lim((lc - x) / 160, 0, 1);
+        rgb = MAR[c].map(v => Math.round(v * (1 - 0.35 * prof)));
+        if (lc - x < 6) rgb = rgb.map(v => Math.min(255, v + 18));
       }
       d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; d[i + 3] = 255;
     }
   }
-  return img;
+  g.putImageData(im, 0, 0);
+  for (const z of D.zonas) g.drawImage(S.casa, Math.round(wx(lonCosta(z.lat))) + 4, Math.round(wy(z.lat)) - 3);
 }
-
-// ---------- estado
-let anio = 2004, t = 0, pausa = true, compacto = false, fin = false, enJuego = false;
-let peces = [], comida = [], aves = [], barco = null, stats = null, avisoT = 0, mesAviso = -1;
-const objetivo = { lon: -79.6, lat: -9.2 };
-const teclas = new Set();
-const mesActual = () => Math.min(11, Math.floor(t / MES_SEG));
-const clave = () => `${anio}-${String(mesActual() + 1).padStart(2, "0")}`;
-const datosMes = () => porMes.get(clave()) || D.meses[D.meses.length - 1];
-const temporadaPesca = mi => (mi >= 3 && mi <= 6) || mi >= 10;          // abr-jul y nov-dic (aprox.)
-
-function avisar(txt, seg = 3) { const a = document.getElementById("aviso"); a.textContent = txt; a.hidden = false; avisoT = seg; }
-
-function crearComida() {
-  comida = [];
-  for (let k = 0; k < 420; k++) {
-    const lat = LAT_S + 0.5 + Math.random() * (LAT_N - LAT_S - 1);
-    const d = Math.pow(Math.random(), 1.6) * 2.4 + 0.08;
-    comida.push({ lat, lon: lonCosta(lat) - d, dist: d, cant: 0.3 });
-  }
-}
-function crearCardumen(n) {
-  peces = Array.from({ length: n }, () => ({ lon: objetivo.lon + (Math.random() - .5) * .8, lat: objetivo.lat + (Math.random() - .5) * .8, vlon: 0, vlat: 0, e: 0.75 }));
-}
-function iniciar(a, tam) {
-  anio = a; t = 0; fin = false; aves = []; barco = null; pausa = true; enJuego = true; mesAviso = -1;
-  objetivo.lon = -79.6; objetivo.lat = -9.2; compacto = false;
-  crearComida(); crearCardumen(tam);
-  stats = { inicial: tam, hambre: 0, aves: 0, red: 0, anomalias: [], ninos: [] };
-  document.getElementById("inicio").hidden = true; document.getElementById("balance").hidden = true;
-  document.getElementById("ayuda").hidden = false; document.getElementById("btnJugar").focus();
-  fondoMes = "";
-}
-function centro() {
-  let a = 0, b = 0; for (const q of peces) { a += q.lon; b += q.lat; }
-  return peces.length ? { lon: a / peces.length, lat: b / peces.length } : { ...objetivo };
-}
-
-// ---------- simulación
-function paso(dt) {
-  t += dt;
-  const m = datosMes(), chl = m[2], mi = mesActual();
-  const v = 2.2 * dt;
-  if (teclas.has("w") || teclas.has("arrowup")) objetivo.lat += v;
-  if (teclas.has("s") || teclas.has("arrowdown")) objetivo.lat -= v;
-  if (teclas.has("a") || teclas.has("arrowleft")) objetivo.lon -= v;
-  if (teclas.has("d") || teclas.has("arrowright")) objetivo.lon += v;
-  objetivo.lat = Math.max(LAT_S + .3, Math.min(LAT_N - .3, objetivo.lat));
-  objetivo.lon = Math.max(LON0 + .3, Math.min(lonCosta(objetivo.lat) - .1, objetivo.lon));
-
-  for (const f of comida) { const tope = riqueza(interpZona(chl, f.lat)) * Math.exp(-f.dist / 0.9); f.cant = Math.min(tope, f.cant + dt * 0.2 * tope); }
-
-  const c = centro(), coh = compacto ? 2.6 : 0.9, sep = compacto ? 0.05 : 0.16;
-  for (const q of peces) {
-    let ax = (objetivo.lon - q.lon) * 1.6 + (c.lon - q.lon) * coh, ay = (objetivo.lat - q.lat) * 1.6 + (c.lat - q.lat) * coh;
-    for (let j = 0; j < 6; j++) { const o = peces[(Math.random() * peces.length) | 0]; const dx = q.lon - o.lon, dy = q.lat - o.lat, d2 = dx * dx + dy * dy;
-      if (d2 > 0 && d2 < sep * sep) { ax += dx / d2 * 0.02; ay += dy / d2 * 0.02; } }
-    ax += (Math.random() - .5) * 1.2; ay += (Math.random() - .5) * 1.2;
-    q.vlon = (q.vlon + ax * dt) * 0.94; q.vlat = (q.vlat + ay * dt) * 0.94;
-    const vel = Math.hypot(q.vlon, q.vlat); if (vel > 1.4) { q.vlon *= 1.4 / vel; q.vlat *= 1.4 / vel; }
-    q.lon += q.vlon * dt; q.lat += q.vlat * dt;
-    const lc = lonCosta(q.lat); if (q.lon > lc - 0.06) { q.lon = lc - 0.06; q.vlon = -Math.abs(q.vlon); }
-    q.lat = Math.max(LAT_S, Math.min(LAT_N, q.lat)); q.lon = Math.max(LON0, q.lon);
-    q.e -= dt * (compacto ? 0.06 : 0.05);
-    for (const f of comida) {
-      if (f.cant < 0.02) continue;
-      const dx = f.lon - q.lon, dy = f.lat - q.lat;
-      if (dx * dx + dy * dy < 0.06) { const b = Math.min(f.cant, dt * (compacto ? 0.25 : 0.45)); f.cant -= b; q.e = Math.min(1, q.e + b * 1.6); }
+const card = {
+  anio: 2004, t: 0, compacto: false, peces: [], comida: [], aves: [], barco: null, stats: null, mesAviso: -1, obj: { lon: -79.6, lat: -9.2 },
+  iniciar() {
+    $("pieControles").textContent = "Mover: ratón / dedo / WASD · Espacio: formación · P: pausa · H: ayuda";
+    objetivoTexto("");
+    $("hud").hidden = true;
+  },
+  empezar(a, tam) {
+    this.anio = a; this.t = 0; this.aves = []; this.barco = null; this.mesAviso = -1; this.compacto = false; this.jugando = false;
+    this.obj = { lon: -79.6, lat: -9.2 };
+    this.comida = Array.from({ length: 420 }, () => { const lat = azar(LAT_S + 0.5, LAT_N - 0.5), dd = Math.pow(Math.random(), 1.6) * 2.4 + 0.08; return { lat, lon: lonCosta(lat) - dd, dist: dd, cant: 0.3 }; });
+    this.peces = Array.from({ length: tam }, () => ({ lon: this.obj.lon + azar(-.4, .4), lat: this.obj.lat + azar(-.4, .4), vlon: 0, vlat: 0, e: 0.75 }));
+    this.stats = { inicial: tam, hambre: 0, aves: 0, red: 0, anomalias: [], ninos: [] };
+    mundoMes = ""; $("inicio").hidden = true; $("balance").hidden = true; $("ayuda").hidden = false; $("btnJugar").focus();
+  },
+  mes() { return Math.min(11, Math.floor(this.t / MES_SEG)); },
+  datos() { return porMes.get(`${this.anio}-${String(this.mes() + 1).padStart(2, "0")}`) || D.meses[D.meses.length - 1]; },
+  centro() { let a = 0, b = 0; for (const q of this.peces) { a += q.lon; b += q.lat; } return this.peces.length ? { lon: a / this.peces.length, lat: b / this.peces.length } : { ...this.obj }; },
+  camara() { const c = this.centro(); return { x: lim(Math.round(wx(c.lon) - VW / 2), 0, WW - VW), y: lim(Math.round(wy(c.lat) - VH / 2), 0, WH - VH) }; },
+  actualizar(dt) {
+    if (!this.jugando) return;
+    this.t += dt;
+    const m = this.datos(), chl = m[2], mi = this.mes(), st = this.stats;
+    const { dx, dy } = direccionTeclas();
+    if (dx || dy) { this.obj.lon += dx * 2.2 * dt; this.obj.lat -= dy * 2.2 * dt; }
+    else if (puntero.activo) { const c = this.camara(); this.obj.lon = LON0 + (puntero.x + c.x) / SC; this.obj.lat = LAT_N - (puntero.y + c.y) / SC; }
+    this.obj.lat = lim(this.obj.lat, LAT_S + .3, LAT_N - .3); this.obj.lon = lim(this.obj.lon, LON0 + .3, lonCosta(this.obj.lat) - .1);
+    for (const f of this.comida) { const tope = riqueza(interpZona(chl, f.lat)) * Math.exp(-f.dist / 0.9); f.cant = Math.min(tope, f.cant + dt * 0.2 * tope); }
+    const c = this.centro(), coh = this.compacto ? 2.6 : 0.7, sep = this.compacto ? 0.09 : 0.26, pe = this.peces;
+    for (const q of pe) {
+      let ax = (this.obj.lon - q.lon) * 1.6 + (c.lon - q.lon) * coh, ay = (this.obj.lat - q.lat) * 1.6 + (c.lat - q.lat) * coh;
+      for (let j = 0; j < 6; j++) { const o = pe[(Math.random() * pe.length) | 0]; const ddx = q.lon - o.lon, ddy = q.lat - o.lat, d2 = ddx * ddx + ddy * ddy; if (d2 > 0 && d2 < sep * sep) { ax += ddx / d2 * 0.02; ay += ddy / d2 * 0.02; } }
+      ax += azar(-.6, .6); ay += azar(-.6, .6);
+      q.vlon = (q.vlon + ax * dt) * 0.94; q.vlat = (q.vlat + ay * dt) * 0.94;
+      const v = Math.hypot(q.vlon, q.vlat); if (v > 1.4) { q.vlon *= 1.4 / v; q.vlat *= 1.4 / v; }
+      q.lon += q.vlon * dt; q.lat = lim(q.lat + q.vlat * dt, LAT_S, LAT_N);
+      const lc = lonCosta(q.lat); if (q.lon > lc - 0.06) { q.lon = lc - 0.06; q.vlon = -Math.abs(q.vlon); }
+      q.lon = Math.max(LON0, q.lon);
+      q.e -= dt * (this.compacto ? 0.06 : 0.05);
+      for (const f of this.comida) { if (f.cant < 0.02) continue; const ddx = f.lon - q.lon, ddy = f.lat - q.lat; if (ddx * ddx + ddy * ddy < 0.06) { const b = Math.min(f.cant, dt * (this.compacto ? 0.25 : 0.45)); f.cant -= b; q.e = Math.min(1, q.e + b * 1.6); } }
     }
-  }
-  let n0 = peces.length; peces = peces.filter(q => q.e > 0); stats.hambre += n0 - peces.length;
-
-  // aves: sombra (aviso) y luego picada
-  if (Math.random() < dt / 9 && peces.length) aves.push({ lon: c.lon + (Math.random() - .5) * .6, lat: c.lat + (Math.random() - .5) * .6, vida: 1.6, golpe: false });
-  for (const a of aves) {
-    a.vida -= dt;
-    if (!a.golpe && a.vida < 0.6) {
-      a.golpe = true; n0 = peces.length; const prob = compacto ? 0.06 : 0.2;
-      peces = peces.filter(q => !((q.lon - a.lon) ** 2 + (q.lat - a.lat) ** 2 < 0.0625 && Math.random() < prob));
-      stats.aves += n0 - peces.length;
+    let n0 = pe.length; this.peces = pe.filter(q => q.e > 0); st.hambre += n0 - this.peces.length;
+    if (Math.random() < dt / 9 && this.peces.length) this.aves.push({ lon: c.lon + azar(-.3, .3), lat: c.lat + azar(-.3, .3), vida: 1.6, golpe: false });
+    for (const a of this.aves) {
+      a.vida -= dt;
+      if (!a.golpe && a.vida < 0.6) { a.golpe = true; n0 = this.peces.length; const prob = this.compacto ? 0.06 : 0.2; this.peces = this.peces.filter(q => !((q.lon - a.lon) ** 2 + (q.lat - a.lat) ** 2 < 0.0625 && Math.random() < prob)); st.aves += n0 - this.peces.length; }
     }
-  }
-  aves = aves.filter(a => a.vida > 0);
-
-  // bolichera: aparece en temporada de pesca y recorre la costa central
-  if (!barco && temporadaPesca(mi) && Math.random() < dt / 12) {
-    const lat = -8 - Math.random() * 6; barco = { lat, lon: lonCosta(lat) - 2.3, dir: 1, vida: 9 };
-    avisar("¡BOLICHERA EN LA COSTA CENTRAL!");
-  }
-  if (barco) {
-    barco.vida -= dt; barco.lon += barco.dir * 0.35 * dt;
-    if (barco.lon > lonCosta(barco.lat) - 0.3) barco.dir = -1;
-    n0 = peces.length;
-    peces = peces.filter(q => !((q.lon - barco.lon) ** 2 + (q.lat - barco.lat) ** 2 < 0.16 && Math.random() < dt * 1.2));
-    stats.red += n0 - peces.length;
-    if (barco.vida <= 0) barco = null;
-  }
-
-  if (stats.anomalias.length <= mi) {
-    stats.anomalias.push(m[3]); stats.ninos.push(m[1]);
-    if (mi !== mesAviso) {
-      mesAviso = mi;
-      const an = interpZona(m[3], c.lat);
-      if (m[1] != null && m[1] >= 2) avisar("EL MAR SE CALENTÓ: ¡EL NIÑO FUERTE! EL ALIMENTO CAE.");
-      else if (m[1] != null && m[1] >= 1) avisar("AGUA CÁLIDA FRENTE A LA COSTA: MENOS ALIMENTO.");
-      else if (an != null && an > 30) avisar("¡AFLORAMIENTO! MUCHO ALIMENTO EN TU ZONA.");
+    this.aves = this.aves.filter(a => a.vida > 0);
+    const temporada = (mi >= 3 && mi <= 6) || mi >= 10;
+    if (!this.barco && temporada && Math.random() < dt / 12) { const lat = -8 - Math.random() * 6; this.barco = { lat, lon: lonCosta(lat) - 2.3, dir: 1, vida: 9 }; avisar("¡BOLICHERA EN LA COSTA CENTRAL! (MIRA EL MAPA)"); }
+    if (this.barco) {
+      const b = this.barco; b.vida -= dt; b.lon += b.dir * 0.35 * dt; if (b.lon > lonCosta(b.lat) - 0.3) b.dir = -1;
+      n0 = this.peces.length; this.peces = this.peces.filter(q => !((q.lon - b.lon) ** 2 + (q.lat - b.lat) ** 2 < 0.16 && Math.random() < dt * 0.8)); st.red += n0 - this.peces.length;
+      if (b.vida <= 0) this.barco = null;
     }
-  }
-  if (t >= 12 * MES_SEG || peces.length === 0) terminar();
-}
-
-// ---------- dibujo en pixel art
-function dibujarSprite(filas, x0, y0, color) {
-  p.fillStyle = color;
-  filas.forEach((f, y) => { for (let x = 0; x < f.length; x++) if (f[x] === "#") p.fillRect(x0 + x, y0 + y, 1, 1); });
-}
-function dibujar() {
-  const m = datosMes(), k = clave();
-  if (k !== fondoMes) { fondo = construirFondo(m); fondoMes = k; }
-  p.putImageData(fondo, 0, 0);
-  // alimento
-  for (const f of comida) {
-    if (f.cant < 0.04) continue;
-    const x = X(f.lon), y = Y(f.lat), n = f.cant > 0.9 ? 3 : f.cant > 0.5 ? 2 : f.cant > 0.2 ? 1 : 0;
-    p.fillStyle = VERDES[n]; p.fillRect(x, y, 1, 1);
-    if (n >= 2) { p.fillStyle = VERDES[n - 1]; p.fillRect(x - 1, y, 1, 1); p.fillRect(x + 1, y, 1, 1); p.fillRect(x, y - 1, 1, 1); p.fillRect(x, y + 1, 1, 1); }
-  }
-  // objetivo (mira de 5 px)
-  const ox = X(objetivo.lon), oy = Y(objetivo.lat);
-  p.fillStyle = "rgba(255,255,255,.55)"; p.fillRect(ox - 2, oy, 2, 1); p.fillRect(ox + 1, oy, 2, 1); p.fillRect(ox, oy - 2, 1, 2); p.fillRect(ox, oy + 1, 1, 2);
-  // peces: 2 px de cuerpo + 1 px de cola según la dirección
-  for (const q of peces) {
-    const x = X(q.lon), y = Y(q.lat), cola = q.vlon >= 0 ? -1 : 2;
-    p.fillStyle = q.e > 0.35 ? PEZ : PEZ_OSC; p.fillRect(x, y, 2, 1);
-    p.fillStyle = PEZ_OSC; p.fillRect(x + cola, y, 1, 1);
-  }
-  // aves: sombra parpadeante y luego picada
-  for (const a of aves) {
-    const x = X(a.lon), y = Y(a.lat);
-    if (!a.golpe) {
-      if (Math.floor(a.vida * 6) % 2 === 0) { p.fillStyle = "rgba(0,0,0,.45)"; p.fillRect(x - 3, y - 1, 7, 3); }
-      dibujarSprite(AVE, x - 5, y - 12 - Math.round((a.vida - 0.6) * 8), "#f4f4f4");
-    } else {
-      const r = Math.round(2 + (0.6 - a.vida) * 10); p.fillStyle = "#ffffff";
-      for (let i = 0; i < 8; i++) { const ang = i * Math.PI / 4; p.fillRect(x + Math.round(Math.cos(ang) * r), y + Math.round(Math.sin(ang) * r), 1, 1); }
+    if (st.anomalias.length <= mi) {
+      st.anomalias.push(m[3]); st.ninos.push(m[1]);
+      if (mi !== this.mesAviso) {
+        this.mesAviso = mi; const an = interpZona(m[3], c.lat);
+        if (m[1] != null && m[1] >= 2) avisar("EL MAR SE CALENTÓ: ¡EL NIÑO FUERTE! EL ALIMENTO CAE.");
+        else if (m[1] != null && m[1] >= 1) avisar("AGUA CÁLIDA FRENTE A LA COSTA: MENOS ALIMENTO.");
+        else if (an != null && an > 30) avisar("¡AFLORAMIENTO! MUCHO ALIMENTO EN TU ZONA.");
+      }
     }
-  }
-  // bolichera (sprite del equipo) con su red
-  if (barco) {
-    const x = X(barco.lon), y = Y(barco.lat);
-    p.fillStyle = "rgba(255,209,102,.35)";
-    for (let i = 0; i < 16; i++) { const ang = i * Math.PI / 8; p.fillRect(x + Math.round(Math.cos(ang) * 9), y + Math.round(Math.sin(ang) * 9), 1, 1); }
-    if (SPR.barco.complete && SPR.barco.naturalWidth) p.drawImage(SPR.barco, x - 13, y - 12);
-    else { p.fillStyle = "#c0392b"; p.fillRect(x - 6, y - 3, 12, 3); }
-  }
-  // ampliar sin suavizado
-  cx.imageSmoothingEnabled = false;
-  cx.drawImage(px, 0, 0, PW * K, PH * K);
-  // nombres de zonas con fuente pixelada
-  cx.font = `${Math.max(8, 4 * K)}px "Press Start 2P", monospace`;
-  D.zonas.forEach((z, i) => {
-    const x = (X(lonCosta(z.lat)) + 3) * K, y = Y(z.lat) * K, an = m[3][i];
-    cx.fillStyle = "#2b220f"; cx.fillText(z.nombre.toUpperCase(), x, y);
-    if (an != null) { cx.fillStyle = an < 0 ? "#7a1d0e" : "#0d4a2e"; cx.fillText(`${an > 0 ? "+" : ""}${an.toFixed(0)}%`, x, y + 6 * K); }
-  });
-}
-
-function hud(dt) {
-  const m = datosMes();
-  document.getElementById("hFecha").textContent = `${NOMBRES_MES[mesActual()]} ${anio}`;
-  const n = m[1];
-  document.getElementById("hNino").textContent = n == null ? "—" : `${n > 0 ? "+" : ""}${n.toFixed(1)}°C`;
-  document.getElementById("hNino").style.color = n >= 2 ? "#e4572e" : n >= 1 ? "#ffd166" : "";
-  const an = interpZona(m[3], centro().lat), el = document.getElementById("hChl");
-  el.textContent = an == null ? "—" : `${an > 0 ? "+" : ""}${an.toFixed(0)}%`;
-  el.style.color = an < -20 ? "#e4572e" : an > 10 ? "#4fd18b" : "";
-  document.getElementById("hCard").textContent = `${peces.length}/${stats ? stats.inicial : 0}`;
-  const e = peces.length ? peces.reduce((s, q) => s + q.e, 0) / peces.length : 0;
-  const barra = document.getElementById("hEnergia"); barra.style.width = `${(e * 100).toFixed(0)}%`; barra.style.background = e < 0.3 ? "#e4572e" : "#4fd18b";
-  document.getElementById("hModo").textContent = compacto ? "COMPACTA" : "DISPERSA";
-  if (avisoT > 0) { avisoT -= dt; if (avisoT <= 0) document.getElementById("aviso").hidden = true; }
-}
-
-// ---------- informe (estilo Papers, Please)
-function terminar() {
-  if (fin) return;
-  fin = true; pausa = true; enJuego = false;
-  const media = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : 0; };
-  const chlMedia = media(stats.anomalias.map(media)), ninoMax = Math.max(...stats.ninos.filter(x => x != null));
-  const L = (a, b) => (a + " ").padEnd(27, ".") + " " + b;
-  const pct = peces.length / stats.inicial;
-  document.getElementById("estrellas").textContent = pct >= 0.6 ? "★★★" : pct >= 0.35 ? "★★☆" : pct > 0 ? "★☆☆" : "☆☆☆";
-  document.getElementById("informe").textContent = [
-    `TEMPORADA ${anio}`, "-".repeat(36),
-    L("Cardumen inicial", stats.inicial), L("Perdidos por hambre", -stats.hambre),
-    L("Perdidos por aves", -stats.aves), L("Atrapados por la red", -stats.red),
-    L("Sobrevivientes", `${peces.length} (${Math.round(pct * 100)}%)`), "",
-    L("Alimento del año vs normal", `${chlMedia > 0 ? "+" : ""}${chlMedia.toFixed(0)}%`),
-    L("Niño 1+2 máximo", `${ninoMax > 0 ? "+" : ""}${ninoMax.toFixed(1)}°C`),
-  ].join("\n");
-  document.getElementById("diario").textContent = ninoMax >= 2
-    ? "DIARIO DEL CIENTÍFICO: el mar se calentó con fuerza y el fitoplancton cayó en la costa central. Con datos satelitales se midió que por cada grado de calentamiento el fitoplancton cae entre 18% y 33% según la zona; el enfriamiento casi no lo recupera."
-    : ninoMax >= 1
-      ? "DIARIO DEL CIENTÍFICO: hubo meses cálidos y el alimento bajó en algunas zonas. No toda la costa responde igual: el centro (Chimbote, Callao) es el más sensible."
+    if (this.t >= 12 * MES_SEG || this.peces.length === 0) this.terminar();
+  },
+  dibujar() {
+    if (!this.stats) { fito.dibujar(); return; }
+    const m = this.datos(), clave = m[0];
+    if (clave !== mundoMes) { construirMundo(m); mundoMes = clave; }
+    const c = this.camara(), t = performance.now() / 1000;
+    p.drawImage(mundo, c.x, c.y, VW, VH, 0, 0, VW, VH);
+    for (let i = 0; i < 70; i++) {                              // olas animadas
+      const x = ((i * 53.3 + t * 9) % (VW + 20)) - 10, y = (i * 29.7) % VH;
+      const lat = LAT_N - (y + c.y) / SC, lon = LON0 + (x + c.x) / SC;
+      if (lon < lonCosta(lat) - 0.15 && Math.sin(t * 2 + i) > 0.2) { p.fillStyle = "rgba(220,240,255,.35)"; p.fillRect(Math.round(x), Math.round(y), 3, 1); }
+    }
+    for (let y = 0; y < VH; y += 2) {                           // espuma en la costa
+      const lat = LAT_N - (y + c.y) / SC, x = Math.round(wx(lonCosta(lat)) - c.x) - 1;
+      if (x > 0 && x < VW && Math.sin(t * 3 + y * 0.7) > 0) { p.fillStyle = "#ffffff"; p.fillRect(x - 1, y, 2, 1); }
+    }
+    for (const f of this.comida) {                              // fitoplancton
+      if (f.cant < 0.04) continue;
+      const x = Math.round(wx(f.lon) - c.x), y = Math.round(wy(f.lat) - c.y);
+      if (x < -3 || y < -3 || x > VW + 3 || y > VH + 3) continue;
+      const n = f.cant > 0.9 ? 3 : f.cant > 0.5 ? 2 : f.cant > 0.2 ? 1 : 0;
+      const col = ["#1f6b45", "#2fa86a", "#4fd18b", "#b8f5cf"];
+      if (n >= 2) { p.drawImage(S.celula, x - 2, y - 2); if (n === 3) { p.fillStyle = col[3]; p.fillRect(x, y, 1, 1); p.drawImage(S.celula, x + 1, y - 4); } }
+      else { p.fillStyle = col[Math.max(0, n)]; p.fillRect(x - 1, y, 3, 1); p.fillRect(x, y - 1, 1, 3); }
+    }
+    const ox = Math.round(wx(this.obj.lon) - c.x), oy = Math.round(wy(this.obj.lat) - c.y);
+    p.fillStyle = "rgba(255,255,255,.5)"; p.fillRect(ox - 3, oy, 2, 1); p.fillRect(ox + 2, oy, 2, 1); p.fillRect(ox, oy - 3, 1, 2); p.fillRect(ox, oy + 2, 1, 2);
+    for (const q of this.peces) {
+      const x = Math.round(wx(q.lon) - c.x), y = Math.round(wy(q.lat) - c.y);
+      if (x < -8 || y < -4 || x > VW + 8 || y > VH + 4) continue;
+      const izq = q.vlon < 0, debil = q.e < 0.35;
+      p.drawImage(debil ? (izq ? S.anchDebilI : S.anchDebil) : (izq ? S.anchI : S.anch), x - 4, y - 1);
+    }
+    for (const a of this.aves) {
+      const x = Math.round(wx(a.lon) - c.x), y = Math.round(wy(a.lat) - c.y);
+      if (!a.golpe) {
+        p.fillStyle = "rgba(0,0,0,.35)"; p.fillRect(x - 4, y - 1, 9, 3);
+        const alt = Math.round((a.vida - 0.6) * 18);
+        p.drawImage(Math.floor(a.vida * 8) % 2 ? S.ave1 : S.ave2, x - 4, y - 10 - alt);
+      } else {
+        const r = Math.round(2 + (0.6 - a.vida) * 14); p.fillStyle = "#ffffff";
+        for (let i = 0; i < 10; i++) { const g = i * Math.PI / 5; p.fillRect(x + Math.round(Math.cos(g) * r), y + Math.round(Math.sin(g) * r * 0.6), 1, 1); }
+      }
+    }
+    if (this.barco) {
+      const x = Math.round(wx(this.barco.lon) - c.x), y = Math.round(wy(this.barco.lat) - c.y);
+      p.fillStyle = Math.floor(t * 4) % 2 ? "#ffd166" : "#f39c12";
+      for (let i = 0; i < 24; i++) { const g = i * Math.PI / 12; p.fillRect(x + Math.round(Math.cos(g) * 16), y + Math.round(Math.sin(g) * 16), 1, 1); }
+      if (listo(IMG.barco)) p.drawImage(IMG.barco, x - 13, y - 10); else { p.fillStyle = "#c0392b"; p.fillRect(x - 8, y - 3, 16, 4); }
+    }
+    D.zonas.forEach((z, i) => {                                 // nombres de puertos
+      const x = Math.round(wx(lonCosta(z.lat)) - c.x) + 11, y = Math.round(wy(z.lat) - c.y);
+      if (x > -20 && x < VW && y > 4 && y < VH) { const an = m[3][i]; texto(z.nombre.toUpperCase(), x, y, "#3a2a10", 0.85); if (an != null) texto(`${an > 0 ? "+" : ""}${an.toFixed(0)}%`, x, y + 7, an < 0 ? "#ffb3a0" : "#b8f5cf", 0.85); }
+    });
+    // minimapa
+    const mw = 48, mh = Math.round(48 * WH / WW), mx = VW - mw - 4, my = 4;
+    p.fillStyle = "#02101c"; p.fillRect(mx - 2, my - 2, mw + 4, mh + 4);
+    p.drawImage(mundo, 0, 0, WW, WH, mx, my, mw, mh);
+    p.strokeStyle = "#ffffff"; p.lineWidth = 1; p.strokeRect(mx + c.x * mw / WW + 0.5, my + c.y * mh / WH + 0.5, VW * mw / WW, VH * mh / WH);
+    const cc = this.centro(); p.fillStyle = "#ffd166"; p.fillRect(Math.round(mx + wx(cc.lon) * mw / WW) - 1, Math.round(my + wy(cc.lat) * mh / WH) - 1, 3, 3);
+    if (this.barco) { p.fillStyle = "#e4572e"; p.fillRect(Math.round(mx + wx(this.barco.lon) * mw / WW) - 1, Math.round(my + wy(this.barco.lat) * mh / WH) - 1, 3, 3); }
+  },
+  hud() {
+    const m = this.datos();
+    $("hFecha").textContent = `${NOMBRES_MES[this.mes()]} ${this.anio}`;
+    const n = m[1]; $("hNino").textContent = n == null ? "—" : `${n > 0 ? "+" : ""}${n.toFixed(1)}°C`; $("hNino").style.color = n >= 2 ? "#e4572e" : n >= 1 ? "#ffd166" : "";
+    const an = interpZona(m[3], this.centro().lat), el = $("hChl"); el.textContent = an == null ? "—" : `${an > 0 ? "+" : ""}${an.toFixed(0)}%`; el.style.color = an < -20 ? "#e4572e" : an > 10 ? "#4fd18b" : "";
+    $("hCard").textContent = `${this.peces.length}/${this.stats.inicial}`;
+    const e = this.peces.length ? this.peces.reduce((s, q) => s + q.e, 0) / this.peces.length : 0;
+    $("hEnergia").style.width = `${(e * 100).toFixed(0)}%`; $("hEnergia").style.background = e < 0.3 ? "#e4572e" : "#4fd18b";
+    $("hModo").textContent = this.compacto ? "COMPACTA" : "DISPERSA";
+  },
+  terminar() {
+    if (this.terminado) return;
+    this.terminado = true; this.jugando = false;
+    const st = this.stats, media = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : 0; };
+    const chlMedia = media(st.anomalias.map(media)), ninoMax = Math.max(...st.ninos.filter(x => x != null));
+    const L = (a, b) => (a + " ").padEnd(27, ".") + " " + b, pct = this.peces.length / st.inicial;
+    $("estrellas").textContent = pct >= 0.6 ? "★★★" : pct >= 0.35 ? "★★☆" : pct > 0 ? "★☆☆" : "☆☆☆";
+    $("informe").textContent = [`TEMPORADA ${this.anio}`, "-".repeat(36), L("Cardumen inicial", st.inicial), L("Perdidos por hambre", -st.hambre),
+      L("Perdidos por aves", -st.aves), L("Atrapados por la red", -st.red), L("Sobrevivientes", `${this.peces.length} (${Math.round(pct * 100)}%)`), "",
+      L("Alimento del año vs normal", `${chlMedia > 0 ? "+" : ""}${chlMedia.toFixed(0)}%`), L("Niño 1+2 máximo", `${ninoMax > 0 ? "+" : ""}${ninoMax.toFixed(1)}°C`)].join("\n");
+    $("diario").textContent = ninoMax >= 2
+      ? "DIARIO DEL CIENTÍFICO: el mar se calentó con fuerza y el fitoplancton cayó en la costa central. Con datos satelitales se midió que por cada grado de calentamiento el fitoplancton cae entre 18% y 33% según la zona; el enfriamiento casi no lo recupera."
+      : ninoMax >= 1 ? "DIARIO DEL CIENTÍFICO: hubo meses cálidos y el alimento bajó en algunas zonas. No toda la costa responde igual: el centro (Chimbote, Callao) es el más sensible."
       : "DIARIO DEL CIENTÍFICO: año de agua fría y afloramiento activo; el alimento abundó cerca de la costa. Sugerido: más alimento coincide con más anchoveta. No demostrado: que la Antártida cambie este año el mar peruano.";
-  const sig = document.getElementById("btnSiguiente");
-  sig.disabled = peces.length < 5; sig.textContent = peces.length < 5 ? "EL CARDUMEN NO SOBREVIVIÓ" : "SIGUIENTE GENERACIÓN ▶";
-  document.getElementById("balance").hidden = false; (peces.length < 5 ? document.getElementById("btnOtro") : sig).focus();
-}
+    const sig = $("btnSiguiente"); sig.disabled = this.peces.length < 5; sig.textContent = this.peces.length < 5 ? "EL CARDUMEN NO SOBREVIVIÓ" : "SIGUIENTE GENERACIÓN ▶";
+    $("balance").hidden = false; (this.peces.length < 5 ? $("btnOtro") : sig).focus();
+  },
+};
 
-// ---------- interfaz
-for (const o of ANIOS) {
-  const b = document.createElement("button");
-  b.innerHTML = `${o.t}<small>${o.d}</small>`;
-  b.onclick = () => iniciar(o.a, 160);
-  document.getElementById("anios").appendChild(b);
+// ============================================================ control de escenas
+let escena = fito, pausa = false;
+function cambiarEscena(e) { escena = e; $("hud").hidden = e !== card || !card.stats; puntero.activo = false; e.iniciar(); }
+function irAlCardumen() {
+  ["titulo", "transicion"].forEach(id => ($(id).hidden = true));
+  cambiarEscena(card); $("inicio").hidden = false; $("anios").querySelector("button").focus();
 }
-document.getElementById("btnJugar").onclick = () => { document.getElementById("ayuda").hidden = true; if (enJuego) pausa = false; };
-document.getElementById("btnSiguiente").onclick = () => iniciar(Math.min(2025, anio + 1), Math.max(40, Math.min(220, Math.round(peces.length * 1.6))));
-document.getElementById("btnOtro").onclick = () => { document.getElementById("balance").hidden = true; document.getElementById("inicio").hidden = false; };
-function moverA(e) { const r = cv.getBoundingClientRect(); objetivo.lon = aLon((e.clientX - r.left) / K); objetivo.lat = aLat((e.clientY - r.top) / K); }
-cv.addEventListener("pointermove", moverA); cv.addEventListener("pointerdown", moverA);
+for (const o of ANIOS) {
+  const b = document.createElement("button"); b.innerHTML = `${o.t}<small>${o.d}</small>`;
+  b.onclick = () => { card.terminado = false; card.empezar(o.a, 160); }; $("anios").appendChild(b);
+}
+$("btnAventura").onclick = () => { $("titulo").hidden = true; cambiarEscena(fito); };
+$("btnDirecto").onclick = irAlCardumen;
+$("btnConocerAnchi").onclick = () => {
+  $("transicion").hidden = true;
+  decir([
+    { q: "ANCHI", t: "¡Bienvenido al mar peruano! Soy Anchi, una anchoveta. Vivo en la corriente de Humboldt y como sobre todo zooplancton, y también fitoplancton." },
+    { q: "ANCHI", t: "Mi vida depende de cómo esté el mar frente a la costa. Elige un año real y ayúdame a sobrevivir." },
+  ], irAlCardumen);
+};
+$("btnJugar").onclick = () => { $("ayuda").hidden = true; card.jugando = true; $("hud").hidden = false; };
+$("btnSiguiente").onclick = () => { card.terminado = false; card.empezar(Math.min(2025, card.anio + 1), Math.max(40, Math.min(220, Math.round(card.peces.length * 1.6)))); };
+$("btnOtro").onclick = () => { $("balance").hidden = true; $("inicio").hidden = false; };
 window.addEventListener("keydown", e => {
   const k = e.key.toLowerCase();
-  if (k === " " && enJuego) { compacto = !compacto; e.preventDefault(); }
-  else if (k === "p" && enJuego && document.getElementById("ayuda").hidden) { pausa = !pausa; avisar(pausa ? "PAUSA" : "", pausa ? 999 : 0.01); }
-  else if (k === "h" && enJuego) { pausa = true; document.getElementById("ayuda").hidden = false; }
-  else teclas.add(k);
+  if (dlg.linea && (k === "enter" || k === " ")) { avanzarDialogo(); e.preventDefault(); return; }
+  if (escena === card && card.jugando) {
+    if (k === " ") { card.compacto = !card.compacto; e.preventDefault(); return; }
+    if (k === "p") { pausa = !pausa; avisar(pausa ? "PAUSA" : "", pausa ? 999 : 0.01); return; }
+    if (k === "h") { card.jugando = false; $("ayuda").hidden = false; return; }
+  }
+  if (escena === ballena && k === "t" && !dlg.linea) { ballena.sat = !ballena.sat; return; }
+  teclas.add(k);
 });
 window.addEventListener("keyup", e => teclas.delete(e.key.toLowerCase()));
 
 let ultimo = performance.now();
 function bucle(ahora) {
   const dt = Math.min(0.05, (ahora - ultimo) / 1000); ultimo = ahora;
-  if (!pausa && stats) paso(dt);
-  dibujar();
-  if (stats) hud(dt);
+  actualizarDialogo(dt);
+  const enTitulo = !$("titulo").hidden;
+  if (!pausa && !dlg.linea && !enTitulo && $("transicion").hidden) escena.actualizar(dt);
+  if (enTitulo) fito.t = (fito.t || 0) + dt;
+  escena.dibujar();
+  presentar();
+  if (escena === card && card.stats) card.hud();
+  if (avisoT > 0) { avisoT -= dt; if (avisoT <= 0) $("aviso").hidden = true; }
   requestAnimationFrame(bucle);
 }
-crearComida(); crearCardumen(0);
 requestAnimationFrame(bucle);
 </script>
 </body>
