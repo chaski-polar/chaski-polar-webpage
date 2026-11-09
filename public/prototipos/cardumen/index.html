@@ -4,65 +4,98 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cardumen · prototipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-  :root { --mar:#0b3c5d; --texto:#e8f1f8; --suave:#9fb6c8; --verde:#3fc28c; --rojo:#e4572e; --panel:rgba(6,24,38,.88); }
+  :root { --fondo:#071a2b; --panel:#0d2b45; --borde:#5fa8d3; --texto:#eaf6ff; --suave:#8fb3cc; --verde:#4fd18b; --rojo:#e4572e; --amarillo:#ffd166; }
   * { box-sizing:border-box; }
-  html, body { margin:0; height:100%; background:#061826; color:var(--texto); font-family:"Segoe UI", system-ui, sans-serif; overflow:hidden; }
-  canvas { display:block; margin:0 auto; touch-action:none; cursor:crosshair; }
-  .hud { position:fixed; top:10px; left:10px; right:10px; display:flex; gap:10px; flex-wrap:wrap; pointer-events:none; }
-  .tarjeta { background:var(--panel); border:1px solid #1d4a68; border-radius:10px; padding:8px 12px; min-width:120px; }
-  .tarjeta b { display:block; font-size:18px; }
-  .tarjeta span { font-size:12px; color:var(--suave); }
-  .barra { height:6px; background:#1d4a68; border-radius:3px; margin-top:4px; overflow:hidden; }
-  .barra i { display:block; height:100%; background:var(--verde); width:50%; transition:width .2s; }
-  .pie { position:fixed; bottom:8px; left:10px; right:10px; font-size:12px; color:var(--suave); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; pointer-events:none; }
-  .capa { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(3,14,23,.78); padding:16px; }
+  html, body { margin:0; height:100%; background:var(--fondo); color:var(--texto); overflow:hidden;
+    font-family:"Press Start 2P", ui-monospace, monospace; font-size:10px; image-rendering:pixelated; }
+  canvas { display:block; margin:0 auto; image-rendering:pixelated; touch-action:none; cursor:crosshair; }
+  .px { background:var(--panel); border:3px solid var(--borde); box-shadow:3px 3px 0 #02101c; }
+  .hud { position:fixed; top:8px; left:8px; right:8px; display:flex; gap:6px; flex-wrap:wrap; pointer-events:none; }
+  .hud .px { padding:6px 8px; line-height:1.6; }
+  .hud small { color:var(--suave); display:block; font-size:8px; }
+  .barra { height:6px; width:90px; background:#163d5c; margin-top:4px; }
+  .barra i { display:block; height:100%; background:var(--verde); width:50%; }
+  .aviso { position:fixed; left:50%; transform:translateX(-50%); bottom:44px; padding:8px 12px; pointer-events:none; color:var(--amarillo); text-align:center; max-width:92vw; line-height:1.6; }
+  .aviso[hidden] { display:none; }
+  .pie { position:fixed; bottom:6px; left:8px; right:8px; font-size:8px; color:var(--suave); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; pointer-events:none; line-height:1.6; }
+  .capa { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,10,18,.8); padding:12px; }
   .capa[hidden] { display:none; }
-  .caja { background:#0c2a40; border:1px solid #2b5f85; border-radius:14px; padding:22px; max-width:560px; width:100%; max-height:92vh; overflow:auto; }
-  h1 { margin:0 0 6px; font-size:26px; } h2 { margin:0 0 10px; font-size:20px; }
-  p { line-height:1.45; margin:6px 0; }
+  .caja { padding:18px; max-width:600px; width:100%; max-height:94vh; overflow:auto; line-height:1.9; }
+  h1 { font-size:20px; margin:0 0 10px; color:var(--amarillo); } h2 { font-size:13px; margin:0 0 10px; color:var(--amarillo); }
+  p, li { font-size:10px; margin:6px 0; } ul { padding-left:18px; margin:6px 0; }
   .anios { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:12px 0; }
-  button { font:inherit; color:var(--texto); background:#14476b; border:1px solid #2f6f9c; border-radius:9px; padding:10px; cursor:pointer; text-align:left; }
-  button:hover, button:focus-visible { background:#1b5c89; outline:2px solid #7fc3ee; }
-  button small { display:block; color:var(--suave); font-size:12px; }
-  .informe { font-family:Consolas, monospace; background:#f7f1e1; color:#2b2b2b; border-radius:8px; padding:12px 14px; white-space:pre; font-size:13.5px; line-height:1.5; overflow-x:auto; }
-  .diario { margin-top:10px; padding:10px 12px; border-left:3px solid var(--verde); background:#0a2234; font-size:14px; }
-  .acciones { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; } .acciones button { flex:1; text-align:center; }
-  kbd { background:#1d4a68; border-radius:4px; padding:1px 5px; font-size:12px; }
+  button { font:inherit; color:var(--texto); background:#14476b; border:3px solid var(--borde); box-shadow:3px 3px 0 #02101c; padding:10px; cursor:pointer; text-align:left; line-height:1.7; }
+  button:hover, button:focus-visible { background:#1d6396; outline:none; }
+  button:active { transform:translate(2px,2px); box-shadow:1px 1px 0 #02101c; }
+  button small { display:block; color:var(--suave); font-size:8px; }
+  .informe { font-family:ui-monospace, Consolas, monospace; font-size:13px; background:#f3ead2; color:#2b2b2b; border:3px solid #8a7a5c; padding:10px 12px; white-space:pre; line-height:1.5; overflow-x:auto; }
+  .estrellas { font-size:18px; color:var(--amarillo); margin:8px 0; letter-spacing:4px; }
+  .diario { margin-top:10px; padding:8px 10px; border-left:4px solid var(--verde); background:#0a2234; }
+  .acciones { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; } .acciones button { flex:1; text-align:center; }
+  .tecla { display:inline-block; border:2px solid var(--borde); padding:1px 4px; margin:0 2px; background:#0a2234; }
+  .leyenda { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center; margin:8px 0; }
+  .muestra { width:14px; height:14px; border:2px solid #02101c; }
 </style>
 </head>
 <body>
-<canvas id="lienzo" aria-label="Mapa de la costa peruana con el cardumen"></canvas>
+<canvas id="lienzo" aria-label="Mapa en pixel art de la costa peruana con el cardumen"></canvas>
 
 <div class="hud" aria-live="polite">
-  <div class="tarjeta"><span>Fecha</span><b id="hFecha">—</b></div>
-  <div class="tarjeta"><span>Niño 1+2</span><b id="hNino">—</b></div>
-  <div class="tarjeta"><span>Alimento en tu zona vs normal</span><b id="hChl">—</b></div>
-  <div class="tarjeta"><span>Cardumen</span><b id="hCard">—</b><div class="barra"><i id="hEnergia"></i></div></div>
-  <div class="tarjeta"><span>Formación (<kbd>Espacio</kbd>)</span><b id="hModo">Dispersa</b></div>
+  <div class="px"><small>FECHA</small><span id="hFecha">—</span></div>
+  <div class="px"><small>NIÑO 1+2</small><span id="hNino">—</span></div>
+  <div class="px"><small>ALIMENTO AQUÍ</small><span id="hChl">—</span></div>
+  <div class="px"><small>CARDUMEN</small><span id="hCard">—</span><div class="barra"><i id="hEnergia"></i></div></div>
+  <div class="px"><small>FORMACIÓN</small><span id="hModo">DISPERSA</span></div>
 </div>
+<div class="aviso px" id="aviso" hidden></div>
 <div class="pie">
-  <span>Mueve el cardumen con el ratón, el dedo o <kbd>W A S D</kbd>/flechas. <kbd>P</kbd> pausa.</span>
-  <span>Prototipo · Mar real (clorofila ESA OC-CCI, temperatura NOAA, Niño 1+2 NOAA) · Cardumen ilustrativo</span>
+  <span>Mover: ratón / dedo / WASD · Espacio: formación · P: pausa · H: ayuda</span>
+  <span>Mar real: clorofila ESA OC-CCI, temperatura NOAA, Niño 1+2 NOAA · Cardumen ilustrativo</span>
 </div>
 
 <div class="capa" id="inicio">
-  <div class="caja">
-    <h1>Cardumen</h1>
-    <p>Guía a un cardumen de anchovetas por la costa del Perú durante un año. El mar es <b>el real</b>: la comida (fitoplancton) y la temperatura salen de datos satelitales de ese año.</p>
-    <p>Busca las nubes verdes de alimento cerca de la costa. Juntarse protege de las aves, pero se come menos.</p>
+  <div class="caja px">
+    <h1>CARDUMEN</h1>
+    <p>Eres un cardumen de anchovetas en la costa del Perú. Sobrevive un año completo en un mar que es <b>el real</b>: la comida y la temperatura vienen de satélites.</p>
+    <p>Elige el año:</p>
     <div class="anios" id="anios"></div>
   </div>
 </div>
 
+<div class="capa" id="ayuda" hidden>
+  <div class="caja px">
+    <h2>CÓMO SE JUEGA</h2>
+    <p><b>Objetivo:</b> llegar a diciembre con la mayor cantidad de anchovetas posible. Cada mes dura 5 segundos (un año = 1 minuto).</p>
+    <ul>
+      <li><b>Mover:</b> el cardumen sigue al puntero (ratón o dedo). También <span class="tecla">W</span><span class="tecla">A</span><span class="tecla">S</span><span class="tecla">D</span> o flechas.</li>
+      <li><b>Comer:</b> nada sobre los puntos verdes. Cada pez tiene energía: si no come, se apaga y muere.</li>
+      <li><b>Formación:</b> <span class="tecla">ESPACIO</span> cambia entre <b>dispersa</b> (come más, más expuesta) y <b>compacta</b> (se protege de aves, come menos).</li>
+      <li><b>Aves:</b> primero aparece su sombra; luego se lanzan. Aléjate o compáctate.</li>
+      <li><b>Bolichera:</b> en temporada de pesca un barco recorre la costa central y atrapa a los peces cerca de su red.</li>
+    </ul>
+    <div class="leyenda">
+      <span class="muestra" style="background:#4fd18b"></span><span>Alimento (fitoplancton). Más brillante = más comida.</span>
+      <span class="muestra" style="background:#0e4470"></span><span>Agua fría y normal.</span>
+      <span class="muestra" style="background:#a8423e"></span><span>Agua cálida (El Niño): menos alimento.</span>
+    </div>
+    <p><b>Consejo:</b> el alimento está pegado a la costa. En años de El Niño el centro (Chimbote, Callao) pierde casi la mitad de su comida: busca las zonas donde todavía hay verde.</p>
+    <div class="acciones"><button id="btnJugar">¡A NADAR! ▶</button></div>
+  </div>
+</div>
+
 <div class="capa" id="balance" hidden>
-  <div class="caja">
-    <h2>Informe de la temporada</h2>
+  <div class="caja px">
+    <h2>INFORME DE LA TEMPORADA</h2>
+    <div class="estrellas" id="estrellas"></div>
     <div class="informe" id="informe"></div>
     <div class="diario" id="diario"></div>
     <div class="acciones">
-      <button id="btnSiguiente">Siguiente generación ▶</button>
-      <button id="btnOtro">Elegir otro año</button>
+      <button id="btnSiguiente">SIGUIENTE GENERACIÓN ▶</button>
+      <button id="btnOtro">OTRO AÑO</button>
     </div>
   </div>
 </div>
@@ -71,116 +104,136 @@
 <script>
 "use strict";
 const D = window.DATOS_MAR;
+// ---------- configuración
 const LON0 = -86, LON1 = -69, LAT_N = -2.5, LAT_S = -19;
-const MES_SEG = 5;                      // segundos de juego por mes
-const NOMBRES_MES = ["ene","feb","mar","abr","may","jun","jul","ago","set","oct","nov","dic"];
+const PW = 288, PH = Math.round(PW * (LAT_N - LAT_S) / (LON1 - LON0));   // resolución en píxeles reales del juego
+const MES_SEG = 5;
+const NOMBRES_MES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SET","OCT","NOV","DIC"];
 const ANIOS = [
-  { a: 2004, t: "Año normal", d: "Mar frío y productivo" },
-  { a: 1998, t: "El Niño 1997-98", d: "Uno de los más fuertes" },
-  { a: 2017, t: "El Niño costero 2017", d: "Golpe corto y desigual" },
-  { a: 2023, t: "El Niño costero 2023", d: "Se canceló la temporada de pesca" },
+  { a: 2004, t: "AÑO NORMAL 2004", d: "Mar frío y productivo" },
+  { a: 1998, t: "EL NIÑO 1998", d: "Uno de los más fuertes" },
+  { a: 2017, t: "NIÑO COSTERO 2017", d: "Golpe corto y desigual" },
+  { a: 2023, t: "NIÑO COSTERO 2023", d: "Se canceló la pesca" },
 ];
 const COSTA = [[-2.5,-80.9],[-3.4,-80.3],[-4.0,-81.1],[-4.6,-81.3],[-5.1,-81.15],[-5.6,-80.9],[-6.0,-81.15],[-6.4,-80.6],
   [-6.85,-79.95],[-7.7,-79.45],[-8.2,-79.0],[-9.1,-78.6],[-10.1,-78.15],[-11.1,-77.6],[-12.05,-77.15],[-12.6,-76.65],
   [-13.1,-76.4],[-13.7,-76.2],[-14.1,-76.3],[-14.8,-75.6],[-15.35,-75.15],[-15.9,-74.4],[-16.2,-73.7],[-16.6,-72.7],
   [-17.0,-72.0],[-17.65,-71.35],[-18.35,-70.4],[-19.0,-70.3]];
+// paleta limitada
+const MAR = ["#082f55", "#0e4470", "#1d5a86", "#4b4a63", "#7a3f4f", "#a8423e"];   // frío → cálido
+const VERDES = ["#1f6b45", "#2fa86a", "#4fd18b", "#a8f0c0"];
+const TIERRA = "#b49a6a", TIERRA_OSC = "#8a744c", BORDE = "#e8dcb4", PEZ = "#d8ecf6", PEZ_OSC = "#6f97ad";
+const AVE = ["..#.....#..", ".#.#...#.#.", "#...#.#...#", ".....#....."];   // gaviota en pixel art
 
-// ---------- datos: rellenar huecos con el último valor válido
+// ---------- datos
 const ZLAT = D.zonas.map(z => z.lat);
-(function rellenar() {
-  for (const k of [2, 3, 4]) {
-    const ult = D.zonas.map(() => null);
-    for (const m of D.meses) m[k] = m[k].map((v, i) => (v == null ? ult[i] : (ult[i] = v)));
-  }
-})();
+for (const k of [2, 3, 4]) { const ult = D.zonas.map(() => null); for (const m of D.meses) m[k] = m[k].map((v, i) => (v == null ? ult[i] : (ult[i] = v))); }
 const porMes = new Map(D.meses.map(m => [m[0], m]));
-
-function interpZona(valores, lat) {          // valores en orden norte → sur
-  if (lat >= ZLAT[0]) return valores[0];
-  for (let i = 0; i < ZLAT.length - 1; i++) {
-    if (lat <= ZLAT[i] && lat >= ZLAT[i + 1]) {
-      const a = valores[i], b = valores[i + 1];
-      if (a == null || b == null) return a ?? b;
-      const t = (ZLAT[i] - lat) / (ZLAT[i] - ZLAT[i + 1]);
-      return a + (b - a) * t;
-    }
+function interpZona(vals, lat) {
+  if (lat >= ZLAT[0]) return vals[0];
+  for (let i = 0; i < ZLAT.length - 1; i++) if (lat <= ZLAT[i] && lat >= ZLAT[i + 1]) {
+    const a = vals[i], b = vals[i + 1]; if (a == null || b == null) return a ?? b;
+    return a + (b - a) * (ZLAT[i] - lat) / (ZLAT[i] - ZLAT[i + 1]);
   }
-  return valores[valores.length - 1];
+  return vals[vals.length - 1];
 }
 function lonCosta(lat) {
-  for (let i = 0; i < COSTA.length - 1; i++) {
-    const [la, lo] = COSTA[i], [lb, lob] = COSTA[i + 1];
-    if (lat <= la && lat >= lb) return lo + (lob - lo) * (la - lat) / (la - lb);
-  }
+  for (let i = 0; i < COSTA.length - 1; i++) { const [la, lo] = COSTA[i], [lb, lob] = COSTA[i + 1];
+    if (lat <= la && lat >= lb) return lo + (lob - lo) * (la - lat) / (la - lb); }
   return lat > COSTA[0][0] ? COSTA[0][1] : COSTA[COSTA.length - 1][1];
 }
 const riqueza = chl => Math.min(1.4, Math.max(0.05, Math.log10((chl ?? 0.5) + 0.1) + 0.6));
+const X = lon => Math.round((lon - LON0) / (LON1 - LON0) * PW);
+const Y = lat => Math.round((LAT_N - lat) / (LAT_N - LAT_S) * PH);
+const aLon = x => LON0 + x / PW * (LON1 - LON0);
+const aLat = y => LAT_N - y / PH * (LAT_N - LAT_S);
 
-// ---------- lienzo y proyección
+// ---------- lienzos: uno pequeño (píxeles del juego) y uno ampliado
 const cv = document.getElementById("lienzo"), cx = cv.getContext("2d");
-let W = 0, H = 0, ESC = 1;
+const px = document.createElement("canvas"); px.width = PW; px.height = PH;
+const p = px.getContext("2d");
+let K = 2;
 function ajustar() {
-  const dpr = window.devicePixelRatio || 1;
-  const alto = window.innerHeight, ancho = window.innerWidth;
-  const razon = (LON1 - LON0) / (LAT_N - LAT_S);
-  H = Math.min(alto, ancho / razon); W = H * razon;
-  cv.style.width = W + "px"; cv.style.height = H + "px";
-  cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ESC = W / (LON1 - LON0);
+  K = Math.max(1, Math.floor(Math.min(window.innerWidth / PW, (window.innerHeight - 20) / PH)));
+  cv.width = PW * K; cv.height = PH * K; cv.style.width = PW * K + "px"; cv.style.height = PH * K + "px";
+  cx.imageSmoothingEnabled = false;
 }
-const px = lon => (lon - LON0) / (LON1 - LON0) * W;
-const py = lat => (LAT_N - lat) / (LAT_N - LAT_S) * H;
-const aLon = x => LON0 + x / W * (LON1 - LON0);
-const aLat = y => LAT_N - y / H * (LAT_N - LAT_S);
-window.addEventListener("resize", ajustar);
-ajustar();
+window.addEventListener("resize", ajustar); ajustar();
+const sprite = n => { const im = new Image(); im.src = `sprites/${n}.png`; return im; };
+const SPR = { barco: sprite("bolichera") };
 
-// ---------- estado del juego
-let anio = 2004, t = 0, pausa = true, compacto = false, fin = false;
-let peces = [], comida = [], aves = [], stats = null;
-const objetivo = { lon: -79.5, lat: -9 };
+// fondo de mar (se recalcula solo cuando cambia el mes) con tramado entre niveles de color
+let fondoMes = "", fondo = null;
+const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+function hexRGB(h) { return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); }
+const MAR_RGB = MAR.map(hexRGB);
+function construirFondo(m) {
+  const img = p.createImageData(PW, PH), d = img.data;
+  for (let y = 0; y < PH; y++) {
+    const lat = aLat(y), an = interpZona(m[4], lat) ?? 0;
+    const nivel = Math.max(0, Math.min(MAR.length - 1.001, 1 + (an >= 0 ? an / 0.8 : an / 1.5)));
+    const base = Math.floor(nivel), frac = nivel - base;
+    const lc = X(lonCosta(lat));
+    for (let x = 0; x < PW; x++) {
+      const i = (y * PW + x) * 4;
+      let rgb;
+      if (x >= lc) {
+        const borde = x === lc;
+        const ruido = (Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0;
+        rgb = hexRGB(borde ? BORDE : (ruido % 29 === 0 ? TIERRA_OSC : TIERRA));
+      } else {
+        const c = frac > BAYER[y % 4][x % 4] / 16 ? Math.min(base + 1, MAR.length - 1) : base;
+        rgb = MAR_RGB[c];
+        const prof = Math.min(1, (lc - x) / 90);            // mar adentro un poco más oscuro
+        rgb = rgb.map(v => Math.round(v * (1 - 0.25 * prof)));
+      }
+      d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; d[i + 3] = 255;
+    }
+  }
+  return img;
+}
+
+// ---------- estado
+let anio = 2004, t = 0, pausa = true, compacto = false, fin = false, enJuego = false;
+let peces = [], comida = [], aves = [], barco = null, stats = null, avisoT = 0, mesAviso = -1;
+const objetivo = { lon: -79.6, lat: -9.2 };
 const teclas = new Set();
+const mesActual = () => Math.min(11, Math.floor(t / MES_SEG));
+const clave = () => `${anio}-${String(mesActual() + 1).padStart(2, "0")}`;
+const datosMes = () => porMes.get(clave()) || D.meses[D.meses.length - 1];
+const temporadaPesca = mi => (mi >= 3 && mi <= 6) || mi >= 10;          // abr-jul y nov-dic (aprox.)
 
-function mesActual() {
-  const i = Math.min(11, Math.floor(t / MES_SEG));
-  return { i, clave: `${anio}-${String(i + 1).padStart(2, "0")}`, frac: (t / MES_SEG) - i };
-}
-function datosMes() { return porMes.get(mesActual().clave) || D.meses[D.meses.length - 1]; }
+function avisar(txt, seg = 3) { const a = document.getElementById("aviso"); a.textContent = txt; a.hidden = false; avisoT = seg; }
 
 function crearComida() {
   comida = [];
   for (let k = 0; k < 420; k++) {
     const lat = LAT_S + 0.5 + Math.random() * (LAT_N - LAT_S - 1);
-    const d = Math.pow(Math.random(), 1.6) * 2.4 + 0.08;      // más densa cerca de la costa
-    comida.push({ lat, lon: lonCosta(lat) - d, dist: d, cant: 0.3, fase: Math.random() * 6.28 });
+    const d = Math.pow(Math.random(), 1.6) * 2.4 + 0.08;
+    comida.push({ lat, lon: lonCosta(lat) - d, dist: d, cant: 0.3 });
   }
 }
 function crearCardumen(n) {
-  peces = [];
-  for (let k = 0; k < n; k++) {
-    peces.push({ lon: objetivo.lon + (Math.random() - .5) * .8, lat: objetivo.lat + (Math.random() - .5) * .8,
-                 vlon: 0, vlat: 0, e: 0.75 });
-  }
+  peces = Array.from({ length: n }, () => ({ lon: objetivo.lon + (Math.random() - .5) * .8, lat: objetivo.lat + (Math.random() - .5) * .8, vlon: 0, vlat: 0, e: 0.75 }));
 }
 function iniciar(a, tam) {
-  anio = a; t = 0; fin = false; aves = []; pausa = false;
-  objetivo.lon = -79.6; objetivo.lat = -9.2;
+  anio = a; t = 0; fin = false; aves = []; barco = null; pausa = true; enJuego = true; mesAviso = -1;
+  objetivo.lon = -79.6; objetivo.lat = -9.2; compacto = false;
   crearComida(); crearCardumen(tam);
-  stats = { inicial: tam, hambre: 0, aves: 0, anomalias: [], ninos: [] };
-  document.getElementById("inicio").hidden = true;
-  document.getElementById("balance").hidden = true;
+  stats = { inicial: tam, hambre: 0, aves: 0, red: 0, anomalias: [], ninos: [] };
+  document.getElementById("inicio").hidden = true; document.getElementById("balance").hidden = true;
+  document.getElementById("ayuda").hidden = false; document.getElementById("btnJugar").focus();
+  fondoMes = "";
+}
+function centro() {
+  let a = 0, b = 0; for (const q of peces) { a += q.lon; b += q.lat; }
+  return peces.length ? { lon: a / peces.length, lat: b / peces.length } : { ...objetivo };
 }
 
 // ---------- simulación
-function centro() {
-  let a = 0, b = 0; for (const p of peces) { a += p.lon; b += p.lat; }
-  return peces.length ? { lon: a / peces.length, lat: b / peces.length } : { ...objetivo };
-}
 function paso(dt) {
   t += dt;
-  const m = datosMes();
-  const chl = m[2], sst = m[4];
-  // teclado mueve el objetivo
+  const m = datosMes(), chl = m[2], mi = mesActual();
   const v = 2.2 * dt;
   if (teclas.has("w") || teclas.has("arrowup")) objetivo.lat += v;
   if (teclas.has("s") || teclas.has("arrowdown")) objetivo.lat -= v;
@@ -189,189 +242,183 @@ function paso(dt) {
   objetivo.lat = Math.max(LAT_S + .3, Math.min(LAT_N - .3, objetivo.lat));
   objetivo.lon = Math.max(LON0 + .3, Math.min(lonCosta(objetivo.lat) - .1, objetivo.lon));
 
-  // comida: se regenera según la clorofila real de su latitud
-  for (const f of comida) {
-    const tope = riqueza(interpZona(chl, f.lat)) * Math.exp(-f.dist / 0.9);
-    f.cant = Math.min(tope, f.cant + dt * 0.2 * tope);
-  }
-  // cardumen (bandada)
-  const c = centro();
-  const coh = compacto ? 2.6 : 0.9, sep = compacto ? 0.05 : 0.16;
-  for (const p of peces) {
-    let ax = (objetivo.lon - p.lon) * 1.6 + (c.lon - p.lon) * coh;
-    let ay = (objetivo.lat - p.lat) * 1.6 + (c.lat - p.lat) * coh;
-    for (let j = 0; j < 6; j++) {                       // separación con vecinos al azar (barato)
-      const q = peces[(Math.random() * peces.length) | 0];
-      const dx = p.lon - q.lon, dy = p.lat - q.lat, d2 = dx * dx + dy * dy;
-      if (d2 > 0 && d2 < sep * sep) { ax += dx / d2 * 0.02; ay += dy / d2 * 0.02; }
-    }
+  for (const f of comida) { const tope = riqueza(interpZona(chl, f.lat)) * Math.exp(-f.dist / 0.9); f.cant = Math.min(tope, f.cant + dt * 0.2 * tope); }
+
+  const c = centro(), coh = compacto ? 2.6 : 0.9, sep = compacto ? 0.05 : 0.16;
+  for (const q of peces) {
+    let ax = (objetivo.lon - q.lon) * 1.6 + (c.lon - q.lon) * coh, ay = (objetivo.lat - q.lat) * 1.6 + (c.lat - q.lat) * coh;
+    for (let j = 0; j < 6; j++) { const o = peces[(Math.random() * peces.length) | 0]; const dx = q.lon - o.lon, dy = q.lat - o.lat, d2 = dx * dx + dy * dy;
+      if (d2 > 0 && d2 < sep * sep) { ax += dx / d2 * 0.02; ay += dy / d2 * 0.02; } }
     ax += (Math.random() - .5) * 1.2; ay += (Math.random() - .5) * 1.2;
-    p.vlon = (p.vlon + ax * dt) * 0.94; p.vlat = (p.vlat + ay * dt) * 0.94;
-    const vel = Math.hypot(p.vlon, p.vlat), max = 1.4;
-    if (vel > max) { p.vlon *= max / vel; p.vlat *= max / vel; }
-    p.lon += p.vlon * dt; p.lat += p.vlat * dt;
-    const lc = lonCosta(p.lat);
-    if (p.lon > lc - 0.04) { p.lon = lc - 0.04; p.vlon = -Math.abs(p.vlon); }   // no entrar a tierra
-    p.lat = Math.max(LAT_S, Math.min(LAT_N, p.lat)); p.lon = Math.max(LON0, p.lon);
-    // comer
-    p.e -= dt * (compacto ? 0.06 : 0.05);
+    q.vlon = (q.vlon + ax * dt) * 0.94; q.vlat = (q.vlat + ay * dt) * 0.94;
+    const vel = Math.hypot(q.vlon, q.vlat); if (vel > 1.4) { q.vlon *= 1.4 / vel; q.vlat *= 1.4 / vel; }
+    q.lon += q.vlon * dt; q.lat += q.vlat * dt;
+    const lc = lonCosta(q.lat); if (q.lon > lc - 0.06) { q.lon = lc - 0.06; q.vlon = -Math.abs(q.vlon); }
+    q.lat = Math.max(LAT_S, Math.min(LAT_N, q.lat)); q.lon = Math.max(LON0, q.lon);
+    q.e -= dt * (compacto ? 0.06 : 0.05);
     for (const f of comida) {
       if (f.cant < 0.02) continue;
-      const dx = f.lon - p.lon, dy = f.lat - p.lat;
-      if (dx * dx + dy * dy < 0.06) {
-        const bocado = Math.min(f.cant, dt * (compacto ? 0.25 : 0.45));
-        f.cant -= bocado; p.e = Math.min(1, p.e + bocado * 1.6);
-      }
+      const dx = f.lon - q.lon, dy = f.lat - q.lat;
+      if (dx * dx + dy * dy < 0.06) { const b = Math.min(f.cant, dt * (compacto ? 0.25 : 0.45)); f.cant -= b; q.e = Math.min(1, q.e + b * 1.6); }
     }
   }
-  const antes = peces.length;
-  peces = peces.filter(p => p.e > 0);
-  stats.hambre += antes - peces.length;
+  let n0 = peces.length; peces = peces.filter(q => q.e > 0); stats.hambre += n0 - peces.length;
 
-  // aves: aparecen cerca del cardumen y atacan
-  if (Math.random() < dt / 9 && peces.length) {
-    aves.push({ lon: c.lon + (Math.random() - .5) * .6, lat: c.lat + (Math.random() - .5) * .6, vida: 1.2, golpe: false });
-  }
+  // aves: sombra (aviso) y luego picada
+  if (Math.random() < dt / 9 && peces.length) aves.push({ lon: c.lon + (Math.random() - .5) * .6, lat: c.lat + (Math.random() - .5) * .6, vida: 1.6, golpe: false });
   for (const a of aves) {
     a.vida -= dt;
     if (!a.golpe && a.vida < 0.6) {
-      a.golpe = true;
-      const prob = compacto ? 0.06 : 0.2;
-      const n0 = peces.length;
-      peces = peces.filter(p => !((p.lon - a.lon) ** 2 + (p.lat - a.lat) ** 2 < 0.0625 && Math.random() < prob));
+      a.golpe = true; n0 = peces.length; const prob = compacto ? 0.06 : 0.2;
+      peces = peces.filter(q => !((q.lon - a.lon) ** 2 + (q.lat - a.lat) ** 2 < 0.0625 && Math.random() < prob));
       stats.aves += n0 - peces.length;
     }
   }
   aves = aves.filter(a => a.vida > 0);
 
-  // registro para el balance
-  const mi = mesActual().i;
-  if (stats.anomalias.length <= mi) { stats.anomalias.push(m[3]); stats.ninos.push(m[1]); }
+  // bolichera: aparece en temporada de pesca y recorre la costa central
+  if (!barco && temporadaPesca(mi) && Math.random() < dt / 12) {
+    const lat = -8 - Math.random() * 6; barco = { lat, lon: lonCosta(lat) - 2.3, dir: 1, vida: 9 };
+    avisar("¡BOLICHERA EN LA COSTA CENTRAL!");
+  }
+  if (barco) {
+    barco.vida -= dt; barco.lon += barco.dir * 0.35 * dt;
+    if (barco.lon > lonCosta(barco.lat) - 0.3) barco.dir = -1;
+    n0 = peces.length;
+    peces = peces.filter(q => !((q.lon - barco.lon) ** 2 + (q.lat - barco.lat) ** 2 < 0.16 && Math.random() < dt * 1.2));
+    stats.red += n0 - peces.length;
+    if (barco.vida <= 0) barco = null;
+  }
 
+  if (stats.anomalias.length <= mi) {
+    stats.anomalias.push(m[3]); stats.ninos.push(m[1]);
+    if (mi !== mesAviso) {
+      mesAviso = mi;
+      const an = interpZona(m[3], c.lat);
+      if (m[1] != null && m[1] >= 2) avisar("EL MAR SE CALENTÓ: ¡EL NIÑO FUERTE! EL ALIMENTO CAE.");
+      else if (m[1] != null && m[1] >= 1) avisar("AGUA CÁLIDA FRENTE A LA COSTA: MENOS ALIMENTO.");
+      else if (an != null && an > 30) avisar("¡AFLORAMIENTO! MUCHO ALIMENTO EN TU ZONA.");
+    }
+  }
   if (t >= 12 * MES_SEG || peces.length === 0) terminar();
 }
 
-// ---------- dibujo
+// ---------- dibujo en pixel art
+function dibujarSprite(filas, x0, y0, color) {
+  p.fillStyle = color;
+  filas.forEach((f, y) => { for (let x = 0; x < f.length; x++) if (f[x] === "#") p.fillRect(x0 + x, y0 + y, 1, 1); });
+}
 function dibujar() {
-  const m = datosMes(), sst = m[4], chl = m[2];
-  // mar teñido por la anomalía de temperatura de cada latitud
-  for (let y = 0; y < H; y += 6) {
-    const lat = aLat(y), an = interpZona(sst, lat) ?? 0;
-    const cal = Math.max(0, Math.min(1, an / 3)), fri = Math.max(0, Math.min(1, -an / 2));
-    const r = 10 + 120 * cal, g = 52 + 10 * cal - 10 * fri, b = 88 - 40 * cal + 30 * fri;
-    cx.fillStyle = `rgb(${r|0},${g|0},${b|0})`; cx.fillRect(0, y, W, 6);
-  }
-  // comida (nubes verdes)
-  const tt = performance.now() / 1000;
+  const m = datosMes(), k = clave();
+  if (k !== fondoMes) { fondo = construirFondo(m); fondoMes = k; }
+  p.putImageData(fondo, 0, 0);
+  // alimento
   for (const f of comida) {
-    if (f.cant < 0.03) continue;
-    cx.fillStyle = `rgba(80,220,140,${Math.min(.75, f.cant * .7)})`;
-    cx.beginPath(); cx.arc(px(f.lon + Math.sin(tt + f.fase) * .03), py(f.lat), 2 + f.cant * 7, 0, 6.29); cx.fill();
+    if (f.cant < 0.04) continue;
+    const x = X(f.lon), y = Y(f.lat), n = f.cant > 0.9 ? 3 : f.cant > 0.5 ? 2 : f.cant > 0.2 ? 1 : 0;
+    p.fillStyle = VERDES[n]; p.fillRect(x, y, 1, 1);
+    if (n >= 2) { p.fillStyle = VERDES[n - 1]; p.fillRect(x - 1, y, 1, 1); p.fillRect(x + 1, y, 1, 1); p.fillRect(x, y - 1, 1, 1); p.fillRect(x, y + 1, 1, 1); }
   }
-  // tierra
-  cx.fillStyle = "#8a7a5c"; cx.beginPath();
-  cx.moveTo(px(COSTA[0][1]), py(COSTA[0][0]));
-  for (const [la, lo] of COSTA) cx.lineTo(px(lo), py(la));
-  cx.lineTo(W, py(LAT_S)); cx.lineTo(W, 0); cx.lineTo(px(COSTA[0][1]), 0); cx.closePath(); cx.fill();
-  cx.strokeStyle = "#d8cba8"; cx.lineWidth = 1.5; cx.stroke();
-  // nombres de zonas y su alimento vs normal
-  cx.font = "12px Segoe UI, sans-serif";
-  D.zonas.forEach((z, i) => {
-    const x = px(lonCosta(z.lat)) + 8, y = py(z.lat);
-    const an = m[3][i];
-    cx.fillStyle = "#1c1a14"; cx.fillText(z.nombre, x, y);
-    if (an != null) { cx.fillStyle = an < 0 ? "#7a1d0e" : "#0d4a2e"; cx.fillText(`${an > 0 ? "+" : ""}${an.toFixed(0)} %`, x, y + 14); }
-  });
-  // objetivo
-  cx.strokeStyle = "rgba(255,255,255,.35)"; cx.setLineDash([3, 4]);
-  cx.beginPath(); cx.arc(px(objetivo.lon), py(objetivo.lat), 12, 0, 6.29); cx.stroke(); cx.setLineDash([]);
-  // peces
-  for (const p of peces) {
-    const ang = Math.atan2(-p.vlat, p.vlon);
-    cx.save(); cx.translate(px(p.lon), py(p.lat)); cx.rotate(ang);
-    cx.fillStyle = `hsl(200,30%,${55 + p.e * 35}%)`;
-    cx.beginPath(); cx.moveTo(5, 0); cx.lineTo(-4, -2); cx.lineTo(-4, 2); cx.closePath(); cx.fill();
-    cx.restore();
+  // objetivo (mira de 5 px)
+  const ox = X(objetivo.lon), oy = Y(objetivo.lat);
+  p.fillStyle = "rgba(255,255,255,.55)"; p.fillRect(ox - 2, oy, 2, 1); p.fillRect(ox + 1, oy, 2, 1); p.fillRect(ox, oy - 2, 1, 2); p.fillRect(ox, oy + 1, 1, 2);
+  // peces: 2 px de cuerpo + 1 px de cola según la dirección
+  for (const q of peces) {
+    const x = X(q.lon), y = Y(q.lat), cola = q.vlon >= 0 ? -1 : 2;
+    p.fillStyle = q.e > 0.35 ? PEZ : PEZ_OSC; p.fillRect(x, y, 2, 1);
+    p.fillStyle = PEZ_OSC; p.fillRect(x + cola, y, 1, 1);
   }
-  // aves
+  // aves: sombra parpadeante y luego picada
   for (const a of aves) {
-    const r = a.golpe ? 18 * (1 - a.vida / 0.6) + 6 : 22 * a.vida;
-    cx.strokeStyle = a.golpe ? "rgba(255,90,60,.8)" : "rgba(255,255,255,.7)";
-    cx.lineWidth = 2; cx.beginPath(); cx.arc(px(a.lon), py(a.lat), r, 0, 6.29); cx.stroke();
-    if (!a.golpe) { cx.fillStyle = "#fff"; cx.font = "16px serif"; cx.fillText("🐦", px(a.lon) - 8, py(a.lat) - r - 4); }
+    const x = X(a.lon), y = Y(a.lat);
+    if (!a.golpe) {
+      if (Math.floor(a.vida * 6) % 2 === 0) { p.fillStyle = "rgba(0,0,0,.45)"; p.fillRect(x - 3, y - 1, 7, 3); }
+      dibujarSprite(AVE, x - 5, y - 12 - Math.round((a.vida - 0.6) * 8), "#f4f4f4");
+    } else {
+      const r = Math.round(2 + (0.6 - a.vida) * 10); p.fillStyle = "#ffffff";
+      for (let i = 0; i < 8; i++) { const ang = i * Math.PI / 4; p.fillRect(x + Math.round(Math.cos(ang) * r), y + Math.round(Math.sin(ang) * r), 1, 1); }
+    }
   }
+  // bolichera (sprite del equipo) con su red
+  if (barco) {
+    const x = X(barco.lon), y = Y(barco.lat);
+    p.fillStyle = "rgba(255,209,102,.35)";
+    for (let i = 0; i < 16; i++) { const ang = i * Math.PI / 8; p.fillRect(x + Math.round(Math.cos(ang) * 9), y + Math.round(Math.sin(ang) * 9), 1, 1); }
+    if (SPR.barco.complete && SPR.barco.naturalWidth) p.drawImage(SPR.barco, x - 13, y - 12);
+    else { p.fillStyle = "#c0392b"; p.fillRect(x - 6, y - 3, 12, 3); }
+  }
+  // ampliar sin suavizado
+  cx.imageSmoothingEnabled = false;
+  cx.drawImage(px, 0, 0, PW * K, PH * K);
+  // nombres de zonas con fuente pixelada
+  cx.font = `${Math.max(8, 4 * K)}px "Press Start 2P", monospace`;
+  D.zonas.forEach((z, i) => {
+    const x = (X(lonCosta(z.lat)) + 3) * K, y = Y(z.lat) * K, an = m[3][i];
+    cx.fillStyle = "#2b220f"; cx.fillText(z.nombre.toUpperCase(), x, y);
+    if (an != null) { cx.fillStyle = an < 0 ? "#7a1d0e" : "#0d4a2e"; cx.fillText(`${an > 0 ? "+" : ""}${an.toFixed(0)}%`, x, y + 6 * K); }
+  });
 }
 
-function hud() {
-  const m = datosMes(), mi = mesActual();
-  document.getElementById("hFecha").textContent = `${NOMBRES_MES[mi.i]} ${anio}`;
+function hud(dt) {
+  const m = datosMes();
+  document.getElementById("hFecha").textContent = `${NOMBRES_MES[mesActual()]} ${anio}`;
   const n = m[1];
-  document.getElementById("hNino").textContent = n == null ? "—" : `${n > 0 ? "+" : ""}${n.toFixed(1)} °C ${n >= 2 ? "· fuerte" : n >= 1 ? "· cálido" : n <= -1 ? "· frío" : ""}`;
-  const an = interpZona(m[3], centro().lat);
-  const el = document.getElementById("hChl");
-  el.textContent = an == null ? "—" : `${an > 0 ? "+" : ""}${an.toFixed(0)} %`;
-  el.style.color = an < -20 ? "#ff8a6b" : an > 10 ? "#7fe0ad" : "";
-  document.getElementById("hCard").textContent = `${peces.length} / ${stats ? stats.inicial : 0}`;
-  const e = peces.length ? peces.reduce((s, p) => s + p.e, 0) / peces.length : 0;
-  document.getElementById("hEnergia").style.width = `${(e * 100).toFixed(0)}%`;
-  document.getElementById("hModo").textContent = compacto ? "Compacta" : "Dispersa";
+  document.getElementById("hNino").textContent = n == null ? "—" : `${n > 0 ? "+" : ""}${n.toFixed(1)}°C`;
+  document.getElementById("hNino").style.color = n >= 2 ? "#e4572e" : n >= 1 ? "#ffd166" : "";
+  const an = interpZona(m[3], centro().lat), el = document.getElementById("hChl");
+  el.textContent = an == null ? "—" : `${an > 0 ? "+" : ""}${an.toFixed(0)}%`;
+  el.style.color = an < -20 ? "#e4572e" : an > 10 ? "#4fd18b" : "";
+  document.getElementById("hCard").textContent = `${peces.length}/${stats ? stats.inicial : 0}`;
+  const e = peces.length ? peces.reduce((s, q) => s + q.e, 0) / peces.length : 0;
+  const barra = document.getElementById("hEnergia"); barra.style.width = `${(e * 100).toFixed(0)}%`; barra.style.background = e < 0.3 ? "#e4572e" : "#4fd18b";
+  document.getElementById("hModo").textContent = compacto ? "COMPACTA" : "DISPERSA";
+  if (avisoT > 0) { avisoT -= dt; if (avisoT <= 0) document.getElementById("aviso").hidden = true; }
 }
 
-// ---------- balance (estilo Papers, Please)
+// ---------- informe (estilo Papers, Please)
 function terminar() {
   if (fin) return;
-  fin = true; pausa = true;
+  fin = true; pausa = true; enJuego = false;
   const media = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : 0; };
-  const chlMedia = media(stats.anomalias.map(media)), ninoMedio = media(stats.ninos), ninoMax = Math.max(...stats.ninos.filter(x => x != null));
-  const L = (a, b) => (a + " ").padEnd(28, ".") + " " + b;
+  const chlMedia = media(stats.anomalias.map(media)), ninoMax = Math.max(...stats.ninos.filter(x => x != null));
+  const L = (a, b) => (a + " ").padEnd(27, ".") + " " + b;
+  const pct = peces.length / stats.inicial;
+  document.getElementById("estrellas").textContent = pct >= 0.6 ? "★★★" : pct >= 0.35 ? "★★☆" : pct > 0 ? "★☆☆" : "☆☆☆";
   document.getElementById("informe").textContent = [
-    `INFORME DE LA TEMPORADA ${anio}`, "-".repeat(40),
-    L("Cardumen inicial", stats.inicial),
-    L("Perdidos por hambre", -stats.hambre),
-    L("Perdidos por aves", -stats.aves),
-    L("Sobrevivientes", peces.length),
-    "",
-    L("Alimento del año vs normal", `${chlMedia > 0 ? "+" : ""}${chlMedia.toFixed(0)} %`),
-    L("Niño 1+2 promedio", `${ninoMedio > 0 ? "+" : ""}${ninoMedio.toFixed(1)} °C`),
-    L("Niño 1+2 máximo", `${ninoMax > 0 ? "+" : ""}${ninoMax.toFixed(1)} °C`),
+    `TEMPORADA ${anio}`, "-".repeat(36),
+    L("Cardumen inicial", stats.inicial), L("Perdidos por hambre", -stats.hambre),
+    L("Perdidos por aves", -stats.aves), L("Atrapados por la red", -stats.red),
+    L("Sobrevivientes", `${peces.length} (${Math.round(pct * 100)}%)`), "",
+    L("Alimento del año vs normal", `${chlMedia > 0 ? "+" : ""}${chlMedia.toFixed(0)}%`),
+    L("Niño 1+2 máximo", `${ninoMax > 0 ? "+" : ""}${ninoMax.toFixed(1)}°C`),
   ].join("\n");
-  const diario = ninoMax >= 2
-    ? "Diario del científico · Observado: el mar frente al Perú se calentó con fuerza y el fitoplancton cayó en la costa central. Con datos satelitales se midió que, por cada grado de calentamiento, el fitoplancton cae entre 18 % y 33 % según la zona; el enfriamiento casi no lo recupera."
+  document.getElementById("diario").textContent = ninoMax >= 2
+    ? "DIARIO DEL CIENTÍFICO: el mar se calentó con fuerza y el fitoplancton cayó en la costa central. Con datos satelitales se midió que por cada grado de calentamiento el fitoplancton cae entre 18% y 33% según la zona; el enfriamiento casi no lo recupera."
     : ninoMax >= 1
-      ? "Diario del científico · Observado: hubo meses cálidos frente a la costa y el alimento bajó en algunas zonas. No toda la costa responde igual: el centro (Chimbote, Callao) es el más sensible."
-      : "Diario del científico · Observado: un año de agua fría y afloramiento activo. El alimento abundó cerca de la costa. Sugerido: más alimento coincide con más anchoveta. No demostrado: que lo que pasa en la Antártida cambie este año el mar peruano.";
-  document.getElementById("diario").textContent = diario;
-  document.getElementById("btnSiguiente").disabled = peces.length < 5;
-  document.getElementById("btnSiguiente").textContent = peces.length < 5 ? "El cardumen no sobrevivió" : "Siguiente generación ▶";
-  document.getElementById("balance").hidden = false;
-  document.getElementById("btnSiguiente").focus();
+      ? "DIARIO DEL CIENTÍFICO: hubo meses cálidos y el alimento bajó en algunas zonas. No toda la costa responde igual: el centro (Chimbote, Callao) es el más sensible."
+      : "DIARIO DEL CIENTÍFICO: año de agua fría y afloramiento activo; el alimento abundó cerca de la costa. Sugerido: más alimento coincide con más anchoveta. No demostrado: que la Antártida cambie este año el mar peruano.";
+  const sig = document.getElementById("btnSiguiente");
+  sig.disabled = peces.length < 5; sig.textContent = peces.length < 5 ? "EL CARDUMEN NO SOBREVIVIÓ" : "SIGUIENTE GENERACIÓN ▶";
+  document.getElementById("balance").hidden = false; (peces.length < 5 ? document.getElementById("btnOtro") : sig).focus();
 }
 
 // ---------- interfaz
-const contAnios = document.getElementById("anios");
 for (const o of ANIOS) {
   const b = document.createElement("button");
-  b.innerHTML = `<b>${o.t}</b><small>${o.d}</small>`;
+  b.innerHTML = `${o.t}<small>${o.d}</small>`;
   b.onclick = () => iniciar(o.a, 160);
-  contAnios.appendChild(b);
+  document.getElementById("anios").appendChild(b);
 }
-document.getElementById("btnSiguiente").onclick = () => {
-  const sigue = Math.min(2025, anio + 1);
-  iniciar(sigue, Math.max(40, Math.min(220, Math.round(peces.length * 1.6))));
-};
-document.getElementById("btnOtro").onclick = () => {
-  document.getElementById("balance").hidden = true; document.getElementById("inicio").hidden = false;
-};
-function moverA(e) {
-  const r = cv.getBoundingClientRect();
-  objetivo.lon = aLon(e.clientX - r.left); objetivo.lat = aLat(e.clientY - r.top);
-}
-cv.addEventListener("pointermove", moverA);
-cv.addEventListener("pointerdown", moverA);
+document.getElementById("btnJugar").onclick = () => { document.getElementById("ayuda").hidden = true; if (enJuego) pausa = false; };
+document.getElementById("btnSiguiente").onclick = () => iniciar(Math.min(2025, anio + 1), Math.max(40, Math.min(220, Math.round(peces.length * 1.6))));
+document.getElementById("btnOtro").onclick = () => { document.getElementById("balance").hidden = true; document.getElementById("inicio").hidden = false; };
+function moverA(e) { const r = cv.getBoundingClientRect(); objetivo.lon = aLon((e.clientX - r.left) / K); objetivo.lat = aLat((e.clientY - r.top) / K); }
+cv.addEventListener("pointermove", moverA); cv.addEventListener("pointerdown", moverA);
 window.addEventListener("keydown", e => {
   const k = e.key.toLowerCase();
-  if (k === " ") { compacto = !compacto; e.preventDefault(); }
-  else if (k === "p" && !fin && document.getElementById("inicio").hidden) pausa = !pausa;
+  if (k === " " && enJuego) { compacto = !compacto; e.preventDefault(); }
+  else if (k === "p" && enJuego && document.getElementById("ayuda").hidden) { pausa = !pausa; avisar(pausa ? "PAUSA" : "", pausa ? 999 : 0.01); }
+  else if (k === "h" && enJuego) { pausa = true; document.getElementById("ayuda").hidden = false; }
   else teclas.add(k);
 });
 window.addEventListener("keyup", e => teclas.delete(e.key.toLowerCase()));
@@ -381,7 +428,7 @@ function bucle(ahora) {
   const dt = Math.min(0.05, (ahora - ultimo) / 1000); ultimo = ahora;
   if (!pausa && stats) paso(dt);
   dibujar();
-  if (stats) hud();
+  if (stats) hud(dt);
   requestAnimationFrame(bucle);
 }
 crearComida(); crearCardumen(0);
