@@ -31,6 +31,10 @@ export function TimelinePanel() {
   }, [i0, ultimo, playing, setMonth])
 
   const posicion = (i: number) => `${((i - i0) / (ultimo - i0)) * 100}%`
+  // si dos marcas quedan muy juntas (2016 y 2017), la primera se corre a la izquierda y la segunda a la derecha
+  const cerca = (a?: number, b?: number) => a != null && b != null && Math.abs(b - a) / (ultimo - i0) < 0.06
+  const desplazamiento = (k: number) =>
+    cerca(eventos[k]?.i, eventos[k + 1]?.i) ? 'translateX(calc(-100% + 4px))' : cerca(eventos[k - 1]?.i, eventos[k]?.i) ? 'translateX(-4px)' : undefined
 
   return <section className="timeline-panel" aria-label="Línea de tiempo del globo">
     <div className="timeline-topline">
@@ -40,8 +44,8 @@ export function TimelinePanel() {
     <div className="timeline-controls">
       <button className="play-button" type="button" aria-label={playing ? 'Pausar animación' : 'Reproducir meses'} onClick={() => setPlaying(!playing)}>{playing ? 'Ⅱ' : '▶'}</button>
       <div className="timeline-track">
-        <div className="timeline-events" role="group" aria-label="Saltar a un evento de El Niño">{eventos.map((e) =>
-          <button key={e.anio} type="button" style={{ left: posicion(e.i) }} aria-current={month === e.i} title={`${e.nombre} (pico en ${mesLargo(modelo.mes(e.i))})`}
+        <div className="timeline-events" role="group" aria-label="Saltar a un evento de El Niño">{eventos.map((e, k) =>
+          <button key={e.anio} type="button" style={{ left: posicion(e.i), transform: desplazamiento(k) }} aria-current={month === e.i} title={`${e.nombre} (pico en ${mesLargo(modelo.mes(e.i))})`}
             onClick={() => { if (!v.mapa) setVariable('temperatura_superficial_C'); setPlaying(false); setMonth(e.i) }}>{e.anio}</button>)}
         </div>
         <div className="timeline-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={serie} margin={{ top: 14, right: 0, bottom: 0, left: 0 }} barCategoryGap={0}>

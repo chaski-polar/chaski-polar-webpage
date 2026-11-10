@@ -172,3 +172,12 @@ table.eventos-nino { width: 100%; border-collapse: separate; border-spacing: 4px
 .cruceros-tabla summary { cursor: pointer; color: var(--frio); }
 .cruceros-tabla small { color: var(--tenue); }
 #cruceros { scroll-margin-top: 76px; }
+
+/* ---------- pantallas de celular ---------- */
+@media (max-width: 640px) {
+  .app-header { padding: 8px 10px; gap: 8px; }
+  .app-brand span:last-child { display: none; }
+  .app-nav a { padding: 5px 9px; font-size: .9rem; }
+  .ley-marcas { display: none; }
+  .timeline-events button { font-size: .66rem; padding: 0 5px; }
+}
