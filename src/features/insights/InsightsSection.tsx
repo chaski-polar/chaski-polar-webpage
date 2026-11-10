@@ -4,6 +4,7 @@ import { media, pearson } from '../../lib/estadistica'
 import { fmtR, nf } from '../../lib/formato'
 import { useExplorer } from '../explorer/ExplorerContext'
 import { ZONA_CHIMBOTE, ZONA_REY_JORGE } from '../explorer/lib/modelo'
+import ResultadosComprobados from './ResultadosComprobados'
 
 const eje = { tick: { fill: '#a3bccb', fontSize: 12 }, stroke: 'rgba(36,80,122,.55)' }
 const tip = { contentStyle: { background: 'rgba(7,30,51,.96)', border: '1px solid #24507a', borderRadius: 8 } }
@@ -109,5 +110,7 @@ export default function InsightsSection() {
         <Bar yAxisId="c" dataKey="clorofila" name="Clorofila promedio (mg/m³)" fill="#3fc28c" radius={3} isAnimationActive={false} />
       </ComposedChart>
     </Hallazgo>
+
+    <ResultadosComprobados />
   </section>
 }
