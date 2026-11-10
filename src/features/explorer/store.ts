@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Comparacion, MapStyle, Panel, Pov } from './lib/estado'
+import type { IdZona } from './lib/tipos'
 
 /** id de una de las variables de lib/variables.ts */
 export type ExplorerVariable = string
@@ -18,6 +19,8 @@ type ExplorerState = {
   mapStyle: MapStyle
   comparison: Comparacion
   camera: CameraRequest | null
+  /** zona elegida en el monitor de condiciones (null = promedio de la costa) */
+  monitorZone: IdZona | null
   setVariable: (variable: ExplorerVariable) => void
   setView: (view: GlobeView) => void
   setMonth: (month: number) => void
@@ -26,6 +29,7 @@ type ExplorerState = {
   setMapStyle: (mapStyle: MapStyle) => void
   setComparison: (comparison: Comparacion) => void
   flyTo: (pov: Pov, ms?: number) => void
+  setMonitorZone: (zone: IdZona | null) => void
 }
 
 export const useExplorerStore = create<ExplorerState>((set) => ({
@@ -37,6 +41,7 @@ export const useExplorerStore = create<ExplorerState>((set) => ({
   mapStyle: 'bandas',
   comparison: { region: 'peru', mes: 4, a: 'prom', b: 2023 },
   camera: null,
+  monitorZone: null,
   setVariable: (variable) => set({ variable }),
   setView: (view) => set({ view }),
   setMonth: (month) => set({ month }),
@@ -45,4 +50,5 @@ export const useExplorerStore = create<ExplorerState>((set) => ({
   setMapStyle: (mapStyle) => set({ mapStyle }),
   setComparison: (comparison) => set({ comparison }),
   flyTo: (pov, ms = 1500) => set((s) => ({ camera: { pov, ms, id: (s.camera?.id ?? 0) + 1 } })),
+  setMonitorZone: (monitorZone) => set({ monitorZone }),
 }))

@@ -22,7 +22,7 @@ function loadScript(src: string) {
 
 export async function loadRuntimeData(): Promise<{ data: ProjectData; monitor: MonitorData }> {
   if (!runtimePromise) {
-    runtimePromise = loadScript('/assets/data/datos.js?v=15').then(() => loadScript('/assets/data/monitor-data.js?v=2'))
+    runtimePromise = loadScript('/assets/data/datos.js?v=15').then(() => loadScript('/assets/data/monitor-data.js?v=3'))
   }
   await runtimePromise
   return {

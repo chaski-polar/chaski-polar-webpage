@@ -4,7 +4,7 @@ import { SIN_DATO, colorDiverge, colorRampa, tClorofila } from "../../../lib/col
 import { media, pearson } from "../../../lib/estadistica";
 import { MESES_LARGOS, claveMes, mesesDesde, mesesEntre, nf, signo, type Mes } from "../../../lib/formato";
 import type { DatosExplorador } from "./adaptador";
-import type { CampoEscenario, CampoMonitor, DatosSeries, FilaAnual, FilaEscenario, IdZona, NombreEscenario, RegistroMonitor, Serie, Zona } from "./tipos";
+import type { CampoEscenario, CampoMonitor, CampoSerieMonitor, ClaveZonaMonitor, MetadataMonitor, DatosSeries, FilaAnual, FilaEscenario, IdZona, NombreEscenario, RegistroMonitor, Serie, Zona } from "./tipos";
 import type { Variable } from "./variables";
 
 export interface TextoAnomalia {
@@ -55,6 +55,8 @@ export class Modelo {
   private readonly cacheMonitor = new Map<CampoMonitor, Serie>();
   private readonly cacheR = new Map<string, number | null>();
   readonly registrosMonitor: RegistroMonitor[];
+  /** zonas, eventos de El Niño y hallazgos calculados junto con el monitor */
+  readonly metadataMonitor: MetadataMonitor;
   /** Niño 1+2: índice de NOAA, luego el monitor y al final el escenario central */
   readonly nino: Serie;
 
@@ -64,6 +66,7 @@ export class Modelo {
     this.ids = Object.keys(D.zonas) as IdZona[];
     this.anual = D.juego;
     this.registrosMonitor = monitor?.records ?? [];
+    this.metadataMonitor = monitor?.metadata ?? {};
     this.hayMonitor = this.registrosMonitor.length > 0;
     this.porMesMonitor = new Map(this.registrosMonitor.map((r) => [r.date.slice(0, 7), r]));
     this.porMesEscenario = new Map((escenarios?.filas ?? []).map((f) => [`${f.fecha}|${f.escenario}`, f]));
@@ -318,7 +321,14 @@ export class Modelo {
   mediaMonitorAnio(campo: CampoMonitor, anio: number): number | null {
     return media(this.registrosMonitor.filter((r) => r.date.startsWith(`${anio}-`)).map((r) => r[campo]));
   }
-  ultimoMonitor(campo: CampoMonitor): RegistroMonitor | undefined {
+  /** Clave corta de una zona en el monitor (null si el monitor no tiene esa zona) */
+  claveMonitor(z: IdZona): ClaveZonaMonitor | null {
+    const zonas = this.metadataMonitor.zonas ?? {};
+    for (const [clave, info] of Object.entries(zonas) as [ClaveZonaMonitor, { id_original: IdZona }][]) if (info.id_original === z) return clave;
+    return null;
+  }
+
+  ultimoMonitor(campo: CampoSerieMonitor): RegistroMonitor | undefined {
     return [...this.registrosMonitor].reverse().find((r) => r[campo] != null);
   }
   /** Año con menos hielo marino antártico (anomalía media) */

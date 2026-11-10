@@ -61,6 +61,7 @@ export default function Zona({ z, nota }: { z: IdZona; nota?: NotaHistoria }) {
       <SerieMensual modelo={modelo} serie={serie} color={v.escala === 'rampa' ? '#3fc28c' : '#63cde8'} mesActual={i} alElegirMes={acciones.fijarMes} escenario={escenario} decimales={v.dec} />
     </div>
     <p className="nota">{v.fuente} Toca el gráfico para saltar a ese mes.</p>
+    {modelo.claveMonitor(z) && <div className="acciones-relato" style={{ marginTop: 10 }}><button className="btn" type="button" onClick={() => { useExplorerStore.getState().setMonitorZone(z); document.getElementById('monitor')?.scrollIntoView({ behavior: 'smooth' }) }}>Ver {p.nombre} en el monitor</button></div>}
     <h3>Cambiar el dato</h3>
     <ChipsVariables zona={z} />
     <h3>Saltar en el tiempo</h3>

@@ -65,15 +65,66 @@ export type CampoMonitor =
   | "biomass_total_t"
   | "biomass_total_t_interpolated";
 
-export type RegistroMonitor = Record<CampoMonitor, number | null> & {
+/** Zonas con series propias en el monitor (clave corta del archivo de datos) */
+export type ClaveZonaMonitor = "paita" | "chimbote" | "callao" | "pisco" | "ilo" | "peninsula_antartica" | "rey_jorge";
+
+/** Clorofila y temperatura de cada zona, con su anomalía ya calculada frente al mismo mes de 1998–2025 */
+export type CampoZonaMonitor =
+  | `chl_${ClaveZonaMonitor}_mg_m3`
+  | `chl_${ClaveZonaMonitor}_anom_pct`
+  | `sst_${ClaveZonaMonitor}_c`
+  | `sst_${ClaveZonaMonitor}_anom_c`;
+
+/** Índices climáticos mensuales del monitor */
+export type CampoIndiceMonitor = "nino12_psl_c" | "oni_c" | "sam_index" | "sea_ice_antarctic_mkm2" | "sea_ice_antarctic_anom_mkm2";
+
+export type CampoSerieMonitor = CampoMonitor | CampoZonaMonitor | CampoIndiceMonitor;
+
+export type RegistroMonitor = Record<CampoSerieMonitor, number | null> & {
   /** "AAAA-MM-01" */
   date: string;
   biomass_observed: boolean;
 };
 
+/** Cambio de clorofila en cada zona del Perú durante un El Niño */
+export interface EventoNinoZonas {
+  nombre: string;
+  cambio_clorofila_pct: Partial<Record<ClaveZonaMonitor, number>> | null;
+  nota?: string;
+}
+
+/** Resultado por zona de la asimetría: cuánto cambia la clorofila por cada grado más cálido o más frío */
+export interface AsimetriaZona {
+  pct_por_grado_calido: number;
+  pct_por_grado_frio: number;
+  p_asimetria: number;
+}
+
+export interface HallazgoDatos {
+  id: string;
+  estado: string;
+  titulo: string;
+  resumen?: string;
+  resultados?: Partial<Record<ClaveZonaMonitor, AsimetriaZona>>;
+}
+
+export interface ZonaMonitor {
+  nombre: string;
+  id_original: IdZona;
+  lat: number;
+  lon: number;
+}
+
+export interface MetadataMonitor {
+  zonas?: Partial<Record<ClaveZonaMonitor, ZonaMonitor>>;
+  eventos_nino?: EventoNinoZonas[];
+  hallazgos?: HallazgoDatos[];
+}
+
 export interface DatosMonitor {
   period: { start: string; end: string };
   records: RegistroMonitor[];
+  metadata?: MetadataMonitor;
 }
 
 /** Escenarios de El Niño: no son observaciones */
