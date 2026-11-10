@@ -164,7 +164,7 @@ export interface GrillaMapa {
   tipo?: string;
 }
 
-export type ClaveCapa = "clorofila" | "temperatura" | "monitor-clorofila";
+export type ClaveCapa = "clorofila" | "temperatura";
 
 export interface ArchivoMapas {
   inicio: string;

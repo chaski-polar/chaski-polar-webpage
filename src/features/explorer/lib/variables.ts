@@ -1,5 +1,5 @@
 /* Datos que se pueden mostrar sobre el globo */
-import type { CampoMonitor, ClaveCapa } from "./tipos";
+import type { ClaveCapa } from "./tipos";
 
 interface Comun {
   /** nombre corto para el enlace (#dato=...) */
@@ -26,13 +26,6 @@ export interface VariableZona extends Comun {
   rango: number;
 }
 
-/** Serie regional del monitor de condiciones (costa del Perú), con escenarios de El Niño al final */
-export interface VariableMonitor extends Comun {
-  modo: "monitor";
-  id: string;
-  campo: CampoMonitor;
-}
-
 /** Índice de la Antártida (extensión del hielo marino) */
 export interface VariableIndice extends Comun {
   modo: "indice";
@@ -40,7 +33,7 @@ export interface VariableIndice extends Comun {
   rango: number;
 }
 
-export type Variable = VariableZona | VariableMonitor | VariableIndice;
+export type Variable = VariableZona | VariableIndice;
 
 export const VARIABLES: readonly Variable[] = [
   { id: "clorofila_mg_m3", clave: "clorofila", nombre: "Fitoplancton (clorofila-a)", corto: "fitoplancton", unidad: "mg/m³", dec: 2, modo: "log", rango: 1.2, escala: "rampa", mapa: "clorofila",
@@ -64,16 +57,7 @@ export const VARIABLES: readonly Variable[] = [
   { id: "hielo", clave: "hielo", nombre: "Hielo marino antártico", corto: "hielo marino", unidad: "millones de km²", dec: 2, modo: "indice", rango: 1.5, escala: "diverge",
     que: "Extensión del hielo que rodea la Antártida. Bajo ese hielo vive el krill, la base de la cadena antártica. Es un dato de todo el continente: se ve en las dos zonas antárticas.",
     fuente: "Extensión mensual del hielo marino antártico, NSIDC Sea Ice Index G02135." },
-  { id: "monitor_chlorophyll", clave: "monitor-chlorophyll", mapa: "monitor-clorofila", nombre: "Monitor · clorofila-a", corto: "clorofila del monitor", unidad: "mg/m³", dec: 2, modo: "monitor", campo: "chlorophyll_a_mg_m3", escala: "rampa",
-    que: "Lectura mensual de la costa peruana en el monitor de condiciones: clorofila-a de OC-CCI y CMEMS. Los últimos meses son escenarios de El Niño, no observaciones.",
-    fuente: "Monitor de condiciones: OC-CCI y reanálisis CMEMS; escenarios de El Niño hasta febrero de 2027." },
-  { id: "monitor_sst", clave: "monitor-sst", nombre: "Monitor · temperatura superficial", corto: "temperatura del monitor", unidad: "°C", dec: 1, modo: "monitor", campo: "sst_c", escala: "diverge",
-    que: "Temperatura superficial mensual de la costa peruana en el monitor de condiciones. Los últimos meses son escenarios de El Niño, no observaciones.",
-    fuente: "Monitor de condiciones: reanálisis CMEMS; escenarios de El Niño hasta febrero de 2027." },
-  { id: "monitor_biomass", clave: "monitor-biomass", nombre: "Monitor · biomasa de anchoveta", corto: "biomasa interpolada", unidad: "t", dec: 0, modo: "monitor", campo: "biomass_total_t_interpolated", escala: "diverge",
-    que: "Biomasa de anchoveta del monitor de condiciones. La línea usa interpolación solo para visualizar el tramo entre cruceros; los puntos observados permanecen identificables.",
-    fuente: "Monitor de condiciones: intervalos de cruceros IMARPE; interpolación lineal para visualización." },
 ];
 
 export const variablePorId = (id: string): Variable => VARIABLES.find((v) => v.id === id) ?? (VARIABLES[0] as Variable);
-export const esRegional = (v: Variable): boolean => v.modo === "monitor" || v.modo === "indice";
+export const esRegional = (v: Variable): boolean => v.modo === "indice";

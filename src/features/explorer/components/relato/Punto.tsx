@@ -2,7 +2,6 @@ import { fmtCoord, MESES_LARGOS, mesLargo, nf, signo } from '../../../../lib/for
 import { useExplorer } from '../../ExplorerContext'
 import { useAcciones } from '../../hooks/useAcciones'
 import { BASE_MACHU_PICCHU, distanciaKm, zonasCercanas } from '../../lib/modelo'
-import { variablePorId } from '../../lib/variables'
 import { useExplorerStore } from '../../store'
 import { SerieMensual } from '../SerieMensual'
 import { BotonVolver } from './comun'
@@ -13,10 +12,10 @@ const km = (d: number): string => nf(0).format(Math.round(d / 10) * 10)
 export default function Punto({ lat, lng }: { lat: number; lng: number }) {
   const { modelo, mapa } = useExplorer()
   const acciones = useAcciones()
-  const { month: i, variable } = useExplorerStore()
+  const i = useExplorerStore((s) => s.month)
   const cerca = zonasCercanas(modelo, lat, lng)
   const dBase = distanciaKm(lat, lng, BASE_MACHU_PICCHU.lat, BASE_MACHU_PICCHU.lng)
-  const dp = mapa.datosPunto(lat, lng, i, variablePorId(variable))
+  const dp = mapa.datosPunto(lat, lng, i)
   const pc = dp?.chl != null && dp.chlNormal ? (dp.chl / dp.chlNormal - 1) * 100 : null
 
   return <>

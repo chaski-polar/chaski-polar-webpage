@@ -39,10 +39,13 @@ export class Modelo {
   readonly i0: number;
   /** último mes con clorofila en alguna zona */
   readonly ultimoSeries: number;
+  private readonly finClima: number;
   /** último mes observado (series o monitor) */
   readonly ultimoObservado: number;
-  /** último mes del calendario (incluye escenarios) */
+  /** último mes con datos por zona: hasta aquí llegan el globo y su línea de tiempo */
   readonly ultimo: number;
+  /** último mes del calendario (incluye los escenarios de El Niño del monitor) */
+  readonly ultimoCalendario: number;
   /** primer mes de escenarios de El Niño, si hay */
   readonly inicioEscenario: number | null;
   readonly anual: FilaAnual[];
@@ -52,7 +55,6 @@ export class Modelo {
   private readonly porMesMonitor: Map<string, RegistroMonitor>;
   private readonly porMesEscenario: Map<string, FilaEscenario>;
   private readonly cacheClima = new Map<string, (number | null)[]>();
-  private readonly cacheMonitor = new Map<CampoMonitor, Serie>();
   private readonly cacheR = new Map<string, number | null>();
   readonly registrosMonitor: RegistroMonitor[];
   /** zonas, eventos de El Niño y hallazgos calculados junto con el monitor */
@@ -77,14 +79,31 @@ export class Modelo {
     const finSeries = nSeries - 1;
     const finMonitor = monitor ? mesesEntre(D.meses_inicio, monitor.period.end.slice(0, 7)) : -1;
     const finEscenario = escenarios ? mesesEntre(D.meses_inicio, escenarios.periodo.fin) : -1;
-    this.ultimo = Math.max(finSeries, finMonitor, finEscenario);
-    this.meses = mesesDesde(D.meses_inicio, this.ultimo + 1);
+    this.ultimoCalendario = Math.max(finSeries, finMonitor, finEscenario);
+    this.meses = mesesDesde(D.meses_inicio, this.ultimoCalendario + 1);
     this.i0 = Math.max(0, this.idxMes(1998, 0));
     this.inicioEscenario = escenarios ? mesesEntre(D.meses_inicio, escenarios.periodo.inicio) : null;
 
-    let ultimoSeries = this.i0;
-    for (let i = this.i0; i < nSeries; i++) if (this.ids.some((z) => D.series[z].clorofila_mg_m3?.[i] != null)) ultimoSeries = i;
+    // clorofila y temperatura por zona: las series del monitor (la misma fuente, más actualizadas) completan los meses que faltan
+    for (const z of this.ids) {
+      const c = this.claveMonitor(z);
+      if (!c) continue;
+      const s = D.series[z];
+      for (const [id, campo] of [["clorofila_mg_m3", `chl_${c}_mg_m3`], ["temperatura_superficial_C", `sst_${c}_c`]] as const) {
+        const base = s[id] ?? [];
+        s[id] = this.meses.map((_, i) => base[i] ?? this.registroMonitor(i)?.[campo] ?? null);
+      }
+    }
+
+    let ultimoSeries = this.i0, ultimo = this.i0;
+    for (let i = this.i0; i <= this.ultimoCalendario; i++) {
+      if (this.ids.some((z) => D.series[z].clorofila_mg_m3?.[i] != null)) ultimoSeries = i;
+      if (this.ids.some((z) => D.series[z].clorofila_mg_m3?.[i] != null || D.series[z].temperatura_superficial_C?.[i] != null)) ultimo = i;
+    }
     this.ultimoSeries = ultimoSeries;
+    this.ultimo = ultimo;
+    // lo "normal" de cada mes se calcula con 1998–2025, igual que en el análisis
+    this.finClima = Math.min(ultimoSeries, this.idxMes(2025, 11));
     this.ultimoObservado = Math.max(ultimoSeries, Math.min(finMonitor, this.inicioEscenario == null ? finMonitor : this.inicioEscenario - 1));
 
     // viento: rapidez a partir de sus componentes
@@ -100,7 +119,7 @@ export class Modelo {
   idxMes(anio: number, mes: number): number {
     const [a0 = 0, m0 = 1] = this.D.meses_inicio.split("-").map(Number);
     const i = anio * 12 + mes - (a0 * 12 + m0 - 1);
-    return i >= 0 && i <= this.ultimo ? i : -1;
+    return i >= 0 && i <= this.ultimoCalendario ? i : -1;
   }
   mes(i: number): Mes {
     return this.meses[i] ?? { anio: 1998, mes: 0 };
@@ -137,12 +156,6 @@ export class Modelo {
     if (!this.esEscenario(i) || !esCampoEscenario(campo)) return null;
     return this.filaEscenario(i, escenario)?.[campo] ?? null;
   }
-  /** Serie completa del monitor (con el escenario central al final) */
-  valoresMonitor(campo: CampoMonitor): Serie {
-    let s = this.cacheMonitor.get(campo);
-    if (!s) { s = this.meses.map((_, i) => this.valorMonitor(campo, i)); this.cacheMonitor.set(campo, s); }
-    return s;
-  }
   /** Serie de un escenario: solo los meses de escenario (y el último observado, para unir la línea) */
   serieEscenario(campo: CampoMonitor, escenario: NombreEscenario): Serie {
     if (this.inicioEscenario == null || !esCampoEscenario(campo)) return this.meses.map(() => null);
@@ -152,7 +165,6 @@ export class Modelo {
 
   /** Valor del dato en una zona y un mes, o null si esa zona no lo tiene */
   valorZona(z: IdZona, v: Variable, i: number): number | null {
-    if (v.modo === "monitor") return esPeru(z) ? this.valorMonitor(v.campo, i) : null;
     if (v.modo === "indice") return esPeru(z) ? null : this.D.indices.hielo[i] ?? null;
     return this.valorSerie(z, v.id, i);
   }
@@ -162,7 +174,6 @@ export class Modelo {
     return this.meses.map((_, i) => { const x = this.valorZona(z, v, i); return x == null ? null : x * f; });
   }
   tieneDato(z: IdZona | null, v: Variable): boolean {
-    if (v.modo === "monitor") return this.hayMonitor && (z == null || esPeru(z));
     if (v.modo === "indice") return z == null || !esPeru(z);
     return z == null || this.tieneSerie(z, v.id);
   }
@@ -173,26 +184,14 @@ export class Modelo {
     let c = this.cacheClima.get(k);
     if (!c) {
       const s = this.D.series[z][id] ?? [];
-      c = Array.from({ length: 12 }, (_, m) => media(s.filter((_, i) => this.mes(i).mes === m && i <= this.ultimoSeries)));
+      c = Array.from({ length: 12 }, (_, m) => media(s.filter((_, i) => this.mes(i).mes === m && i <= this.finClima)));
       this.cacheClima.set(k, c);
     }
     return c;
   }
-  private rangoMonitor(campo: CampoMonitor): { min: number; max: number; media: number | null } {
-    const xs = this.valoresMonitor(campo).filter((x): x is number => x != null);
-    return xs.length ? { min: Math.min(...xs), max: Math.max(...xs), media: media(xs) } : { min: 0, max: 0, media: null };
-  }
 
   /** Anomalía normalizada (cerca de −1 a 1) frente al mes normal de la zona */
   anomalia(z: IdZona, v: Variable, i: number): number | null {
-    if (v.modo === "monitor") {
-      const x = this.valorZona(z, v, i);
-      if (x == null) return null;
-      const m = this.mes(i).mes, todos = this.valoresMonitor(v.campo);
-      const base = media(todos.filter((_, k) => this.mes(k).mes === m && !this.esEscenario(k)));
-      const { min, max } = this.rangoMonitor(v.campo);
-      return base == null ? null : (x - base) / (max - min || 1);
-    }
     if (v.modo === "indice") {
       if (esPeru(z)) return null;
       const a = this.D.indices.hielo_anom[i];
@@ -207,14 +206,6 @@ export class Modelo {
   }
 
   anomaliaTxt(z: IdZona, v: Variable, i: number): TextoAnomalia | null {
-    if (v.modo === "monitor") {
-      const x = this.valorZona(z, v, i);
-      if (x == null) return null;
-      const prom = this.rangoMonitor(v.campo).media || 1;
-      const p = ((x - prom) / prom) * 100;
-      const escenario = this.esEscenario(i) ? " (escenario central, no es una observación)" : "";
-      return { corto: `${signo(p)}${nf(0).format(Math.abs(p))} %`, frase: `${nf(v.dec).format(x)} ${v.unidad}; ${nf(0).format(Math.abs(p))} % ${p >= 0 ? "sobre" : "bajo"} el promedio del monitor${escenario}`, valor: p };
-    }
     if (v.modo === "indice") {
       const a = esPeru(z) ? null : this.D.indices.hielo_anom[i];
       if (a == null) return null;
@@ -239,13 +230,6 @@ export class Modelo {
 
   /** Color de la zona en un mes (la misma escala que la leyenda) */
   colorZona(z: IdZona, v: Variable, i: number, alfa = 0.85): string {
-    if (v.modo === "monitor") {
-      const x = this.valorZona(z, v, i);
-      if (x == null) return esPeru(z) ? SIN_DATO : "rgba(120,140,155,0.2)";
-      const { min, max } = this.rangoMonitor(v.campo);
-      const t = max === min ? 0.5 : (x - min) / (max - min);
-      return v.escala === "rampa" ? colorRampa(t, alfa) : colorDiverge((t - 0.5) * 2, alfa);
-    }
     if (v.mapa === "clorofila") {
       const x = this.valorSerie(z, v.id, i);
       return x == null ? SIN_DATO : colorRampa(tClorofila(x), alfa);
@@ -272,7 +256,7 @@ export class Modelo {
 
   /** Otras zonas ordenadas por parecido (vacío para datos regionales, que no se comparan entre zonas) */
   conexionesDe(z: IdZona, v: Variable): { o: IdZona; r: number }[] {
-    if (v.modo === "monitor" || v.modo === "indice") return [];
+    if (v.modo === "indice") return [];
     return this.ids.filter((o) => o !== z)
       .map((o) => ({ o, r: this.rZonas(z, o, v) }))
       .filter((c): c is { o: IdZona; r: number } => c.r != null)

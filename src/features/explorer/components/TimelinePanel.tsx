@@ -62,11 +62,11 @@ export function TimelinePanel() {
 
 function Leyenda() {
   const v = variablePorId(useExplorerStore((s) => s.variable))
-  const clorofila = v.mapa === 'clorofila' || v.mapa === 'monitor-clorofila'
+  const clorofila = v.mapa === 'clorofila'
   const [min, max] = clorofila
-    ? v.mapa === 'monitor-clorofila' ? ['menos clorofila', 'más clorofila'] : ['poco fitoplancton', 'mucho fitoplancton (alimento)']
+    ? ['poco fitoplancton', 'mucho fitoplancton (alimento)']
     : v.mapa === 'temperatura' ? ['más frío que lo normal', 'más caliente que lo normal']
-      : v.modo === 'monitor' ? ['valor bajo en el monitor', 'valor alto en el monitor'] : ['por debajo de lo normal', 'por encima']
+      : ['por debajo de lo normal', 'por encima']
   const valores = [0.03, 0.1, 0.3, 1, 3, 10]
   return <div className="timeline-legend" aria-hidden="true">
     <span>{min}</span>

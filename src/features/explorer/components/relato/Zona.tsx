@@ -9,7 +9,7 @@ import type { IdZona, Nutriente } from '../../lib/tipos'
 import { esRegional, variablePorId } from '../../lib/variables'
 import { useExplorerStore } from '../../store'
 import { SerieMensual } from '../SerieMensual'
-import { AvisoEscenario, BotonVolver, ChipsVariables } from './comun'
+import { BotonVolver, ChipsVariables } from './comun'
 
 const NUTRIENTES: readonly Nutriente[] = ['nitrato', 'fosfato', 'silicato']
 
@@ -21,14 +21,7 @@ export default function Zona({ z, nota }: { z: IdZona; nota?: NotaHistoria }) {
   const v = variablePorId(variable)
   const p = modelo.zona(z)
 
-  // serie observada (los meses de escenario van aparte, como banda y línea discontinua)
-  const serie = useMemo(() => modelo.serieZona(z, v).map((y, k) => (modelo.esEscenario(k) ? null : y)).slice(modelo.i0, modelo.ultimo + 1), [modelo, z, v])
-  const escenario = useMemo(() => {
-    if (v.modo !== 'monitor' || modelo.inicioEscenario == null || !esPeru(z)) return undefined
-    const tramo = (e: 'weak' | 'central' | 'intense') => modelo.serieEscenario(v.campo, e).slice(modelo.i0, modelo.ultimo + 1)
-    const central = tramo('central')
-    return central.some((x) => x != null) ? { central, debil: tramo('weak'), intenso: tramo('intense') } : undefined
-  }, [modelo, v, z])
+  const serie = useMemo(() => modelo.serieZona(z, v).slice(modelo.i0, modelo.ultimo + 1), [modelo, z, v])
 
   const tendencia = useMemo(() => {
     const anios: number[] = [], vals: (number | null)[] = []
@@ -52,13 +45,12 @@ export default function Zona({ z, nota }: { z: IdZona; nota?: NotaHistoria }) {
     {nota && <div className="nota-historia"><b>{nota.titulo}</b><p>{nota.texto}</p></div>}
     <h2>{p.nombre}</h2>
     <div className="region">{p.region}</div>
-    <AvisoEscenario />
     <div className="cifras">
       <div className="cifra"><b className="num">{x == null ? 'sin dato' : modelo.valorTxt(v, x)}</b><span>{etiquetaMes(modelo.mes(i))}{a ? `, ${a.frase}` : invierno ? ': invierno antártico, el satélite no ve el color del mar' : ''}</span></div>
       <div className="cifra"><b className="num">{tendencia}</b><span>tendencia por década (1998–{modelo.mes(modelo.ultimoObservado).anio})</span></div>
     </div>
     <div className="grafico" aria-label={`Serie mensual de ${v.nombre} en ${p.nombre}`}>
-      <SerieMensual modelo={modelo} serie={serie} color={v.escala === 'rampa' ? '#3fc28c' : '#63cde8'} mesActual={i} alElegirMes={acciones.fijarMes} escenario={escenario} decimales={v.dec} />
+      <SerieMensual modelo={modelo} serie={serie} color={v.escala === 'rampa' ? '#3fc28c' : '#63cde8'} mesActual={i} alElegirMes={acciones.fijarMes} decimales={v.dec} />
     </div>
     <p className="nota">{v.fuente} Toca el gráfico para saltar a ese mes.</p>
     {modelo.claveMonitor(z) && <div className="acciones-relato" style={{ marginTop: 10 }}><button className="btn" type="button" onClick={() => { useExplorerStore.getState().setMonitorZone(z); document.getElementById('monitor')?.scrollIntoView({ behavior: 'smooth' }) }}>Ver {p.nombre} en el monitor</button></div>}
@@ -69,7 +61,7 @@ export default function Zona({ z, nota }: { z: IdZona; nota?: NotaHistoria }) {
       <button className="chip" type="button" onClick={() => acciones.fijarMes(modelo.mesExtremo(z, v, null, 1))}>Su mes más alto</button>
       <button className="chip" type="button" onClick={() => acciones.fijarMes(modelo.mesExtremo(z, v, null, -1))}>Su mes más bajo</button>
       <button className="chip" type="button" onClick={() => acciones.fijarMes(modelo.idxMes(2023, 4))}>Mayo de 2023</button>
-      {mapaEstado === 'listo' && v.mapa !== 'monitor-clorofila' && <button className="chip" type="button" onClick={() => { const m = modelo.mes(i); acciones.comparar({ region: esPeru(z) ? 'peru' : 'antartida', mes: m.mes, b: m.anio }) }}>Comparar dos años</button>}
+      {mapaEstado === 'listo' && <button className="chip" type="button" onClick={() => { const m = modelo.mes(i); acciones.comparar({ region: esPeru(z) ? 'peru' : 'antartida', mes: m.mes, b: m.anio }) }}>Comparar dos años</button>}
     </div>
     <h3>¿Con quién se parece?</h3>
     {esRegional(v)

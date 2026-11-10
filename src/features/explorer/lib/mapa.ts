@@ -195,12 +195,8 @@ export class MapaSatelital {
     if (!("DecompressionStream" in window)) { this.estado = "error"; return; }
     this.estado = "cargando";
     try {
-      const archivos = await Promise.all([
-        leerMapas("mapas.json"),
-        leerMapas("mapas-monitor.json").catch((e: unknown) => { console.warn("Sin el mapa del monitor", e); return null; }),
-      ]);
+      const archivos = [await leerMapas("mapas.json")];
       for (const archivo of archivos) {
-        if (!archivo) continue;
         const [a, m] = archivo.inicio.split("-").map(Number);
         const i0 = this.modelo.idxMes(a ?? 1998, (m ?? 1) - 1);
         for (const [clave, g] of Object.entries(archivo.capas) as [ClaveCapa, GrillaMapa][]) this.capas[clave] = await prepararCapa(clave, g, archivo, i0);
@@ -339,9 +335,9 @@ export class MapaSatelital {
   }
 
   /** Clorofila y temperatura de un punto cualquiera del mar */
-  datosPunto(lat: number, lng: number, iMes: number, variable: Variable): DatosPunto | null {
+  datosPunto(lat: number, lng: number, iMes: number): DatosPunto | null {
     if (this.estado !== "listo") return null;
-    const chl = this.capas[variable.mapa === "monitor-clorofila" ? "monitor-clorofila" : "clorofila"], sst = this.capas.temperatura;
+    const chl = this.capas.clorofila, sst = this.capas.temperatura;
     const cc = chl ? celdaDe(chl, lat, lng) : { fuera: true, j: -1 }, cs = sst ? celdaDe(sst, lat, lng) : { fuera: true, j: -1 };
     if (cc.fuera && cs.fuera) return null;
     const m = this.modelo.mes(iMes).mes;

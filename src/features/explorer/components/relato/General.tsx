@@ -5,7 +5,7 @@ import { HISTORIAS } from '../../lib/historias'
 import { esPeru } from '../../lib/modelo'
 import { variablePorId } from '../../lib/variables'
 import { useExplorerStore } from '../../store'
-import { AvisoEscenario, ChipsEventos } from './comun'
+import { ChipsEventos } from './comun'
 
 /** Resumen de todas las zonas en el mes elegido */
 export default function General() {
@@ -24,8 +24,6 @@ export default function General() {
   if (conMapa) {
     notaMapa = v.mapa === 'clorofila'
       ? ' El mapa sobre el globo muestra la clorofila en celdas de medio grado: amarillo y verde es mucho fitoplancton; morado, poco.'
-      : v.mapa === 'monitor-clorofila'
-        ? ' El mapa sobre el globo muestra la clorofila del monitor en celdas de medio grado: amarillo y verde es más clorofila; morado, menos.'
         : ' El mapa sobre el globo muestra cuánto se alejó la temperatura de lo normal en celdas de un grado: naranja es más cálido; azul, más frío; donde el mar estuvo normal casi no hay color.'
   } else if (view === 'illustrated' && v.mapa) {
     notaMapa = <> Cada punto del globo es una zona de estudio, coloreada según su dato del mes. Para ver el mapa completo del satélite, cambia arriba a la vista <strong>Detallada</strong> o <strong>Satelital</strong>.</>
@@ -34,7 +32,6 @@ export default function General() {
   return <>
     <h2>{v.nombre}</h2>
     <p>{v.que}{notaMapa}</p>
-    <AvisoEscenario />
     <button className="recorrido-cta" type="button" onClick={() => acciones.paso(0)}>
       <b>Del hielo a la anchoveta</b>
       <span>Recorrido guiado en 6 pasos, con datos reales. Unos 3 minutos.</span>
@@ -55,7 +52,7 @@ export default function General() {
     <h3>Historias para explorar</h3>
     <div className="historias">
       {HISTORIAS.map((h) => <button key={h.id} className="historia" type="button" onClick={() => acciones.historia(h.id)}><b>{h.titulo}</b><span>{h.desc}</span></button>)}
-      {mapaEstado === 'listo' && v.mapa !== 'monitor-clorofila' && <button className="historia" type="button" onClick={() => { const m = modelo.mes(i); acciones.comparar({ mes: m.mes, b: m.anio }) }}><b>Comparar dos años</b><span>Dos mapas del mismo mes, lado a lado.</span></button>}
+      {mapaEstado === 'listo' && <button className="historia" type="button" onClick={() => { const m = modelo.mes(i); acciones.comparar({ mes: m.mes, b: m.anio }) }}><b>Comparar dos años</b><span>Dos mapas del mismo mes, lado a lado.</span></button>}
     </div>
     <div className="acciones-relato">
       <a className="btn" href="#hallazgos">Ver los hallazgos</a>

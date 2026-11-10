@@ -63,7 +63,7 @@ export function useAcciones() {
     const comparar = (cambio: Partial<Comparacion> = {}) => {
       if (mapa.estado !== 'listo') return
       const v = variablePorId(st().variable)
-      if (!v.mapa || v.mapa === 'monitor-clorofila') st().setVariable('clorofila_mg_m3')
+      if (!v.mapa) st().setVariable('clorofila_mg_m3')
       const primera = st().panel.tipo !== 'comparar' || cambio.region != null
       const cmp = { ...st().comparison, ...cambio }
       st().setComparison(cmp)

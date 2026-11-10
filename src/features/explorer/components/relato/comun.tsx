@@ -37,11 +37,3 @@ export function ChipsEventos() {
     }}>{e.nombre}</button>)}
   </div>
 }
-
-/** Aviso cuando el mes elegido es un escenario de El Niño */
-export function AvisoEscenario() {
-  const { modelo } = useExplorer()
-  const month = useExplorerStore((s) => s.month)
-  if (!modelo.esEscenario(month)) return null
-  return <p className="aviso-escenario"><strong>Este mes es un escenario, no una observación.</strong> De septiembre de 2026 a febrero de 2027 los valores se construyen con la climatología de cada mes y una trayectoria asumida de El Niño. Solo los datos del monitor tienen valores para estos meses.</p>
-}
