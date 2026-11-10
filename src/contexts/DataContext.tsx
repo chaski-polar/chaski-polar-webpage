@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { loadPredictions, loadRuntimeData } from '../data/loaders/runtime'
-import type { MonitorData, PredictionRow, ProjectData } from '../data/types'
+import { loadCruises, loadPredictions, loadRuntimeData } from '../data/loaders/runtime'
+import type { Cruise, MonitorData, PredictionRow, ProjectData } from '../data/types'
 
 type DataContextValue = {
   data: ProjectData | null
   monitor: MonitorData | null
   predictions: PredictionRow[]
+  cruises: Cruise[]
   loading: boolean
   error: Error | null
   reload: () => void
@@ -18,6 +19,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     data: null,
     monitor: null,
     predictions: [],
+    cruises: [],
     loading: true, error: null
   })
   const [version, setVersion] = useState(0)
@@ -30,9 +32,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       error: null
     }))
 
-    Promise.all([loadRuntimeData(), loadPredictions()])
-      .then(([runtime, predictions]) => {
-        if (active) setState({ ...runtime, predictions, loading: false, error: null })
+    Promise.all([loadRuntimeData(), loadPredictions(), loadCruises().catch(() => [])])
+      .then(([runtime, predictions, cruises]) => {
+        if (active) setState({ ...runtime, predictions, cruises, loading: false, error: null })
       })
       .catch((error: unknown) => { if (active) setState((current) => ({ ...current, loading: false, error: error instanceof Error ? error : new Error('No se pudieron cargar los datos') })) })
 

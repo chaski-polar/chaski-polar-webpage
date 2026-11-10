@@ -19,6 +19,22 @@ export const ProjectDataSchema = z.object({
   juego: z.array(z.record(z.string(), z.number())).optional(),
 }).passthrough()
 
+export const CruisesSchema = z.object({
+  cruceros: z.array(z.object({
+    crucero: z.string(),
+    anio: z.number(),
+    inicio: z.string(),
+    fin: z.string(),
+    fecha_aproximada: z.boolean(),
+    area: z.string(),
+    stock: z.enum(['toda_costa', 'norte_centro', 'sur']),
+    biomasa_t: z.number(),
+    fuente: z.string(),
+    enlace: z.string(),
+    provisional: z.boolean(),
+  })),
+})
+
 export const MonitorDataSchema = z.object({
   records: z.array(z.object({ date: z.string() }).passthrough()),
   metadata: z.record(z.string(), z.unknown()).optional(),

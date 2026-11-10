@@ -1,5 +1,5 @@
-import { MonitorDataSchema, ProjectDataSchema } from '../schemas'
-import type { MonitorData, PredictionRow, ProjectData } from '../types'
+import { CruisesSchema, MonitorDataSchema, ProjectDataSchema } from '../schemas'
+import type { Cruise, MonitorData, PredictionRow, ProjectData } from '../types'
 
 let runtimePromise: Promise<void> | null = null
 
@@ -29,6 +29,13 @@ export async function loadRuntimeData(): Promise<{ data: ProjectData; monitor: M
     data: ProjectDataSchema.parse(window.DATOS) as ProjectData,
     monitor: MonitorDataSchema.parse(window.MONITOR_DATA) as MonitorData,
   }
+}
+
+/** Biomasa por crucero de IMARPE (opcional: si falta, la página sigue funcionando) */
+export async function loadCruises(): Promise<Cruise[]> {
+  const response = await fetch('/assets/data/cruceros.json')
+  if (!response.ok) return []
+  return CruisesSchema.parse(await response.json()).cruceros
 }
 
 export async function loadPredictions(): Promise<PredictionRow[]> {

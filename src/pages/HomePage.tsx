@@ -6,6 +6,7 @@ import '../features/explorer/explorer.css'
 import { DataState } from '../components/ui/DataState'
 import { DataProvider, useData } from '../contexts/DataContext'
 import { ExplorerProvider } from '../features/explorer/ExplorerContext'
+import CrucerosSection from '../features/cruceros/CrucerosSection'
 import EventosNinoSection from '../features/eventos/EventosNinoSection'
 import FuentesSection from '../features/fuentes/FuentesSection'
 import InsightsSection from '../features/insights/InsightsSection'
@@ -49,6 +50,7 @@ function Explorador() {
             <InsightsSection />
             <EventosNinoSection />
             <MonitorSection />
+            <CrucerosSection />
             <section className="seccion">
               <div className="llamada">
                 <div>

@@ -34,6 +34,23 @@ export type MonitorData = {
 
 export type PredictionRow = Record<string, string | number | null>
 
+/** Biomasa total de anchoveta estimada en un crucero acústico de IMARPE */
+export type Cruise = {
+  crucero: string
+  anio: number
+  inicio: string
+  fin: string
+  /** sin fecha publicada: día 15 de los meses del código del crucero */
+  fecha_aproximada: boolean
+  area: string
+  stock: 'toda_costa' | 'norte_centro' | 'sur'
+  biomasa_t: number
+  fuente: string
+  enlace: string
+  /** cifra provisional (todavía no publicada por IMARPE) */
+  provisional: boolean
+}
+
 declare global {
   interface Window {
     DATOS?: unknown

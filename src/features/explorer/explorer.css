@@ -165,3 +165,10 @@ table.eventos-nino { width: 100%; border-collapse: separate; border-spacing: 4px
 .estado { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: .74rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
 .estado-comprobado { background: rgba(63, 194, 140, .18); color: var(--fito); border: 1px solid rgba(63, 194, 140, .5); }
 .estado-pendiente { background: rgba(240, 138, 75, .12); color: var(--nino); border: 1px solid rgba(240, 138, 75, .5); }
+
+/* ---------- cruceros de IMARPE ---------- */
+.cruceros-grafico { height: clamp(280px, 34vw, 380px); }
+.cruceros-tabla { margin-top: 14px; }
+.cruceros-tabla summary { cursor: pointer; color: var(--frio); }
+.cruceros-tabla small { color: var(--tenue); }
+#cruceros { scroll-margin-top: 76px; }
