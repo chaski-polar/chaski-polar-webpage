@@ -138,3 +138,30 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 
 footer.pie { padding: 40px clamp(16px, 4vw, 56px) 60px; color: var(--tenue); font-size: .9rem; max-width: 1180px; margin: 0 auto; }
 #contenido, #monitor, #hallazgos, #fuentes { scroll-margin-top: 76px; }
+
+/* ---------- cada El Niño, zona por zona ---------- */
+table.eventos-nino { width: 100%; border-collapse: separate; border-spacing: 4px; font-size: .95rem; }
+.eventos-nino th { text-align: left; font-weight: 400; color: var(--niebla); padding: 6px 8px; }
+.eventos-nino thead th { font-size: .85rem; text-align: center; }
+.eventos-nino tbody th { color: var(--hielo); white-space: nowrap; }
+.eventos-nino td { text-align: center; padding: 0; }
+.eventos-nino td button, .eventos-nino td span { display: block; width: 100%; padding: 10px 6px; border: 1px solid transparent; border-radius: 8px; color: var(--hielo); font: inherit; font-variant-numeric: tabular-nums; }
+.eventos-nino td button { cursor: pointer; transition: border-color .2s; }
+.eventos-nino td button:hover, .eventos-nino td button:focus-visible { border-color: var(--hielo); }
+.eventos-nino .evento-nota { text-align: left; padding: 10px 8px; color: var(--niebla); font-size: .88rem; border: 1px dashed var(--linea); border-radius: 8px; }
+.eventos-nino .fila-promedio th { font-weight: 700; }
+#eventos-nino { scroll-margin-top: 76px; }
+.eventos-nino tbody th small { display: block; font-size: .75rem; color: var(--tenue); }
+
+/* ---------- estado de cada resultado ---------- */
+.resultados { padding-top: clamp(36px, 6vw, 64px); border-top: 1px solid var(--linea); }
+.resultados > h3 { font-size: 1.6rem; }
+.resultados-lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 16px; }
+.resultado { padding: 16px 18px; border: 1px solid var(--linea); border-radius: var(--r-medio); background: rgba(12, 44, 74, .45); }
+.resultado.con-grafico { grid-column: 1 / -1; }
+.resultado h4 { margin: 8px 0 6px; font-family: var(--serif); font-size: 1.2rem; font-weight: 500; }
+.resultado p { color: var(--niebla); margin-bottom: .6em; }
+.resultado-grafico { height: 240px; margin: 8px 0; }
+.estado { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: .74rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.estado-comprobado { background: rgba(63, 194, 140, .18); color: var(--fito); border: 1px solid rgba(63, 194, 140, .5); }
+.estado-pendiente { background: rgba(240, 138, 75, .12); color: var(--nino); border: 1px solid rgba(240, 138, 75, .5); }
