@@ -63,7 +63,7 @@ export default function EventosNinoSection() {
                 const p = e.cambio_clorofila_pct?.[c]
                 return <td key={c}>{p == null ? '—' : <button type="button" style={{ background: colorCambio(p) }} onClick={() => ir(e.nombre, c)} title={`Ver ${zonas[c]?.nombre ?? c} en el globo`}>{signo(p)}{nf(0).format(Math.abs(p))} %</button>}</td>
               })
-              : <td colSpan={ZONAS_PERU.length} className="evento-nota">{e.nota ?? 'Sin datos todavía.'}</td>}
+              : <td colSpan={ZONAS_PERU.length} className="evento-nota">{e.nota ?? 'Sin datos todavía.'} <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ver El Niño 2026 en el globo</button></td>}
           </tr>)}
           <tr className="fila-promedio">
             <th scope="row">Promedio de los eventos</th>

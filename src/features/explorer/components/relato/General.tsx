@@ -51,6 +51,7 @@ export default function General() {
     <ChipsEventos />
     <h3>Historias para explorar</h3>
     <div className="historias">
+      <button className="historia destacada" type="button" onClick={acciones.nino2026}><b>El Niño 2026, en curso</b><span>El mar frente al Perú se está calentando: lo que dicen los datos hasta hoy.</span></button>
       {HISTORIAS.map((h) => <button key={h.id} className="historia" type="button" onClick={() => acciones.historia(h.id)}><b>{h.titulo}</b><span>{h.desc}</span></button>)}
       {mapaEstado === 'listo' && <button className="historia" type="button" onClick={() => { const m = modelo.mes(i); acciones.comparar({ mes: m.mes, b: m.anio }) }}><b>Comparar dos años</b><span>Dos mapas del mismo mes, lado a lado.</span></button>}
     </div>

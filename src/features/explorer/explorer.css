@@ -105,8 +105,6 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .etq.agrupada { display: none; }
 .etq.grupo i { width: 18px; height: 18px; left: -9px; top: -9px; background: #63cde8; box-shadow: 0 0 0 2px rgba(4,18,31,.75), 4px -4px 0 -1px #3fc28c, 8px -8px 0 -2px #f2e14c; }
 .etq.grupo span { left: 18px; }
-.aviso-escenario { margin: 0 0 16px; padding: 10px 14px; border-left: 3px solid var(--nino); background: rgba(240,138,75,.08); font-size: .9rem; }
-.aviso-escenario strong { color: var(--hielo); }
 .nota { font-size: .85rem; color: var(--tenue); }
 .relato h2 { font-weight: 400; }
 
@@ -126,7 +124,6 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .timeline-events { pointer-events: auto; }
 .timeline-events button { position: absolute; transform: translateX(-50%); padding: 1px 7px; border: 1px solid var(--nino); border-radius: 999px; background: rgba(7, 30, 51, .9); color: var(--nino); font: inherit; font-size: .7rem; line-height: 1.2; cursor: pointer; }
 .timeline-events button:hover, .timeline-events button[aria-current="true"] { background: var(--nino); color: var(--abismo); }
-.timeline-date.es-escenario::after { content: "escenario"; display: block; font-family: var(--sans); font-size: .66rem; letter-spacing: .04em; text-transform: uppercase; color: var(--nino); text-align: right; }
 .timeline-legend .ley-escala { flex: 1; min-width: 0; }
 .timeline-legend .rampa { height: 7px; }
 .ley-marcas { position: relative; height: 14px; font-size: .7rem; color: var(--niebla); font-variant-numeric: tabular-nums; }
@@ -181,3 +178,8 @@ table.eventos-nino { width: 100%; border-collapse: separate; border-spacing: 4px
   .ley-marcas { display: none; }
   .timeline-events button { font-size: .66rem; padding: 0 5px; }
 }
+
+/* ---------- El Niño 2026 ---------- */
+.historia.destacada { border-color: rgba(240, 138, 75, .7); background: linear-gradient(120deg, rgba(240, 138, 75, .16), rgba(12, 44, 74, .7)); }
+.historia.destacada:hover { border-color: var(--nino); }
+.enlace { background: none; border: 0; padding: 0; color: var(--frio); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

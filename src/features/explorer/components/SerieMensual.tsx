@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Area, ComposedChart, Legend, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { ComposedChart, Legend, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { mediaMovil } from '../../../lib/estadistica'
 import { etiquetaMes, nf } from '../../../lib/formato'
 import type { Modelo } from '../lib/modelo'
@@ -13,27 +13,18 @@ type Props = {
   mesActual: number
   alElegirMes: (i: number) => void
   logaritmica?: boolean
-  /** escenarios de El Niño: central y banda entre débil e intenso */
-  escenario?: { central: Serie; debil: Serie; intenso: Serie }
   decimales?: number
 }
 
 /** Serie mensual: cada mes, promedio de 12 meses y línea vertical en el mes elegido. Tocar el gráfico salta a ese mes */
-export function SerieMensual({ modelo, serie, color, mesActual, alElegirMes, logaritmica, escenario, decimales = 2 }: Props) {
+export function SerieMensual({ modelo, serie, color, mesActual, alElegirMes, logaritmica, decimales = 2 }: Props) {
   const { i0 } = modelo
   const datos = useMemo(() => {
     const media = mediaMovil(serie)
-    return serie.map((valor, k) => {
-      const d = escenario?.debil[k], n = escenario?.intenso[k]
-      return {
-        k, valor, media: media[k],
-        central: escenario?.central[k] ?? null,
-        banda: d != null && n != null ? [Math.min(d, n), Math.max(d, n)] : null,
-      }
-    })
-  }, [serie, escenario])
+    return serie.map((valor, k) => ({ k, valor, media: media[k] }))
+  }, [serie])
   const marcas = useMemo(() => datos.filter((d) => { const m = modelo.mes(i0 + d.k); return m.mes === 0 && m.anio % 5 === 0 }).map((d) => d.k), [datos, modelo, i0])
-  const fmt = (x: unknown) => (typeof x === 'number' ? nf(x < 1 ? decimales : Math.min(decimales, 1)).format(x) : Array.isArray(x) ? x.map((y: number) => nf(decimales).format(y)).join(' – ') : 'sin dato')
+  const fmt = (x: unknown) => (typeof x === 'number' ? nf(x < 1 ? decimales : Math.min(decimales, 1)).format(x) : 'sin dato')
 
   return <ResponsiveContainer width="100%" height="100%">
     <ComposedChart data={datos} margin={{ top: 6, right: 6, bottom: 0, left: -12 }}
@@ -44,8 +35,6 @@ export function SerieMensual({ modelo, serie, color, mesActual, alElegirMes, log
       <Legend verticalAlign="bottom" height={24} wrapperStyle={{ fontSize: 12, color: '#a3bccb' }} />
       <Line name="Cada mes" dataKey="valor" stroke="rgba(163,188,203,0.45)" strokeWidth={1} dot={false} isAnimationActive={false} connectNulls={false} />
       <Line name="Promedio de 12 meses" dataKey="media" stroke={color} strokeWidth={2.4} dot={false} isAnimationActive={false} connectNulls />
-      {escenario && <Area name="Escenarios débil a intenso" dataKey="banda" stroke="none" fill="rgba(240,138,75,0.22)" isAnimationActive={false} />}
-      {escenario && <Line name="Escenario central de El Niño" dataKey="central" stroke="#f08a4b" strokeDasharray="5 4" strokeWidth={2} dot={false} isAnimationActive={false} />}
       <ReferenceLine x={mesActual - i0} stroke="rgba(234,243,245,0.75)" strokeDasharray="3 3" />
     </ComposedChart>
   </ResponsiveContainer>

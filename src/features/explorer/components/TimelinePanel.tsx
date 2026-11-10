@@ -3,22 +3,23 @@ import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from 'rechar
 import { colorDiverge, colorRampa, DEGRADADO_DIVERGE, tClorofila } from '../../../lib/color'
 import { etiquetaMes, mesLargo, nf } from '../../../lib/formato'
 import { useExplorer } from '../ExplorerContext'
+import { useAcciones } from '../hooks/useAcciones'
 import { VARIABLES, variablePorId } from '../lib/variables'
 import { useExplorerStore } from '../store'
 
 /** Línea de tiempo: dato, mes, reproducción, saltos a cada El Niño y barra con el histórico del dato elegido */
 export function TimelinePanel() {
   const { modelo } = useExplorer()
+  const acciones = useAcciones()
   const { variable, month, playing, setVariable, setMonth, setPlaying } = useExplorerStore()
   const v = variablePorId(variable)
   const { i0, ultimo } = modelo
   const eventos = useMemo(() => modelo.eventosNino(), [modelo])
-  const escenario = modelo.esEscenario(month)
 
-  // barras: el dato frente a lo normal, promedio de la región (los meses de escenario, más tenues)
+  // barras: el dato frente a lo normal, promedio de la región
   const serie = useMemo(() => modelo.meses.slice(i0, ultimo + 1).map((_, k) => {
     const i = i0 + k, t = modelo.anomaliaRegional(v, i)
-    return { month: i, value: t, color: t == null ? 'transparent' : v.escala === 'rampa' ? colorRampa((t + 1) / 2, modelo.esEscenario(i) ? 0.45 : 0.9) : colorDiverge(t, modelo.esEscenario(i) ? 0.45 : 0.9) }
+    return { month: i, value: t, color: t == null ? 'transparent' : v.escala === 'rampa' ? colorRampa((t + 1) / 2, 0.9) : colorDiverge(t, 0.9) }
   }), [modelo, v, i0, ultimo])
 
   useEffect(() => {
@@ -39,14 +40,14 @@ export function TimelinePanel() {
   return <section className="timeline-panel" aria-label="Línea de tiempo del globo">
     <div className="timeline-topline">
       <label className="timeline-variable"><span>Dato</span><select value={variable} onChange={(e) => setVariable(e.target.value)}>{VARIABLES.map((x) => <option key={x.id} value={x.id}>{x.nombre}</option>)}</select></label>
-      <strong className={`timeline-date${escenario ? ' es-escenario' : ''}`} title={escenario ? 'Escenario de El Niño, no es una observación' : undefined}>{etiquetaMes(modelo.mes(month))}</strong>
+      <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>
     <div className="timeline-controls">
       <button className="play-button" type="button" aria-label={playing ? 'Pausar animación' : 'Reproducir meses'} onClick={() => setPlaying(!playing)}>{playing ? 'Ⅱ' : '▶'}</button>
       <div className="timeline-track">
         <div className="timeline-events" role="group" aria-label="Saltar a un evento de El Niño">{eventos.map((e, k) =>
           <button key={e.anio} type="button" style={{ left: posicion(e.i), transform: desplazamiento(k) }} aria-current={month === e.i} title={`${e.nombre} (pico en ${mesLargo(modelo.mes(e.i))})`}
-            onClick={() => { if (!v.mapa) setVariable('temperatura_superficial_C'); setPlaying(false); setMonth(e.i) }}>{e.anio}</button>)}
+            onClick={() => { setPlaying(false); if (e.anio === 2026) { acciones.nino2026(); return } if (!v.mapa) setVariable('temperatura_superficial_C'); setMonth(e.i) }}>{e.anio}</button>)}
         </div>
         <div className="timeline-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={serie} margin={{ top: 14, right: 0, bottom: 0, left: 0 }} barCategoryGap={0}>
           <XAxis dataKey="month" hide />

@@ -5,6 +5,7 @@ import Comparar from './Comparar'
 import Corriente from './Corriente'
 import General from './General'
 import Punto from './Punto'
+import Nino2026 from './Nino2026'
 import Recorrido from './Recorrido'
 import Zona from './Zona'
 
@@ -25,6 +26,7 @@ export default function Relato() {
     case 'punto': vista = <Punto lat={panel.lat} lng={panel.lng} />; break
     case 'comparar': vista = <Comparar />; break
     case 'recorrido': vista = <Recorrido paso={panel.paso} />; break
+    case 'nino2026': vista = <Nino2026 />; break
     default: vista = <General />
   }
   return <div className="relato-contenido" key={clave} ref={raiz}>{vista}</div>

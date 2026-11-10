@@ -28,9 +28,10 @@ export function ChipsVariables({ zona }: { zona: IdZona | null }) {
 /** Saltos a cada El Niño (cambian a temperatura si el dato no tiene mapa) */
 export function ChipsEventos() {
   const { modelo } = useExplorer()
-  const { fijarMes } = useAcciones()
+  const { fijarMes, nino2026 } = useAcciones()
   return <div className="chips" role="group" aria-label="Saltar a un evento de El Niño">
     {modelo.eventosNino().map((e) => <button key={e.anio} className="chip" type="button" onClick={() => {
+      if (e.anio === 2026) { nino2026(); return }
       const st = useExplorerStore.getState()
       if (!VARIABLES.find((v) => v.id === st.variable)?.mapa) st.setVariable('temperatura_superficial_C')
       fijarMes(e.i)

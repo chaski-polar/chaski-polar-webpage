@@ -22,7 +22,8 @@ export type Panel =
   | { tipo: "corriente"; id: IdCorriente }
   | { tipo: "punto"; lat: number; lng: number }
   | { tipo: "comparar" }
-  | { tipo: "recorrido"; paso: number };
+  | { tipo: "recorrido"; paso: number }
+  | { tipo: "nino2026" };
 
 /** Comparación de dos años del mismo mes */
 export interface Comparacion {

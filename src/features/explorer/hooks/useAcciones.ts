@@ -87,6 +87,13 @@ export function useAcciones() {
       st().setPanel({ tipo: 'recorrido', paso: k })
     }
 
-    return { fijarMes, irAZona, general, base, corriente, clicMar, historia, comparar, paso }
+    /** El Niño 2026, en curso: costa del Perú */
+    const nino2026 = () => {
+      st().setPlaying(false)
+      st().setPanel({ tipo: 'nino2026' })
+      st().flyTo({ lat: -9, lng: -84, altitude: 1.1 }, 1600)
+    }
+
+    return { fijarMes, irAZona, general, base, corriente, clicMar, historia, comparar, paso, nino2026 }
   }, [modelo, mapa])
 }

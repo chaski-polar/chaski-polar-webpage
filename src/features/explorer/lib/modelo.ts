@@ -49,7 +49,6 @@ export class Modelo {
   /** primer mes de escenarios de El Niño, si hay */
   readonly inicioEscenario: number | null;
   readonly anual: FilaAnual[];
-  readonly avisosEscenario: string[];
   readonly hayMonitor: boolean;
 
   private readonly porMesMonitor: Map<string, RegistroMonitor>;
@@ -72,7 +71,6 @@ export class Modelo {
     this.hayMonitor = this.registrosMonitor.length > 0;
     this.porMesMonitor = new Map(this.registrosMonitor.map((r) => [r.date.slice(0, 7), r]));
     this.porMesEscenario = new Map((escenarios?.filas ?? []).map((f) => [`${f.fecha}|${f.escenario}`, f]));
-    this.avisosEscenario = escenarios?.avisos ?? [];
 
     const primera = this.ids[0] as IdZona;
     const nSeries = D.series[primera].clorofila_mg_m3?.length ?? 0;
@@ -95,10 +93,22 @@ export class Modelo {
       }
     }
 
+    // índices: SAM y extensión del hielo son la misma serie en el monitor; la anomalía del hielo solo cambia de
+    // periodo de referencia, así que se convierte con la diferencia de cada mes calendario
+    const ind = D.indices;
+    const refHielo = Array.from({ length: 12 }, (_, m) => media(ind.hielo.map((h, i) => (i % 12 === m && h != null && ind.hielo_anom[i] != null ? h - (ind.hielo_anom[i] as number) : null))));
+    const completar = (s: Serie, valor: (i: number) => number | null): Serie => this.meses.map((_, i) => s[i] ?? valor(i));
+    ind.sam = completar(ind.sam, (i) => this.registroMonitor(i)?.sam_index ?? null);
+    ind.hielo = completar(ind.hielo, (i) => this.registroMonitor(i)?.sea_ice_antarctic_mkm2 ?? null);
+    ind.hielo_anom = completar(ind.hielo_anom, (i) => {
+      const h = ind.hielo[i], ref = refHielo[this.mes(i).mes];
+      return h == null || ref == null ? null : h - ref;
+    });
+
     let ultimoSeries = this.i0, ultimo = this.i0;
     for (let i = this.i0; i <= this.ultimoCalendario; i++) {
       if (this.ids.some((z) => D.series[z].clorofila_mg_m3?.[i] != null)) ultimoSeries = i;
-      if (this.ids.some((z) => D.series[z].clorofila_mg_m3?.[i] != null || D.series[z].temperatura_superficial_C?.[i] != null)) ultimo = i;
+      if (ind.hielo[i] != null || this.ids.some((z) => D.series[z].clorofila_mg_m3?.[i] != null || D.series[z].temperatura_superficial_C?.[i] != null)) ultimo = i;
     }
     this.ultimoSeries = ultimoSeries;
     this.ultimo = ultimo;
@@ -112,7 +122,8 @@ export class Modelo {
       if (u && v) s.viento = u.map((x, i) => { const y = v[i]; return x == null || y == null ? null : Math.hypot(x, y); });
     }
 
-    this.nino = this.meses.map((_, i) => D.indices.nino12[i] ?? this.valorMonitor("nino12_anom_c", i));
+    // Niño 1+2: una sola versión del índice (NOAA PSL, la del monitor, que es la del análisis y los escenarios)
+    this.nino = this.meses.map((_, i) => (i > this.ultimoObservado ? null : this.registroMonitor(i)?.nino12_psl_c ?? D.indices.nino12[i] ?? null));
   }
 
   /* ---------- calendario ---------- */
@@ -287,6 +298,7 @@ export class Modelo {
       { anio: 2016, nombre: "El Niño 2015–16" },
       { anio: 2017, nombre: "El Niño costero 2017" },
       { anio: 2023, nombre: "El Niño 2023" },
+      { anio: 2026, nombre: "El Niño 2026" },
     ];
     return eventos.flatMap((e) => {
       let mejor: number | null = null;

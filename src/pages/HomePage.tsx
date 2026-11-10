@@ -6,14 +6,16 @@ import '../features/explorer/explorer.css'
 import { DataState } from '../components/ui/DataState'
 import { DataProvider, useData } from '../contexts/DataContext'
 import { ExplorerProvider } from '../features/explorer/ExplorerContext'
-import CrucerosSection from '../features/cruceros/CrucerosSection'
-import EventosNinoSection from '../features/eventos/EventosNinoSection'
+import { CargarAlVer } from '../components/ui/CargarAlVer'
 import FuentesSection from '../features/fuentes/FuentesSection'
-import InsightsSection from '../features/insights/InsightsSection'
-import MonitorSection from '../features/monitor/MonitorSection'
 import AppShell from '../layouts/AppShell'
 
 const GlobePanel = lazy(() => import('../features/explorer/components/GlobePanel'))
+// las secciones con gráficos se descargan cuando el usuario se acerca a ellas
+const InsightsSection = lazy(() => import('../features/insights/InsightsSection'))
+const EventosNinoSection = lazy(() => import('../features/eventos/EventosNinoSection'))
+const MonitorSection = lazy(() => import('../features/monitor/MonitorSection'))
+const CrucerosSection = lazy(() => import('../features/cruceros/CrucerosSection'))
 
 /** Explorador: los datos se cargan solo al entrar a esta página */
 export default function HomePage() {
@@ -47,10 +49,10 @@ function Explorador() {
                 </p>
               </div>
             </section>
-            <InsightsSection />
-            <EventosNinoSection />
-            <MonitorSection />
-            <CrucerosSection />
+            <CargarAlVer id="hallazgos" alto={2600}><InsightsSection /></CargarAlVer>
+            <CargarAlVer id="eventos-nino" alto={760}><EventosNinoSection /></CargarAlVer>
+            <CargarAlVer id="monitor" alto={980}><MonitorSection /></CargarAlVer>
+            <CargarAlVer id="cruceros" alto={820}><CrucerosSection /></CargarAlVer>
             <section className="seccion">
               <div className="llamada">
                 <div>

@@ -28,7 +28,8 @@ export function useEnlace() {
     const estilo = MAP_STYLES.find((x) => x === p.get('estilo'))
     if (estilo) st.setMapStyle(estilo)
     const zona = p.get('zona'), paso = Number(p.get('paso'))
-    if (modelo.esZona(zona)) acciones.irAZona(zona)
+    if (p.get('tema') === 'nino2026') acciones.nino2026()
+    else if (modelo.esZona(zona)) acciones.irAZona(zona)
     else if (Number.isInteger(paso) && paso > 0) acciones.paso(paso - 1)
   }, [modelo, acciones])
 
@@ -44,6 +45,7 @@ export function useEnlace() {
         p.set('dato', VARIABLES.find((v) => v.id === s.variable)?.clave ?? 'clorofila')
         if (s.panel.tipo === 'zona') p.set('zona', s.panel.z)
         if (s.panel.tipo === 'recorrido') p.set('paso', String(s.panel.paso + 1))
+        if (s.panel.tipo === 'nino2026') p.set('tema', 'nino2026')
         p.set('vista', s.view)
         if (s.view !== 'illustrated') p.set('estilo', s.mapStyle)
         history.replaceState(history.state, '', `#${p.toString()}`)
