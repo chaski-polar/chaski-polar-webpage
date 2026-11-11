@@ -47,9 +47,10 @@ export default function Nino2026() {
     })
     const inicioEsc = modelo.inicioEscenario, finEsc = filas.at(-1)?.i
 
-    // última clorofila por zona (antes de que llegue el calor)
+    // clorofila por zona en el último mes con dato y su cambio durante el evento (mismo método que la tabla de El Niño)
     const chl = variablePorId('clorofila_mg_m3')
-    const zonas = modelo.ids.filter(esPeru).map((z) => ({ z, a: modelo.anomaliaTxt(z, chl, modelo.ultimoSeries) }))
+    const evento = modelo.metadataMonitor.eventos_nino?.find((e) => e.nombre.includes('2026'))
+    const zonas = modelo.ids.filter(esPeru).map((z) => ({ z, a: modelo.anomaliaTxt(z, chl, modelo.ultimoSeries), cambio: evento?.cambio_clorofila_pct?.[modelo.claveMonitor(z) ?? 'paita'] ?? null }))
 
     return { filas, pico, icen, clorofila, inicioEsc, finEsc, zonas }
   }, [modelo])
@@ -97,13 +98,14 @@ export default function Nino2026() {
       <p>El crucero {ultimo.crucero} estimó <strong>{nf(2).format(ultimo.biomasa_t / 1e6)} millones de t</strong> en la región norte-centro{ultimo.provisional ? ' (cifra provisional)' : ''}.{promAnteriores ? ` Es ${nf(0).format(Math.abs((ultimo.biomasa_t / promAnteriores - 1) * 100))} % ${ultimo.biomasa_t < promAnteriores ? 'menos' : 'más'} que el promedio de los cruceros de primavera anteriores de esa región (${anteriores.map((c) => c.anio).join(', ')}).` : ''}</p>
     </>}
 
-    <h3>Antes del calor</h3>
-    <p>La clorofila por zona llega hasta {mesLargo(modelo.mes(modelo.ultimoSeries))}, antes de que el mar se calentara. En ese mes:</p>
-    <ul className="lista-zonas">{d.zonas.map(({ z, a }) => <li key={z}><button className="fila-zona" type="button" onClick={() => acciones.irAZona(z)}>
-      <span className="punto" />
-      <span>{modelo.zona(z).nombre}</span>
-      <span className="valor">{a ? a.corto : 'sin dato'}</span>
+    <h3>El fitoplancton durante el calor</h3>
+    <p>Cambio de la clorofila frente a lo normal en cada zona, de mayo a {mesLargo(modelo.mes(modelo.ultimoSeries))}{d.zonas.some((x) => x.cambio != null) ? '' : ' (sin datos todavía)'}. Entre paréntesis, el último mes.</p>
+    <ul className="lista-zonas">{d.zonas.map(({ z, a, cambio }) => <li key={z}><button className="fila-zona" type="button" onClick={() => acciones.irAZona(z)}>
+      <span className="punto" style={{ background: cambio == null ? undefined : cambio < 0 ? 'var(--nino)' : 'var(--fito)' }} />
+      <span>{modelo.zona(z).nombre}<small>{a ? `${a.corto} en ${mesLargo(modelo.mes(modelo.ultimoSeries))}` : 'sin dato el último mes'}</small></span>
+      <span className="valor">{cambio == null ? '—' : pct(cambio)}</span>
     </button></li>)}</ul>
+    <p className="nota">Promedio de la clorofila (ESA OC-CCI) de mayo a {mesLargo(modelo.mes(modelo.ultimoSeries))} comparado con el mismo mes de un año normal (1998–2025). Es parcial: el evento sigue.</p>
 
     <div className="acciones-relato">
       <button className="btn" type="button" onClick={() => { useExplorerStore.getState().setMonitorZone(null); document.getElementById('monitor')?.scrollIntoView({ behavior: 'smooth' }) }}>Ver el monitor</button>

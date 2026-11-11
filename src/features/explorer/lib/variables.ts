@@ -47,7 +47,7 @@ export const VARIABLES: readonly Variable[] = [
     fuente: "Kd490 de ESA OC-CCI v6." },
   { id: "viento", clave: "viento", nombre: "Viento sobre el mar", corto: "viento", unidad: "m/s", dec: 1, modo: "dif", rango: 1.5, escala: "diverge",
     que: "Frente al Perú, el viento empuja el agua de la superficie mar adentro y hace subir agua profunda fría con nutrientes: el afloramiento.",
-    fuente: "Velocidad del viento CCMP v2 (1993 a diciembre de 2018)." },
+    fuente: "Viento a 10 m sobre el mar: ERA5 (ECMWF/Copernicus) en las zonas del Perú, de 1998 a 2026, solo con los puntos de mar; CCMP v2 en la Antártida, hasta 2018." },
   { id: "salinidad_psu", clave: "salinidad", nombre: "Salinidad", corto: "salinidad", unidad: "PSU", dec: 2, modo: "dif", rango: 0.35, escala: "diverge",
     que: "Qué tan salada está el agua. Cambia con las lluvias, los ríos, el hielo que se derrite y la llegada de otras masas de agua.",
     fuente: "Salinidad superficial del satélite SMOS (desde 2010)." },

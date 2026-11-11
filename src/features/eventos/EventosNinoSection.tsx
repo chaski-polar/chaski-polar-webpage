@@ -13,6 +13,7 @@ const PERIODOS: Record<string, string> = {
   '2015-16': 'jun 2015–abr 2016',
   '2017': 'ene–may 2017',
   '2023-24': 'mar 2023–ene 2024',
+  '2026': 'may–sep 2026, parcial',
 }
 const periodo = (nombre: string): string | undefined => Object.entries(PERIODOS).find(([k]) => nombre.includes(k))?.[1]
 
@@ -30,7 +31,7 @@ export default function EventosNinoSection() {
   const zonas = modelo.metadataMonitor.zonas ?? {}
   if (!eventos.length) return null
 
-  const completos = eventos.filter((e) => e.cambio_clorofila_pct)
+  const completos = eventos.filter((e) => e.cambio_clorofila_pct && !e.nombre.includes('2026'))
   const promedio = ZONAS_PERU.map((c) => ({ c, p: media(completos.map((e) => e.cambio_clorofila_pct?.[c])) }))
   const picos = modelo.eventosNino()
   const vulnerables = modelo.metadataMonitor.hallazgos?.find((h) => h.id === 'zonas_vulnerables')
@@ -57,7 +58,7 @@ export default function EventosNinoSection() {
         <thead><tr><th scope="col">El Niño</th>{ZONAS_PERU.map((c) => <th scope="col" key={c}>{zonas[c]?.nombre ?? c}</th>)}</tr></thead>
         <tbody>
           {eventos.map((e) => <tr key={e.nombre}>
-            <th scope="row">{e.nombre}{periodo(e.nombre) && <small>{periodo(e.nombre)}</small>}</th>
+            <th scope="row">{e.nombre}{periodo(e.nombre) && <small>{periodo(e.nombre)}</small>}{e.nombre.includes('2026') && <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ver en el globo</button>}</th>
             {e.cambio_clorofila_pct
               ? ZONAS_PERU.map((c) => {
                 const p = e.cambio_clorofila_pct?.[c]
@@ -66,7 +67,7 @@ export default function EventosNinoSection() {
               : <td colSpan={ZONAS_PERU.length} className="evento-nota">{e.nota ?? 'Sin datos todavía.'} <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ver El Niño 2026 en el globo</button></td>}
           </tr>)}
           <tr className="fila-promedio">
-            <th scope="row">Promedio de los eventos</th>
+            <th scope="row">Promedio de los eventos<small>sin 2026, que sigue en curso</small></th>
             {promedio.map(({ c, p }) => <td key={c}>{p == null ? '—' : <span style={{ background: colorCambio(p) }}>{signo(p)}{nf(0).format(Math.abs(p))} %</span>}</td>)}
           </tr>
         </tbody>
