@@ -15,7 +15,7 @@ export function HudLumi({ e }: { e: EstadoLumi | null }) {
     <div>Lumi se dividió <b>{e.divisiones} de {DIVISIONES_META}</b></div>
     <div>Luz</div><Barra valor={e.luz} color="#f2c14e" etiqueta="Luz" />
     <div>Nutrientes</div><Barra valor={e.nutrientes} color="#5ab4e5" etiqueta="Nutrientes" />
-    <div>Crecimiento</div><Barra valor={e.crecimiento} color="#3fae6b" etiqueta="Crecimiento" />
+    <div>Crecimiento</div><Barra valor={e.crecimiento} color="#3fc28c" etiqueta="Crecimiento" />
     {e.bajoHielo && <div className="juego-alerta">Bajo el hielo casi no hay luz</div>}
     {e.nutrientes <= 0 && <div className="juego-alerta">Sin nutrientes: baja a buscar chispas azules</div>}
   </div>
@@ -32,7 +32,7 @@ export function HudNara({ e }: { e: EstadoNara | null }) {
   const grados = (x: number, pos: string, neg: string) => `${Math.abs(x).toFixed(0)}° ${x >= 0 ? pos : neg}`
   return <div className="juego-estado-cardumen juego-caja">
     <div>Grasa de Nara</div><Barra valor={e.grasa} color={e.grasa < 0.25 ? '#d1495b' : '#e3a33b'} etiqueta="Grasa" />
-    <div>Viaje</div><Barra valor={e.avance} color="#3d7f97" etiqueta="Avance del viaje" />
+    <div>Viaje</div><Barra valor={e.avance} color="#63cde8" etiqueta="Avance del viaje" />
     <div><small>{grados(e.lat, 'N', 'S')}, {grados(e.lon, 'E', 'O')}</small></div>
     {e.corriente && <div><b>{NOMBRE_CORRIENTE[e.corriente]}</b></div>}
   </div>

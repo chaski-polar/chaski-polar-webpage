@@ -25,14 +25,14 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
   return <>
     <div className="juego-fecha juego-caja">
       <b>{MESES[hud.mes]} {hud.anio}</b> · {NOMBRE_ZONA[hud.zona]}
-      <Barra valor={hud.avanceMes} color="#1d2b36" etiqueta="Avance del mes" />
+      <Barra valor={hud.avanceMes} color="#a3bccb" etiqueta="Avance del mes" />
     </div>
 
     <div className="juego-estado-cardumen juego-caja">
       <div>Cardumen <b>{n0.format(hud.peces)}</b> <small>({Math.round((hud.peces / hud.inicial) * 100)} %)</small></div>
-      <Barra valor={hud.peces / hud.inicial} color="#3d7f97" etiqueta="Tamaño del cardumen" />
+      <Barra valor={hud.peces / hud.inicial} color="#63cde8" etiqueta="Tamaño del cardumen" />
       <div>Energía</div>
-      <Barra valor={hud.energia} color={hud.energia < 0.25 ? '#d1495b' : '#3fae6b'} etiqueta="Energía" />
+      <Barra valor={hud.energia} color={hud.energia < 0.25 ? '#d1495b' : '#3fc28c'} etiqueta="Energía" />
       {hud.energia < 0.25 && <div className="juego-alerta">¡Hambre! Busca fitoplancton</div>}
       {hud.bajoOxigeno && <div className="juego-alerta">¡Sin oxígeno! Sube</div>}
     </div>
