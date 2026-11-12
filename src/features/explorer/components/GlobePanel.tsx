@@ -74,7 +74,7 @@ export default function GlobePanel() {
     ...modelo.ids.map((z): Marca => ({ z, lat: modelo.zona(z).lat, lng: modelo.zona(z).lon, texto: modelo.zona(z).nombre, lado: LADO[z] ?? 'der', soloCerca: AGRUPAR })),
     { z: 'grupo-peru', lat: -11, lng: -78.2, texto: '5 zonas del Perú', lado: 'der', forma: 'grupo', soloLejos: AGRUPAR },
     { z: 'grupo-antartida', lat: -62, lng: -62, texto: 'Península Antártica', lado: 'der-arriba', forma: 'grupo', soloLejos: AGRUPAR },
-    { z: 'base', ...BASE_MACHU_PICCHU, texto: 'Base Machu Picchu', lado: 'der-abajo', forma: 'base' },
+    { z: 'base', ...BASE_MACHU_PICCHU, texto: 'Base Machu Picchu', lado: 'der-abajo', forma: 'base', soloCerca: AGRUPAR },
     { z: 'rio-humboldt', lat: -27, lng: -78.4, texto: 'Corriente de Humboldt ↑', forma: 'rio' },
     { z: 'rio-circumpolar', lat: -55.2, lng: -96, texto: 'Corriente Circumpolar →', forma: 'rio' },
   ], [modelo])
