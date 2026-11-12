@@ -75,7 +75,7 @@ export function TimelinePanel() {
         <input className="timeline-range" type="range" min={i0} max={ultimo} step={1} value={month} aria-label="Mes" onChange={(e) => { setPlaying(false); setMonth(Number(e.target.value)) }} />
       </div>
     </div>}
-    <Leyenda />
+    {opciones.length > 0 && <Leyenda />}
   </section>
 }
 
