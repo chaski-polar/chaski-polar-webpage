@@ -13,6 +13,7 @@ import { crearPersonaje, type Personaje } from "../motor/personaje";
 import { dibujarFito } from "../personajes/antartida";
 import { dibujarAnchi, dibujarAnchoveta, dibujarGuanay, dibujarLetrero, dibujarLobo } from "../personajes/costa";
 import { sonar } from "../motor/sonido";
+import { sprite } from "../personajes/sprites";
 
 const LARGO_ZONA = 30;
 const X_MIN = -16, X_MAX = 9;
@@ -203,12 +204,12 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
     const c = L.crearCardumen(o.anio, o.peces, o.estrategia, o.mesFin);
     const inicial = o.peces;
 
-    const anchi = crearPersonaje(escena, dibujarAnchi(), { ancho: 2.6, alto: 2.6 });
+    const anchi = crearPersonaje(escena, sprite("anchi", dibujarAnchi), { ancho: 2.6, alto: 2.6 });
     anchi.posicion.set(-3, -3, centroZona(ZONA_INICIAL));
     const seguidor = crearSeguidor(camara, renderer.domElement, anchi.posicion, { distancia: 15, giro: 0.9 });
 
     // el cardumen: un dibujo por cada PECES_POR_DIBUJO peces
-    const dibujoPez = dibujarAnchoveta();
+    const dibujoPez = sprite("anchoveta", dibujarAnchoveta);
     const peces: Seguidor[] = Array.from({ length: DIBUJOS_MAX }, () => {
       const p = crearPersonaje(escena, dibujoPez, { ancho: azar(1.15, 1.45), alto: azar(1.15, 1.45) });
       p.posicion.copy(anchi.posicion);
@@ -216,7 +217,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
     });
 
     // comida: manchas de fitoplancton en todas las zonas, según la clorofila de cada una ese mes
-    const dibujoFito = dibujarFito();
+    const dibujoFito = sprite("fito", dibujarFito);
     const parches: Parche[] = [];
     const colocar = (pa: Parche, yOx: number) => {
       const zi = ZONAS_PERU.indexOf(pa.zona as (typeof ZONAS_PERU)[number]);
@@ -245,14 +246,14 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
     prepararMes();
 
     // depredadores y flota
-    const guanay = crearPersonaje(escena, dibujarGuanay(), { ancho: 2, alto: 2 });
+    const guanay = crearPersonaje(escena, sprite("guanay", dibujarGuanay), { ancho: 2, alto: 2 });
     guanay.sprite.visible = false;
     const sombraAve = new THREE.Mesh(new THREE.CircleGeometry(2.6, 24).rotateX(Math.PI / 2), sinContorno(new THREE.MeshBasicMaterial({ color: 0x0d1b26, transparent: true, opacity: 0.35, depthWrite: false })));
     sombraAve.visible = false;
     escena.add(sombraAve);
     const ave = { estado: "espera" as "espera" | "aviso" | "picada", t: azar(5, 9), objetivo: new THREE.Vector3() };
 
-    const lobo = crearPersonaje(escena, dibujarLobo(), { ancho: 3.6, alto: 3.6 });
+    const lobo = crearPersonaje(escena, sprite("lobo", dibujarLobo), { ancho: 3.6, alto: 3.6 });
     lobo.posicion.set(-12, -7, centroZona(ZONA_INICIAL) - 26);
     // al empezar el año el lobo marino espera un poco antes de cazar
     const loboEstado = { pausa: 10, rumbo: new THREE.Vector3(1, 0, 0), vel: new THREE.Vector3() };

@@ -12,6 +12,7 @@ import { crearPersonaje } from "../motor/personaje";
 import { dibujarFlecha, dibujarNara } from "../personajes/antartida";
 import { dibujarLetrero } from "../personajes/costa";
 import { sonar } from "../motor/sonido";
+import { sprite } from "../personajes/sprites";
 
 const V: Ventana = { lonO: -105, latN: 0, lonE: -55, latS: -70 };
 const K = 2; // unidades por grado
@@ -103,7 +104,7 @@ export function escenaNara(entrada: Entrada, eventos: EventosNara, pausa: () => 
     meta.position.set(aX(META.lon), 0.1, aZ(META.lat));
     escena.add(meta);
 
-    const nara = crearPersonaje(escena, dibujarNara(), { ancho: 5, alto: 4.7, suelo: 0 });
+    const nara = crearPersonaje(escena, sprite("nara", dibujarNara), { ancho: 5, alto: 4.7, suelo: 0 });
     nara.posicion.set(aX(INICIO.lon), 1.6, aZ(INICIO.lat));
     const seguidor = crearSeguidor(camara, renderer.domElement, nara.posicion, { distancia: 26, giro: 0.6 });
 

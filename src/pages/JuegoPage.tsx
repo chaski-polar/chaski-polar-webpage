@@ -17,6 +17,7 @@ import { crearEntrada, type Entrada } from '../features/juego/motor/entrada'
 import { crearMotor, type Motor } from '../features/juego/motor/escena'
 import { crearMar, type Mar } from '../features/juego/motor/mar'
 import { protagonistas } from '../features/juego/personajes/galeria'
+import { precargarSprites } from '../features/juego/personajes/sprites'
 import { alCambiarSilencio, alternarSilencio, despertarAudio, detenerAmbiente, estaEnSilencio, iniciarAmbiente, sonar } from '../features/juego/motor/sonido'
 import '../features/juego/juego.css'
 
@@ -81,8 +82,9 @@ export default function JuegoPage() {
   // los datos del mar son los mismos que usa el explorador
   useEffect(() => {
     let activo = true
-    loadRuntimeData()
-      .then(({ monitor }) => { if (activo) setMar(crearMar(monitor)) })
+    // los dibujos de los personajes (PNG si existen) se cargan junto con los datos
+    Promise.all([loadRuntimeData(), precargarSprites()])
+      .then(([{ monitor }]) => { if (activo) setMar(crearMar(monitor)) })
       .catch(() => { if (activo) setError('No se pudieron cargar los datos del mar.') })
     return () => { activo = false }
   }, [])

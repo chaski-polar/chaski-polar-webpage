@@ -7,6 +7,7 @@ import { azar, sinContorno, toon, type Escena, type Motor } from "../motor/escen
 import { crearPersonaje, type Personaje } from "../motor/personaje";
 import { dibujarFito, dibujarKiri, dibujarPinguino } from "../personajes/antartida";
 import { sonar } from "../motor/sonido";
+import { sprite } from "../personajes/sprites";
 
 const ALTURA_NADO = 4;
 const LIMITE = 28;
@@ -91,11 +92,11 @@ export function escenaKiri(entrada: Entrada, avisos: AvisosKiri, pausa: () => bo
   return (motor) => {
     const { escena, camara, renderer } = motor;
     const { rayos, nieve } = crearFondo(escena);
-    const kiri = crearPersonaje(escena, dibujarKiri(), { ancho: 2.6, alto: 2.6, suelo: 0 });
+    const kiri = crearPersonaje(escena, sprite("kiri", dibujarKiri), { ancho: 2.6, alto: 2.6, suelo: 0 });
     kiri.posicion.set(0, ALTURA_NADO, 0);
     const seguidor = crearSeguidor(camara, renderer.domElement, kiri.posicion);
 
-    const dibujoPinguino = dibujarPinguino(), dibujoFito = dibujarFito();
+    const dibujoPinguino = sprite("pinguino", dibujarPinguino), dibujoFito = sprite("fito", dibujarFito);
     const pinguinos: Pinguino[] = Array.from({ length: 3 }, (_, i) => ({ p: crearPersonaje(escena, dibujoPinguino, { ancho: 2.4, alto: 2.4, suelo: 0 }), ang: i * 2.1, estado: "ronda", dur: 0 }));
     const colocar = (f: Personaje) => { const a = azar(0, Math.PI * 2), d = azar(3, 22); f.posicion.set(Math.cos(a) * d, azar(2, 9), Math.sin(a) * d); };
     const fitos = Array.from({ length: 14 }, () => { const f = crearPersonaje(escena, dibujoFito, { ancho: 1.4, alto: 1.4, suelo: 0 }); colocar(f); return { f, fase: azar(0, 6) }; });

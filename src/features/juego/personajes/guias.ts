@@ -3,6 +3,7 @@
 import { lienzo, ojo, recortar, rellenar, rubor, silueta, TINTA, type Forma } from "../motor/dibujo";
 import { dibujarKiri } from "./antartida";
 import type { Hablante } from "../dialogo/estado";
+import { sprite } from "./sprites";
 
 /** ORBI: cuerpo dorado, paneles solares azules, antena y cara amable */
 const dibujarOrbi = (): HTMLCanvasElement => lienzo((g) => {
@@ -50,6 +51,6 @@ export const nombreDe = (h: Hablante): string => NOMBRES[h];
 /** Retrato como imagen (data URL), dibujado una sola vez */
 export function retratoDe(h: Hablante): string {
   let url = cache.get(h);
-  if (!url) { url = DIBUJOS[h]().toDataURL("image/png"); cache.set(h, url); }
+  if (!url) { url = sprite(h, DIBUJOS[h]).toDataURL("image/png"); cache.set(h, url); }
   return url;
 }

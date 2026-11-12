@@ -10,6 +10,7 @@ import { azar, sinContorno, toon, type Escena, type Motor } from "../motor/escen
 import { crearPersonaje, type Personaje } from "../motor/personaje";
 import { sonar } from "../motor/sonido";
 import { dibujarFito, dibujarLumi, dibujarNutriente } from "../personajes/antartida";
+import { sprite } from "../personajes/sprites";
 
 export const DIVISIONES_META = 3;
 const X = 14, Y_MIN = -13, Y_MAX = -0.8, Z = 5;
@@ -102,7 +103,7 @@ export function escenaLumi(entrada: Entrada, eventos: EventosLumi, pausa: () => 
     });
 
     // fitoplancton de fondo: otras células que flotan lejos (decoración)
-    const dibujoFito = dibujarFito();
+    const dibujoFito = sprite("fito", dibujarFito);
     const fondoFito = Array.from({ length: 16 }, () => {
       const p = crearPersonaje(escena, dibujoFito, { ancho: 0.9, alto: 0.9 });
       p.posicion.set(azar(-X - 6, X + 6), azar(-9, -1), azar(-12, -6));
@@ -117,16 +118,16 @@ export function escenaLumi(entrada: Entrada, eventos: EventosLumi, pausa: () => 
     const nieve = new THREE.Points(geoNieve, sinContorno(new THREE.PointsMaterial({ color: 0xffffff, size: 0.06, transparent: true, opacity: 0.6, depthWrite: false })));
     escena.add(nieve);
 
-    const lumi = crearPersonaje(escena, dibujarLumi(), { ancho: 2, alto: 2 });
+    const lumi = crearPersonaje(escena, sprite("lumi", dibujarLumi), { ancho: 2, alto: 2 });
     lumi.posicion.set(-4.5, -6, 0); // en un claro entre las placas de hielo
     const halo = new THREE.Sprite(sinContorno(new THREE.SpriteMaterial({ map: texturaHalo(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })));
     escena.add(halo);
     const seguidor = crearSeguidor(camara, renderer.domElement, lumi.posicion, { distancia: 14, giro: 0.5, inclinacion: 1.5, inclinacionLimites: [1.35, 1.75] }); // casi de lado: la cámara queda bajo el agua
-    const dibujo = dibujarLumi();
+    const dibujo = sprite("lumi", dibujarLumi);
     const hijas: Personaje[] = [];
 
     // nutrientes: suben desde el fondo (en el mismo plano que Lumi) y se agotan cerca de la superficie
-    const dibujoChispa = dibujarNutriente();
+    const dibujoChispa = sprite("nutriente", dibujarNutriente);
     const chispas = Array.from({ length: 20 }, () => {
       const p = crearPersonaje(escena, dibujoChispa, { ancho: 0.8, alto: 0.8 });
       p.posicion.set(azar(-X, X), azar(Y_MIN, -3), azar(-0.3, 0.3));
