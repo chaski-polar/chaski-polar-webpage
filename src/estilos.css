@@ -30,6 +30,15 @@
   --control-fondo-hover: rgba(36, 80, 122, .6);
   --control-borde: var(--linea);
 
+  /* paneles: azules del océano (el negro queda solo para la zona del globo) */
+  --panel-suave: rgba(12, 44, 74, .5);
+  --panel-medio: rgba(12, 44, 74, .7);
+  --panel-fuerte: rgba(12, 44, 74, .94);
+  --panel-tooltip: rgba(7, 30, 51, .95);
+  --panel-lateral: linear-gradient(180deg, rgba(12, 44, 74, .55), rgba(7, 30, 51, .9));
+  --panel-tarjeta: linear-gradient(145deg, rgba(19, 60, 97, .92), rgba(7, 30, 51, .92));
+  --globo-fondo: #02040a;
+
   --r-chico: 6px;
   --r-medio: 14px;
   color-scheme: dark;

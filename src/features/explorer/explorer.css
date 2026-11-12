@@ -15,7 +15,7 @@
 .historias { display: grid; gap: 8px; }
 .historia {
   display: block; width: 100%; text-align: left; font: inherit; cursor: pointer; color: var(--hielo);
-  padding: 12px 14px; border-radius: var(--r-chico); border: 1px solid var(--linea); background: rgba(5, 22, 38, 0.96);
+  padding: 12px 14px; border-radius: var(--r-chico); border: 1px solid var(--linea); background: var(--panel-medio);
   transition: border-color .2s, background-color .2s;
 }
 .historia:hover { border-color: var(--fito); background: rgba(63, 194, 140, 0.08); }
@@ -33,7 +33,7 @@
 .conexiones .r { text-align: right; color: var(--niebla); font-variant-numeric: tabular-nums; }
 .acciones-relato { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
 .tip {
-  background: rgba(3,12,22,.98); border: 1px solid var(--linea); border-radius: 8px;
+  background: var(--panel-tooltip); border: 1px solid var(--linea); border-radius: 8px;
   padding: 8px 10px; font-family: var(--sans); font-size: .88rem; color: var(--hielo); max-width: 240px;
 }
 .tip b { font-family: var(--serif); font-size: 1.05rem; font-weight: 500; }
@@ -45,7 +45,7 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .tabla-envoltura { overflow-x: auto; }
 .lectura {
   position: absolute; z-index: 5; left: 0; top: 0; pointer-events: none;
-  background: rgba(3, 12, 22, .97); border: 1px solid var(--linea); border-radius: 8px; padding: 6px 9px;
+  background: var(--panel-tooltip); border: 1px solid var(--linea); border-radius: 8px; padding: 6px 9px;
   font-size: .82rem; line-height: 1.35; color: var(--hielo); white-space: nowrap; font-variant-numeric: tabular-nums;
 }
 .lectura small { display: block; color: var(--niebla); font-size: .76rem; }
@@ -133,7 +133,7 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .ley-marcas span { position: absolute; top: 1px; transform: translateX(-50%); white-space: nowrap; }
 
 /* ---------- entrada desde la portada: la página se aclara desde negro ---------- */
-.velo-entrada { position: fixed; inset: 0; z-index: 60; background: #02040a; pointer-events: none; transition: opacity 1.1s ease; }
+.velo-entrada { position: fixed; inset: 0; z-index: 60; background: var(--globo-fondo); pointer-events: none; transition: opacity 1.1s ease; }
 .velo-entrada.abierto { opacity: 0; }
 
 footer.pie { padding: 40px clamp(16px, 4vw, 56px) 60px; color: var(--tenue); font-size: .9rem; max-width: 1180px; margin: 0 auto; }

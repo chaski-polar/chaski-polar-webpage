@@ -33,7 +33,7 @@ function Explorador() {
           </div>}>
             <GlobePanel />
           </Suspense>
-          <main id="contenido" className="bg-black">
+          <main id="contenido">
             <section className="seccion pregunta">
               <blockquote>How are changes in Antarctic phytoplankton associated with marine life in Peru?</blockquote>
               <div className="cuerpo">
