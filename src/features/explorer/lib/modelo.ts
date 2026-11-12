@@ -189,6 +189,8 @@ export class Modelo {
   /** Valor del dato en una zona y un mes, o null si esa zona no lo tiene */
   valorZona(z: IdZona, v: Variable, i: number): number | null {
     if (v.modo === "indice") return esPeru(z) ? null : (v.indice === "hielo" ? this.D.indices.hielo[i] : this.D.indices.sam[i]) ?? null;
+    if (v.modo === "nutriente") return this.D.nutrientes[z]?.[v.nutriente]?.[this.mes(i).mes] ?? null;
+    if (v.modo === "regional") return esPeru(z) ? this.valorMonitor(v.campo, i) : null;
     return this.valorSerie(z, v.id, i);
   }
   /** Serie completa de una zona (multiplicada por el factor de la variable) */
@@ -198,6 +200,8 @@ export class Modelo {
   }
   tieneDato(z: IdZona | null, v: Variable): boolean {
     if (v.modo === "indice") return z == null || !esPeru(z);
+    if (v.modo === "nutriente") return z == null || (this.D.nutrientes[z]?.[v.nutriente] ?? []).some((x) => x != null);
+    if (v.modo === "regional") return z == null || (esPeru(z) && this.registrosMonitor.some((r) => r[v.campo] != null));
     return z == null || this.tieneSerie(z, v.id);
   }
 
@@ -220,8 +224,9 @@ export class Modelo {
       const a = v.indice === "hielo" ? this.D.indices.hielo_anom[i] : this.D.indices.sam[i];
       return a == null ? null : a / v.rango;
     }
-    const x = this.valorSerie(z, v.id, i);
+    const x = this.valorZona(z, v, i);
     if (x == null) return null;
+    if (v.modo === "nutriente" || v.modo === "regional") return (x / v.rango) * 2 - 1;
     if (v.modo === "directo") return x / v.rango;
     const c = this.climatologia(z, v.id)[this.mes(i).mes];
     if (c == null) return null;
@@ -236,8 +241,10 @@ export class Modelo {
         ? { corto: `${signo(a)}${nf(1).format(Math.abs(a))}`, frase: `${nf(2).format(Math.abs(a))} million km² ${a >= 0 ? "above" : "below"} normal`, valor: a }
         : { corto: `${signo(a)}${nf(v.dec).format(Math.abs(a))}`, frase: `${nf(v.dec).format(Math.abs(a))} puntos del índice SAM/AAO`, valor: a };
     }
-    const x = this.valorSerie(z, v.id, i);
+    const x = this.valorZona(z, v, i);
     if (x == null) return null;
+    if (v.modo === "nutriente") return { corto: `${nf(v.dec).format(x)} ${v.unidad}`, frase: `${nf(v.dec).format(x)} ${v.unidad}; historical monthly climatology`, valor: x };
+    if (v.modo === "regional") return { corto: `${nf(v.dec).format(x)} ${v.unidad}`, frase: `${nf(v.dec).format(x)} ${v.unidad}; Peruvian coastal regional average`, valor: x };
     if (v.modo === "directo") {
       const d = x * (v.factor ?? 1);
       return { corto: `${signo(d)}${nf(v.dec).format(Math.abs(d))} ${v.unidad}`, frase: `${nf(v.dec).format(Math.abs(d))} ${v.unidad} ${d >= 0 ? "above" : "below"} normal`, valor: d };
@@ -281,7 +288,7 @@ export class Modelo {
 
   /** Otras zonas ordenadas por parecido (vacío para datos regionales, que no se comparan entre zonas) */
   conexionesDe(z: IdZona, v: Variable): { o: IdZona; r: number }[] {
-    if (v.modo === "indice") return [];
+    if (v.modo === "indice" || v.modo === "regional") return [];
     return this.ids.filter((o) => o !== z)
       .map((o) => ({ o, r: this.rZonas(z, o, v) }))
       .filter((c): c is { o: IdZona; r: number } => c.r != null)
