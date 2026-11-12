@@ -1,0 +1,50 @@
+/* Carta de campo: tinta, cuadrícula y una sola jerarquía de lectura. */
+.juego .juego-galeria.cuaderno-sprites { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; padding: 28px; background: #071b29; box-sizing: border-box; }
+.juego .cuaderno-cabecera { grid-column: 1 / -1; padding: 0 0 24px; border-bottom: 1px solid #345361; }
+.juego .cuaderno-cabecera h1 { font: 500 36px var(--serif); color: #edf1e7; margin: 20px 0 10px; }
+.juego .cuaderno-cabecera p, .juego .cuaderno-cabecera a { color: #b2cacb; }
+.juego .cuaderno-paleta { display: flex; flex-wrap: wrap; margin-top: 20px; gap: 3px; }
+.juego .cuaderno-paleta span { width: 18px; height: 18px; border: 1px solid #345361; }
+.juego .cuaderno-sprites figure { display: flex; align-items: stretch; padding: 16px; border: 1px solid #345361; background: #0b2435; }
+.juego .cuaderno-sprites .cuaderno-muestra { display: grid; place-items: center; height: 120px; background: repeating-linear-gradient(0deg, transparent 0 23px, #153347 23px 24px), repeating-linear-gradient(90deg, transparent 0 23px, #153347 23px 24px); }
+.juego .cuaderno-sprites figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 14px; }
+.juego .cuaderno-sprites figcaption b { font: 500 21px var(--serif); color: #edf1e7; }
+.juego .cuaderno-sprites figcaption span { font: 10px monospace; color: #b2cacb; }
+.juego .cuaderno-sprites .cuaderno-cuadros { display: flex; flex-wrap: wrap; gap: 12px; min-height: 36px; align-items: center; margin-top: 10px; border-top: 1px solid #345361; padding-top: 10px; }
+.juego .cuaderno-cuadros a { display: inline-flex; padding: 3px; border: 1px solid transparent; }
+.juego .cuaderno-cuadros a:hover { border-color: #dfbc79; }
+.juego .juego-menu.menu-carta { background: #071b29; padding: 76px 36px 60px; overflow-y: auto; display: block; touch-action: pan-y; }
+.juego .menu-carta-interior { max-width: 1080px; margin: auto; }
+.juego .menu-carta-marca { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid #345361; padding-bottom: 16px; color: #b2cacb; font: 12px var(--sans); letter-spacing: .12em; }
+.juego .menu-carta-principal { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; padding: 36px 0; }
+.juego .menu-carta-numero { color: #dfbc79; font: 11px var(--sans); letter-spacing: .14em; margin: 0 0 20px; }
+.juego .menu-carta h1 { font: 500 clamp(48px, 6vw, 80px)/1 var(--serif); color: #edf1e7; margin: 0; letter-spacing: -.04em; }
+.juego .menu-carta h1 span { display: block; font: 400 19px/1.5 var(--serif); color: #b2cacb; margin-top: 12px; letter-spacing: 0; }
+.juego .menu-carta-descripcion { max-width: 430px; font-size: 16px; line-height: 1.7; color: #b2cacb; margin: 22px 0; }
+.juego .menu-carta-acciones { display: flex; flex-wrap: wrap; gap: 10px; }
+.juego .menu-carta-acciones button.juego-caja { border-radius: 3px !important; border-width: 1px; padding: 13px 18px; background: #102f40; border-color: #52707a; font-size: 14px; }
+.juego .menu-carta-acciones button.juego-caja.principal { background: #afcfba; color: #0a242e; border-color: #afcfba; }
+.juego .menu-carta-acciones button.juego-caja.principal:hover { background: #c8dfce; border-color: #c8dfce; }
+.juego .menu-carta-acciones button span { margin-left: 18px; }
+.juego .menu-carta-datos { margin: 18px 0 0; color: #8eafb8; font-size: 11px; line-height: 1.6; }
+.juego .menu-carta-mapa { margin: 0; border: 1px solid #345361; padding: 10px; background: #0b2435; }
+.juego .menu-carta-mapa canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; }
+.juego .menu-carta-mapa figcaption { padding: 10px 8px 4px; border-top: 1px solid #345361; color: #b2cacb; font: italic 15px var(--serif); }
+.juego .menu-carta-reparto { display: grid; grid-template-columns: repeat(4, 1fr); list-style: none; margin: 0; padding: 20px 0; border-block: 1px solid #345361; gap: 20px; }
+.juego .menu-carta-reparto li { display: flex; align-items: center; gap: 12px; }
+.juego .menu-carta-reparto img { object-fit: contain; image-rendering: pixelated; width: 80px; height: 56px; }
+.juego .menu-carta-reparto small { color: #dfbc79; font: 10px monospace; }
+.juego .menu-carta-reparto b { display: block; font: 500 20px var(--serif); color: #edf1e7; }
+.juego .menu-carta-reparto span { display: block; color: #b2cacb; font-size: 11px; }
+.juego .menu-carta-pie { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; padding: 16px 0; color: #8eafb8; font-size: 12px; }
+.juego .menu-carta-pie nav { display: flex; flex-wrap: wrap; gap: 18px; }
+.juego .menu-carta-pie button, .juego .menu-carta-pie a { color: #b2cacb; background: none; border: 0; border-radius: 0; box-shadow: none; font: inherit; padding: 5px 0; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.juego .menu-carta-pie button:hover, .juego .menu-carta-pie a:hover { color: #edf1e7; }
+@media (max-width: 760px) {
+  .juego .juego-menu.menu-carta { padding: 72px 20px 70px; }
+  .juego .menu-carta-principal { gap: 24px; grid-template-columns: 1fr; padding: 28px 0; }
+  .juego .menu-carta-mapa { max-width: 440px; width: 100%; box-sizing: border-box; }
+  .juego .menu-carta-reparto { grid-template-columns: 1fr 1fr; gap: 16px 8px; }
+  .juego .menu-carta-marca { font-size: 10px; letter-spacing: .06em; }
+  .juego .menu-carta-pie { gap: 8px; }
+}

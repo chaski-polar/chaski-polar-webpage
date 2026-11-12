@@ -12,12 +12,13 @@ import HudCardumen from '../features/juego/interfaz/HudCardumen'
 import { HudKiri, HudLumi, HudNara } from '../features/juego/interfaz/HudPrologo'
 import Final, { type ResultadoAnio } from '../features/juego/interfaz/Final'
 import Escritorio from '../features/juego/interfaz/Escritorio'
+import GaleriaSprites from '../features/juego/interfaz/GaleriaSprites'
 import { ESTRATEGIAS, mesesConDatos, PECES_INICIALES, type Estrategia, type Informe as DatosInforme, type Mes } from '../features/juego/logica/cardumen'
 import { crearEntrada, type Entrada } from '../features/juego/motor/entrada'
 import { crearMotor, type Motor } from '../features/juego/motor/escena'
 import { crearTurno } from '../features/juego/logica/escritorio'
 import { crearMar, type Mar } from '../features/juego/motor/mar'
-import { protagonistas } from '../features/juego/personajes/galeria'
+import MenuCardumen from '../features/juego/interfaz/MenuCardumen'
 import { precargarSprites } from '../features/juego/personajes/sprites'
 import { alCambiarSilencio, alternarSilencio, despertarAudio, detenerAmbiente, estaEnSilencio, iniciarAmbiente, sonar } from '../features/juego/motor/sonido'
 import '../features/juego/juego.css'
@@ -40,10 +41,10 @@ type Pantalla =
   | { tipo: 'cardumen'; generacion: number; peces: number; estrategia: Estrategia['id']; intento: number }
 
 const AYUDA: Record<EscenaPrologo | 'cardumen', string> = {
-  lumi: 'W/S o ↑/↓: subir y bajar · A/D o ←/→: a los lados',
+  lumi: 'W o Espacio: subir · S o C: bajar · A/D: a los lados',
   kiri: 'WASD o flechas: nadar',
   nara: 'WASD o flechas: nadar',
-  cardumen: 'WASD o flechas: nadar · Q/E: subir y bajar · Shift: impulso · C: juntar',
+  cardumen: 'WASD: nadar · Espacio: subir · C: bajar · Shift: impulso · F: juntar',
 }
 
 /** Juego: mundo 3D con personajes dibujados en 2D */
@@ -208,7 +209,7 @@ export default function JuegoPage() {
   // C junta o dispersa el cardumen
   useEffect(() => {
     if (pantalla.tipo !== 'cardumen') return
-    const tecla = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'c' && !e.repeat) setCompacto((x) => !x) }
+    const tecla = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'f' && !e.repeat) setCompacto((x) => !x) }
     addEventListener('keydown', tecla)
     return () => removeEventListener('keydown', tecla)
   }, [pantalla.tipo])
@@ -219,32 +220,16 @@ export default function JuegoPage() {
     : null
   const ayuda = pantalla.tipo === 'cardumen' ? AYUDA.cardumen : pantalla.tipo === 'prologo' ? AYUDA[pantalla.escena] : ''
 
+  if (new URLSearchParams(location.search).has('sprites')) return <div className="juego"><GaleriaSprites /></div>
   return <div className="juego" ref={contenedor}>
     <canvas className="juego-lienzo" ref={lienzo} aria-label="Escena del juego" />
     <Link className="juego-volver juego-caja" to="/">← Portada</Link>
     <button type="button" className="juego-sonido juego-caja" onClick={alternarSilencio} aria-pressed={!silencio}
-      aria-label={silencio ? 'Activar el sonido' : 'Silenciar'}>{silencio ? '🔇' : '🔊'}</button>
+      >{silencio ? 'Sonido: no' : 'Sonido: sí'}</button>
     {pantalla.tipo !== 'menu' && <button type="button" className="juego-menu-boton juego-caja" onClick={() => { setInforme(null); setVerFinal(false); setPantalla({ tipo: 'menu' }) }}>Menú</button>}
 
-    {pantalla.tipo === 'menu' && mar && <div className="juego-menu">
-      <div className="juego-menu-caja juego-caja">
-        <ul className="juego-protagonistas" aria-label="Protagonistas">
-          {protagonistas().map((p, i) => <li key={p.nombre} style={{ animationDelay: `${i * 0.35}s` }}>
-            <img src={p.src} alt="" width={84} height={84} /><b>{p.nombre}</b><small>{p.que}</small>
-          </li>)}
-        </ul>
-        <h1>Cardumen</h1>
-        <p>De la Antártida al mar peruano, en un océano que cambia con datos satelitales reales.</p>
-        <button type="button" className="juego-caja principal" onClick={() => prologo('lumi', true)}>Jugar la historia completa</button>
-        <button type="button" className="juego-caja" onClick={empezarCampana}>Solo el cardumen (1998–2026)</button>
-        <p className="juego-menu-escenas">Escenas del prólogo:
-          <button type="button" className="juego-caja" onClick={() => prologo('lumi', false)}>Lumi</button>
-          <button type="button" className="juego-caja" onClick={() => prologo('kiri', false)}>Kiri</button>
-          <button type="button" className="juego-caja" onClick={() => prologo('nara', false)}>Nara</button>
-        </p>
-        <p className="nota">Versión en desarrollo: personajes provisionales.</p>
-      </div>
-    </div>}
+    {pantalla.tipo === 'menu' && mar && <MenuCardumen historia={() => prologo('lumi', true)} cardumen={empezarCampana}
+      escena={(id) => prologo(id, false)} />}
 
     {pantalla.tipo === 'prologo' && pantalla.escena === 'lumi' && <HudLumi e={estadoLumi} />}
     {pantalla.tipo === 'prologo' && pantalla.escena === 'kiri' && <HudKiri comidos={comidos} />}
@@ -253,7 +238,7 @@ export default function JuegoPage() {
 
     <div className={`juego-aviso${aviso ? ' visible' : ''}`} aria-live="assertive">{aviso}</div>
     {pantalla.tipo === 'cardumen' && cartel && <div className="juego-cartel" role="status"><b>{cartel.mes}</b>{cartel.detalle && <span>{cartel.detalle}</span>}</div>}
-    {ayuda && <p className="juego-ayuda"><span className="solo-teclado">{ayuda} · </span>Arrastrar: girar la cámara</p>}
+    {ayuda && <p className="juego-ayuda"><span className="solo-teclado">{ayuda} · </span>Ratón: arrastra para girar la cámara, rueda para acercar</p>}
     <Dialogo />
 
     {pantalla.tipo === 'cardumen' && informe && mar && <Escritorio key={clave} datos={informe.datos}

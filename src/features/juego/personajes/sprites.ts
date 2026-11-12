@@ -1,6 +1,8 @@
-/* Imágenes de los personajes. Si existe public/assets/juego/sprites/<nombre>.png se usa esa imagen;
-   si no, el dibujo hecho en código. Así se pueden reemplazar los dibujos de uno en uno, sin tocar el código.
-   Las imágenes deben tener fondo transparente y, salvo el pingüino, el guanay y los retratos, mirar a la derecha. */
+/* Arte compartido por escenas, retratos y menú. Por defecto usa el pixel art original y sus cuadros.
+   ?arte=png permite comparar los PNG de public/assets/juego/sprites/ sin sustituir la dirección actual.
+   Las imágenes externas deben ser transparentes y, salvo pingüino, guanay y retratos, mirar a la derecha. */
+
+import * as px from './pixelart';
 
 export const NOMBRES_SPRITES = [
   "lumi", "kiri", "nara", "anchi", "anchoveta", "pinguino", "guanay", "lobo", "fito", "nutriente", "orbi", "gaia",
@@ -9,6 +11,27 @@ export type NombreSprite = (typeof NOMBRES_SPRITES)[number];
 
 const RUTA = "/assets/juego/sprites/";
 const cargadas = new Map<NombreSprite, HTMLCanvasElement>();
+const animaciones = new WeakMap<HTMLCanvasElement, readonly HTMLCanvasElement[]>();
+const dibujantes: Record<NombreSprite, () => HTMLCanvasElement[]> = {
+  lumi: px.lumiPixel, kiri: px.kiriPixel, nara: px.naraPixel,
+  anchi: px.anchiPixel, anchoveta: px.anchovetaPixel, pinguino: px.pinguinoPixel,
+  guanay: px.guanayPixel, lobo: px.loboPixel, fito: px.fitoPixel,
+  nutriente: px.nutrientePixel, orbi: px.orbiPixel, gaia: px.gaiaPixel,
+};
+
+/** El pixel art es la dirección actual. Los PNG anteriores solo se prueban con ?arte=png. */
+function prepararPixel(nombre: NombreSprite): HTMLCanvasElement {
+  let c = cargadas.get(nombre);
+  if (!c) {
+    const cuadros = dibujantes[nombre]();
+    c = cuadros[0]!;
+    animaciones.set(c, cuadros);
+    cargadas.set(nombre, c);
+  }
+  return c;
+}
+
+export const cuadrosSprite = (c: HTMLCanvasElement): readonly HTMLCanvasElement[] => animaciones.get(c) ?? [c];
 let precarga: Promise<void> | null = null;
 
 function cargar(nombre: NombreSprite): Promise<void> {
@@ -28,11 +51,14 @@ function cargar(nombre: NombreSprite): Promise<void> {
 
 /** Intenta cargar todas las imágenes una vez (las que falten se ignoran) */
 export function precargarSprites(): Promise<void> {
-  precarga ??= Promise.all(NOMBRES_SPRITES.map(cargar)).then(() => undefined);
+  precarga ??= new URLSearchParams(location.search).get('arte') === 'png'
+    ? Promise.all(NOMBRES_SPRITES.map(cargar)).then(() => undefined)
+    : Promise.resolve();
   return precarga;
 }
 
 /** La imagen del personaje si se cargó; si no, el dibujo de respaldo */
 export function sprite(nombre: NombreSprite, respaldo: () => HTMLCanvasElement): HTMLCanvasElement {
-  return cargadas.get(nombre) ?? respaldo();
+  if (new URLSearchParams(location.search).get('arte') === 'png') return cargadas.get(nombre) ?? respaldo();
+  return prepararPixel(nombre);
 }
