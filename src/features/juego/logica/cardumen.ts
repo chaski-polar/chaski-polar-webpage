@@ -36,8 +36,36 @@ export interface Mes {
   alimento: number;
   origen: EstadoMar["origen"];
   nino12: number | null;
+  /** temperatura del mar en la zona frente a lo normal (°C) */
+  anomaliaTemp: number | null;
   temporada: Temporada;
 }
+
+/** Estrategia que el jugador elige para la siguiente generación, como en el balance de Papers, Please.
+    Son decisiones de juego del cardumen, no rasgos heredados. Cada una tiene una ventaja y un costo. */
+export interface Estrategia {
+  id: "ninguna" | "profundo" | "costero" | "apretado";
+  nombre: string;
+  ventaja: string;
+  costo: string;
+  /** multiplicadores sobre las reglas */
+  gasto: number;
+  gastoCalido: number;
+  comida: number;
+  depredadores: number;
+  oxigeno: number;
+  velocidad: number;
+}
+
+const BASE = { gasto: 1, gastoCalido: 1, comida: 1, depredadores: 1, oxigeno: 1, velocidad: 1 };
+export const ESTRATEGIAS: Record<Estrategia["id"], Estrategia> = {
+  ninguna: { id: "ninguna", nombre: "Sin estrategia", ventaja: "", costo: "", ...BASE },
+  profundo: { id: "profundo", nombre: "Nadador profundo", ventaja: "Aguanta mucho mejor la falta de oxígeno.", costo: "Gasta más energía todo el año.", ...BASE, gasto: 1.1, oxigeno: 0.3 },
+  costero: { id: "costero", nombre: "Migrador costero", ventaja: "Nada más rápido y aprovecha más cada mancha de comida.", costo: "Sufre mucho cuando el mar está cálido.", ...BASE, comida: 1.2, velocidad: 1.2, gastoCalido: 1.5 },
+  apretado: { id: "apretado", nombre: "Cardumen apretado", ventaja: "Se defiende mejor de aves y lobos marinos.", costo: "Los peces compiten más por la comida.", ...BASE, comida: 0.85, depredadores: 0.6 },
+};
+/** se considera mar cálido para la estrategia "costero" desde esta anomalía de temperatura (°C) */
+const MAR_CALIDO = 1;
 
 export interface Cardumen {
   anio: number;
@@ -52,10 +80,19 @@ export interface Cardumen {
   /** lo que vivió el cardumen cada mes (para el informe) */
   historia: Mes[];
   terminado: boolean;
+  estrategia: Estrategia;
+  /** el año termina al llegar a este mes (12 = diciembre completo; menos si aún no hay datos) */
+  mesFin: number;
 }
 
-export function crearCardumen(anio: number, peces = PECES_INICIALES): Cardumen {
-  return { anio, mes: 0, tMes: 0, peces, energia: 0.8, compacto: false, perdidas: { hambre: 0, depredadores: 0, flota: 0, oxigeno: 0 }, historia: [], terminado: false };
+export function crearCardumen(anio: number, peces = PECES_INICIALES, estrategia: Estrategia = ESTRATEGIAS.ninguna, mesFin = 12): Cardumen {
+  return { anio, mes: 0, tMes: 0, peces, energia: 0.8, compacto: false, perdidas: { hambre: 0, depredadores: 0, flota: 0, oxigeno: 0 }, historia: [], terminado: false, estrategia, mesFin: Math.max(1, Math.min(12, mesFin)) };
+}
+
+/** Último mes con datos del año (1 a 12), para no jugar meses que los satélites aún no midieron */
+export function mesesConDatos(mar: Mar, anio: number): number {
+  for (let m = 12; m >= 1; m--) if (mar.indice(anio, m) >= 0) return m;
+  return 0;
 }
 
 /** Altura (y) del límite de la zona sin oxígeno: 0 es la superficie. Se hunde con El Niño y sube con agua fría */
@@ -88,7 +125,7 @@ export function temporadaDePesca(mar: Mar, anio: number, mes: number): Temporada
 export function condiciones(mar: Mar, anio: number, mes: number, zona: ZonaMar): Mes {
   const i = mar.indice(anio, mes + 1);
   const e = i >= 0 ? mar.estado(zona, i) : null;
-  return { zona, alimento: e?.alimento ?? 1, origen: e?.origen ?? "normal", nino12: e?.nino12 ?? null, temporada: temporadaDePesca(mar, anio, mes) };
+  return { zona, alimento: e?.alimento ?? 1, origen: e?.origen ?? "normal", nino12: e?.nino12 ?? null, anomaliaTemp: e?.anomaliaTemp ?? null, temporada: temporadaDePesca(mar, anio, mes) };
 }
 
 /** Quita una fracción del cardumen por una causa y la anota en el informe */
@@ -100,29 +137,31 @@ export function perder(c: Cardumen, causa: Causa, fraccion: number): number {
 }
 
 export function comer(c: Cardumen): void {
-  c.energia = Math.min(1, c.energia + REGLAS.energiaPorParche * (c.compacto ? REGLAS.factorCompacto : 1));
+  c.energia = Math.min(1, c.energia + REGLAS.energiaPorParche * c.estrategia.comida * (c.compacto ? REGLAS.factorCompacto : 1));
 }
 
 /** Pérdida por un ataque (ave o lobo marino) o por una red, según cómo va el cardumen */
 export function golpe(c: Cardumen, tipo: "ave" | "lobo" | "red"): number {
   const r = REGLAS[tipo];
-  return perder(c, tipo === "red" ? "flota" : "depredadores", c.compacto ? r.compacto : r.normal);
+  const base = c.compacto ? r.compacto : r.normal;
+  return tipo === "red" ? perder(c, "flota", base) : perder(c, "depredadores", base * c.estrategia.depredadores);
 }
 
 /** Avanza el tiempo: gasta energía, aplica hambre y falta de oxígeno. Devuelve true si empezó un mes nuevo.
     dtCalendario permite acelerar solo el paso de los meses (para probar) */
 export function avanzar(c: Cardumen, dt: number, bajoOxigeno: boolean, mes: Mes, dtCalendario = dt): boolean {
   if (c.terminado) return false;
-  c.energia = Math.max(0, c.energia - REGLAS.gastoEnergia * dt);
+  const calido = (mes.anomaliaTemp ?? 0) >= MAR_CALIDO;
+  c.energia = Math.max(0, c.energia - REGLAS.gastoEnergia * c.estrategia.gasto * (calido ? c.estrategia.gastoCalido : 1) * dt);
   if (c.energia <= 0) perder(c, "hambre", REGLAS.hambreFuerte * dt);
   else if (c.energia < 0.25) perder(c, "hambre", REGLAS.hambreLeve * dt);
-  if (bajoOxigeno) perder(c, "oxigeno", REGLAS.oxigeno * dt);
+  if (bajoOxigeno) perder(c, "oxigeno", REGLAS.oxigeno * c.estrategia.oxigeno * dt);
   c.tMes += dtCalendario;
   if (c.tMes < SEGUNDOS_POR_MES) return false;
   c.historia.push(mes);
   c.tMes = 0;
   c.mes++;
-  if (c.mes >= 12) { c.mes = 11; c.terminado = true; }
+  if (c.mes >= c.mesFin) { c.mes = c.mesFin - 1; c.terminado = true; }
   return true;
 }
 
@@ -137,6 +176,10 @@ export interface Informe {
   mesesObservados: number;
   vedas: number;
   mesesTemporada: number;
+  /** índice Niño 1+2 promedio de los meses jugados */
+  ninoPromedio: number | null;
+  mesesJugados: number;
+  estrategia: Estrategia["id"];
 }
 
 export function informe(c: Cardumen, inicial: number): Informe {
@@ -147,5 +190,50 @@ export function informe(c: Cardumen, inicial: number): Informe {
     mesesObservados: h.filter((m) => m.origen === "observado").length,
     vedas: h.filter((m) => m.temporada === "veda").length,
     mesesTemporada: h.filter((m) => m.temporada !== "fuera").length,
+    ninoPromedio: (() => { const v = h.map((m) => m.nino12).filter((x): x is number => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; })(),
+    mesesJugados: h.length,
+    estrategia: c.estrategia.id,
   };
+}
+
+/** Qué explica el año según los datos. "Una tendencia" nunca es la respuesta: desde 1998 no hay tendencias
+    significativas de clorofila frente al Perú (resultado del proyecto); dominan los golpes de El Niño. */
+export type Diagnostico = "nino" | "suerte" | "bueno";
+
+/** El año visto por el satélite, sin importar por dónde nadó el jugador: costa central e índice Niño 1+2 */
+export interface AnioDelMar {
+  anio: number;
+  meses: number;
+  /** comida promedio en la costa central (Chimbote y Callao), 1 = normal */
+  alimentoCentro: number;
+  /** Niño 1+2 promedio y máximo del año */
+  nino: number | null;
+  ninoMax: number | null;
+  /** meses con Niño 1+2 de +1 °C o más, y la peor comida en la costa central en esos meses */
+  mesesNino: number;
+  peorConNino: number | null;
+}
+export function anioDelMar(mar: Mar, anio: number, meses: number): AnioDelMar {
+  const centro: number[] = [], nino: number[] = [], conNino: number[] = [];
+  for (let m = 1; m <= meses; m++) {
+    const i = mar.indice(anio, m);
+    if (i < 0) continue;
+    const comida = (mar.estado("chimbote", i).alimento + mar.estado("callao", i).alimento) / 2;
+    centro.push(comida);
+    const n = mar.estado("chimbote", i).nino12;
+    if (n != null) { nino.push(n); if (n >= 1) conNino.push(comida); }
+  }
+  const prom = (v: number[]) => (v.length ? v.reduce((a, b) => a + b, 0) / v.length : null);
+  return {
+    anio, meses: centro.length, alimentoCentro: prom(centro) ?? 1, nino: prom(nino), ninoMax: nino.length ? Math.max(...nino) : null,
+    mesesNino: conNino.length, peorConNino: conNino.length ? Math.min(...conNino) : null,
+  };
+}
+
+/** El Niño explica el año si hubo meses con Niño 1+2 ≥ +1 °C y en ellos la comida de la costa central cayó fuerte;
+    así se reconocen también los golpes cortos, como el Niño costero de 2017 */
+export function diagnosticar(a: AnioDelMar): Diagnostico {
+  if (a.mesesNino > 0 && (a.peorConNino ?? 1) < 0.7) return "nino";
+  if (a.alimentoCentro < 0.9) return "suerte";
+  return "bueno";
 }

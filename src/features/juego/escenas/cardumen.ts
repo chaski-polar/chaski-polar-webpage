@@ -58,6 +58,9 @@ export interface OpcionesCardumen {
   compacto: () => boolean;
   /** acelera el calendario para probar (1 = normal) */
   rapidez?: number;
+  estrategia?: L.Estrategia;
+  /** el año termina al completar este mes (12 = diciembre) */
+  mesFin?: number;
 }
 
 interface Parche { p: Personaje; zona: ZonaMar; activo: boolean; espera: number; fase: number }
@@ -122,7 +125,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
   return (motor) => {
     const { escena, camara, renderer } = motor;
     const { capaOxigeno } = crearMundo(escena);
-    const c = L.crearCardumen(o.anio, o.peces);
+    const c = L.crearCardumen(o.anio, o.peces, o.estrategia, o.mesFin);
     const inicial = o.peces;
 
     const anchi = crearPersonaje(escena, dibujarAnchi(), { ancho: 2.2, alto: 2.2 });
@@ -207,7 +210,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
         const d = detenido ? { x: 0, y: 0 } : entrada.direccion();
         mov.set(0, 0, 0).addScaledVector(seguidor.adelante, d.y).addScaledVector(seguidor.derecha, d.x);
         if (mov.lengthSq() > 1) mov.normalize();
-        mov.multiplyScalar(VELOCIDAD * (c.compacto ? 0.85 : 1));
+        mov.multiplyScalar(VELOCIDAD * c.estrategia.velocidad * (c.compacto ? 0.85 : 1));
         mov.y = detenido ? 0 : entrada.vertical() * VELOCIDAD_VERTICAL;
         vel.lerp(mov, 1 - Math.pow(0.003, dt));
         anchi.posicion.addScaledVector(vel, dt);
