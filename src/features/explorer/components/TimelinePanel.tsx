@@ -56,10 +56,10 @@ export function TimelinePanel() {
       <label className="timeline-variable"><span>{opciones.length ? 'Dato' : 'Pacífico Sur'}</span>{opciones.length
         ? <select value={variable} onChange={(e) => setVariable(e.target.value)}>{opciones.map((x) => <option key={x.id} value={x.id}>{x.nombre} · {x.unidad}</option>)}</select>
         : <span className="timeline-unavailable">Sin parámetros regionales disponibles</span>}</label>
-      <div className="timeline-regions col-span-full flex flex-row flex-wrap items-center justify-start gap-1 text-control text-ice-300" role="group" aria-label="Apartados de exploración">
+      <div className="timeline-regions order-3 basis-full flex flex-row flex-wrap items-center justify-start gap-1 text-control text-ice-300" role="group" aria-label="Apartados de exploración">
         <span>Zonas:</span>
-        <button className="control-pill" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Océano Austral y Antártida</button>
-        <button className="control-pill" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt y mar peruano</button>
+        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Océano Austral y Antártida</button>
+        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt y mar peruano</button>
       </div>
       <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>
