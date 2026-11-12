@@ -56,10 +56,10 @@ export function TimelinePanel() {
       <label className="timeline-variable"><span>{opciones.length ? 'Variable' : 'South Pacific'}</span>{opciones.length
         ? <select value={variable} onChange={(e) => setVariable(e.target.value)}>{opciones.map((x) => <option key={x.id} value={x.id}>{x.nombre} · {x.unidad}</option>)}</select>
         : <span className="timeline-unavailable">Sin parámetros regionales disponibles</span>}</label>
-      <div className="timeline-regions order-3 basis-full flex flex-row flex-wrap items-center justify-start gap-1 text-control text-ice-300" role="group" aria-label="Apartados de exploración">
+      <div className="timeline-regions flex flex-row flex-wrap items-center justify-center gap-1 text-control text-ice-300" role="group" aria-label="Apartados de exploración">
         <span>Zones:</span>
-        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Southern Ocean & Antarctica</button>
-        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt & Peruvian sea</button>
+        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-700/45 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Southern Ocean & Antarctica</button>
+        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-700/45 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt & Peruvian sea</button>
       </div>
       <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>
@@ -72,7 +72,12 @@ export function TimelinePanel() {
         </div>
         <div className="timeline-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={serie} margin={{ top: 14, right: 0, bottom: 0, left: 0 }} barCategoryGap={0}>
           <XAxis dataKey="month" hide />
-          <Tooltip cursor={false} formatter={(x) => [typeof x === 'number' ? `${x >= 0 ? '+' : '−'}${nf(2).format(Math.abs(x))}` : 'sin dato', `${v.nombre} frente a lo normal`]} labelFormatter={(i) => etiquetaMes(modelo.mes(Number(i)))} />
+          <Tooltip cursor={false} isAnimationActive={false} position={{ y: -36 }} wrapperStyle={{ zIndex: 20 }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null
+              const x = payload[0]?.value
+              return <div className="tip whitespace-nowrap">{etiquetaMes(modelo.mes(Number(label)))} · <b>{typeof x === 'number' ? `${x >= 0 ? '+' : '−'}${nf(2).format(Math.abs(x))}` : 'no data'}</b> vs. normal</div>
+            }} />
           <Bar dataKey="value" isAnimationActive={false}>{serie.map((d) => <Cell key={d.month} fill={d.color} />)}</Bar>
         </BarChart></ResponsiveContainer></div>
         <input className="timeline-range" type="range" min={i0} max={ultimo} step={1} value={month} aria-label="Mes" onChange={(e) => { setPlaying(false); setMonth(Number(e.target.value)) }} />

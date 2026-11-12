@@ -89,7 +89,9 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .siguiente-paso { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--frio); background: rgba(12, 44, 74, .6); border-radius: 0 var(--r-chico) var(--r-chico) 0; color: var(--niebla); max-width: 72ch; }
 .siguiente-paso strong { color: var(--hielo); }
 .vista-nota { font-size: .74rem; }
-.timeline-topline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
+/* el panel lateral usa el texto del panel; sus pestañas, el texto de control */
+.relato { font-size: var(--texto-panel); }
+.relato [role="tab"] { font-size: var(--texto-control); line-height: 1.25; }
 .variable-meta { color: var(--tenue); font-size: var(--texto-pequeno); }
 .timeline-unavailable { color: var(--tenue); font-size: var(--texto-secundario); }
 .etq { position: absolute; width: 0; height: 0; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; transition: opacity .25s; font: 700 13px/1.2 var(--sans); }

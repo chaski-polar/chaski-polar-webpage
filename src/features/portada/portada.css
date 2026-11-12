@@ -1,8 +1,8 @@
 /* Portada: todas las reglas van dentro de .portada para no mezclarse con el explorador */
 @font-face { font-family: "Dancing Script Local"; src: url("/assets/fonts/dancing-script-600.ttf") format("truetype"); font-style: normal; font-weight: 600; font-display: swap; }
 .portada { --tinta: #1d2b36; --crema: #f7f3e8; --acento: #ff8a5c; --oscuro: #02040a;
-  background: var(--oscuro); color: #fff; font-family: "Trebuchet MS", system-ui, sans-serif; }
-.portada h1, .portada h2 { font-family: inherit; font-weight: 700; line-height: 1.2; letter-spacing: normal; }
+  background: var(--oscuro); color: #fff; font-family: var(--font-body); }
+.portada h1, .portada h2 { font-family: var(--font-display); font-weight: 500; line-height: 1.2; letter-spacing: normal; }
 
 .portada #escena { position: fixed; inset: 0; display: block; }
 .portada .portada-largo { height: 900vh; }

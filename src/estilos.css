@@ -19,8 +19,9 @@
   /* tipografía compartida con los tokens de la aplicación */
   --serif: var(--font-display, "Newsreader", Georgia, serif);
   --sans: var(--font-body, "Atkinson Hyperlegible", system-ui, sans-serif);
-  --texto-base: 1.0625rem;
-  --texto-control: var(--texto-base);
+  --texto-base: 1rem;
+  --texto-panel: .95rem; /* texto corrido del panel lateral */
+  --texto-control: .9rem; /* botones, selectores y pestañas */
   --texto-secundario: .85rem;
   --texto-pequeno: .78rem;
   --texto-micro: .72rem;
@@ -150,3 +151,6 @@ select {
   .marca span { display: none; }
   .nav a { padding: 6px 11px; }
 }
+
+/* tooltips de los gráficos: siguen al cursor sin retraso y no lo interceptan (si no, parpadean) */
+.recharts-tooltip-wrapper { pointer-events: none !important; transition: none !important; }
