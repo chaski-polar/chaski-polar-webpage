@@ -7,6 +7,8 @@ import { espejo, textura } from "./dibujo";
 export interface Personaje {
   readonly sprite: THREE.Sprite;
   readonly posicion: THREE.Vector3;
+  /** multiplica el tamaño del dibujo (por ejemplo, para que crezca) */
+  escala: number;
   /** anima el dibujo según su velocidad; "derecha" es la derecha de la cámara */
   animar(t: number, velocidad: THREE.Vector3, derecha: THREE.Vector3, velocidadMax: number): void;
   /** parpadeo cuando recibe un golpe */
@@ -41,16 +43,17 @@ export function crearPersonaje(escena: THREE.Scene, dibujo: HTMLCanvasElement, o
   }
   let haciaDerecha = true;
 
-  return {
+  const p: Personaje = {
     sprite,
     posicion: sprite.position,
+    escala: 1,
     animar(t, vel, derecha, max) {
       if (vel.lengthSq() > 0.2) {
         haciaDerecha = vel.dot(derecha) >= 0;
         material.map = haciaDerecha ? derechaTex : izquierdaTex;
       }
       const mueve = Math.min(1, vel.length() / Math.max(0.001, max));
-      sprite.scale.set(o.ancho * (1 - 0.06 * mueve * Math.sin(t * 14)), o.alto * (1 + 0.08 * mueve * Math.sin(t * 14)), 1);
+      sprite.scale.set(o.ancho * p.escala * (1 - 0.06 * mueve * Math.sin(t * 14)), o.alto * p.escala * (1 + 0.08 * mueve * Math.sin(t * 14)), 1);
       material.rotation = (haciaDerecha ? -1 : 1) * 0.12 * mueve * Math.sin(t * 7);
       if (sombra) sombra.position.set(sprite.position.x, sombra.position.y, sprite.position.z);
     },
@@ -58,4 +61,5 @@ export function crearPersonaje(escena: THREE.Scene, dibujo: HTMLCanvasElement, o
       material.opacity = activo && Math.floor(t * 12) % 2 ? 0.35 : 1;
     },
   };
+  return p;
 }

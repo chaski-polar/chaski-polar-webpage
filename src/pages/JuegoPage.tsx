@@ -38,7 +38,7 @@ type Pantalla =
   | { tipo: 'cardumen'; generacion: number; peces: number; estrategia: Estrategia['id']; intento: number }
 
 const AYUDA: Record<EscenaPrologo | 'cardumen', string> = {
-  lumi: 'WASD o flechas: moverse · Q/E: subir y bajar',
+  lumi: 'W/S o ↑/↓: subir y bajar · A/D o ←/→: a los lados',
   kiri: 'WASD o flechas: nadar',
   nara: 'WASD o flechas: nadar',
   cardumen: 'WASD o flechas: nadar · Q/E: subir y bajar · C: juntar',

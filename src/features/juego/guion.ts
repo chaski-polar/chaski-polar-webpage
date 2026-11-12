@@ -28,7 +28,7 @@ export function introLumi(mar: Mar): Linea[] {
     { quien: "orbi", texto: "Hola, soy ORBI, un satélite. Desde aquí arriba mido el color del mar: donde hay fitoplancton, el mar se ve más verde." },
     ...(dato ? [{ quien: "orbi" as const, texto: `${dato} Es primavera y el hielo marino empieza a abrirse.` }] : []),
     { quien: "gaia", texto: "Lumi es una diatomea, un tipo de fitoplancton. Para crecer necesita luz, que llega desde arriba, y nutrientes, que suben desde abajo." },
-    { quien: "gaia", texto: "Busca las chispas azules y vuelve a la luz. Bajo el hielo casi no llega el sol. Cuando estés llena, te dividirás. WASD para moverte; Q sube y E baja." },
+    { quien: "gaia", texto: "Busca las chispas azules y vuelve a la luz. Bajo el hielo casi no llega el sol. Cuando estés llena, te dividirás. W sube, S baja, y A y D te llevan a los lados." },
   ];
 }
 
