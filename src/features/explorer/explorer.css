@@ -6,7 +6,7 @@
 .nota-historia b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.15rem; margin-bottom: 4px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
-  font: inherit; font-size: .9rem; cursor: pointer; padding: 7px 14px; border-radius: 999px;
+  font: inherit; font-size: .9rem; cursor: pointer; padding: 7px 14px; border-radius: 6px;
   border: 1px solid var(--linea); background: var(--profundo); color: var(--hielo);
   transition: background-color .2s, border-color .2s, color .2s; touch-action: manipulation;
 }
@@ -132,7 +132,7 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 
 /* ---------- línea de tiempo ---------- */
 .timeline-events { pointer-events: auto; }
-.timeline-events button { position: absolute; transform: translateX(-50%); padding: 1px 7px; border: 1px solid var(--nino); border-radius: 999px; background: rgba(7, 30, 51, .9); color: var(--nino); font: inherit; font-size: .7rem; line-height: 1.2; cursor: pointer; }
+.timeline-events button { position: absolute; transform: translateX(-50%); padding: 1px 7px; border: 1px solid var(--nino); border-radius: 4px; background: rgba(7, 30, 51, .9); color: var(--nino); font: inherit; font-size: .7rem; line-height: 1.2; cursor: pointer; }
 .timeline-events button:hover, .timeline-events button[aria-current="true"] { background: var(--nino); color: var(--abismo); }
 .timeline-legend .ley-escala { flex: 1; min-width: 0; }
 .timeline-legend .rampa { height: 7px; }

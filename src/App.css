@@ -27,8 +27,8 @@
 #globo canvas { display: block; }
 .globe-toolbar { position: absolute; z-index: 7; top: 16px; left: 16px; display: grid; gap: 8px; max-width: 380px; }
 .globe-toolbar p { margin: 0; color: var(--niebla); font-size: .85rem; }
-.view-toggle { display: inline-flex; width: fit-content; padding: 4px; border: 1px solid var(--linea); border-radius: 14px; background: rgba(7, 30, 51, .88); backdrop-filter: blur(10px); }
-.view-toggle button { display: grid; gap: 2px; padding: 8px 14px; border: 0; border-radius: 10px; background: transparent; color: var(--niebla); font: inherit; text-align: left; cursor: pointer; }
+.view-toggle { display: inline-flex; width: fit-content; padding: 4px; border: 1px solid var(--linea); border-radius: 8px; background: rgba(7, 30, 51, .88); backdrop-filter: blur(10px); }
+.view-toggle button { display: grid; gap: 2px; padding: 8px 14px; border: 0; border-radius: 5px; background: transparent; color: var(--niebla); font: inherit; text-align: left; cursor: pointer; }
 .view-toggle button:hover, .view-toggle button.is-active { background: var(--hielo); color: var(--abismo); }
 .view-toggle small { font-size: .72rem; opacity: .75; }
 .timeline-panel { position: absolute; z-index: 6; left: 5%; right: 5%; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; gap: 8px; padding: 12px 16px 10px; border: 1px solid var(--linea); border-radius: 16px; background: rgba(12, 44, 74, .9); backdrop-filter: blur(12px); }
@@ -54,7 +54,7 @@
 .leyenda { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; font-size: .82rem; color: var(--niebla); }
 .leyenda .rampa { height: 7px; }
 .zonas-inferior { grid-column: 1 / -1; display: flex; gap: 6px; overflow-x: auto; padding: 2px 0; scrollbar-width: thin; }
-.zona-punto { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 5px 8px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--niebla); font: inherit; font-size: .78rem; cursor: pointer; white-space: nowrap; }
+.zona-punto { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 5px 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--niebla); font: inherit; font-size: .78rem; cursor: pointer; white-space: nowrap; }
 .zona-punto:hover, .zona-punto[aria-pressed=true] { color: var(--hielo); background: rgba(63, 194, 140, .12); border-color: var(--fito); }
 .zona-punto .punto, .fila-zona .punto { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--fito); border: 1px solid rgba(234, 243, 245, .7); }
 .lista-zonas { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }

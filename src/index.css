@@ -14,7 +14,7 @@
   --font-display: "Newsreader", Georgia, serif;
   --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
   --radius-card: 14px;
-  --radius-pill: 999px;
+  --radius-pill: 6px; /* botones: esquinas poco redondeadas en toda la página */
 }
 
 @layer components {

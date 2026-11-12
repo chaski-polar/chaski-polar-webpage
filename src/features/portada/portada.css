@@ -11,9 +11,10 @@
 .portada .portada-seccion h1 { font-size: clamp(26px, 4.6vw, 56px); margin: 0 0 6px; letter-spacing: 2px; }
 .portada .portada-seccion h2 { font-size: clamp(22px, 3.4vw, 34px); margin: 0 0 10px; color: var(--acento); }
 .portada .portada-seccion p { font-size: 17px; line-height: 1.55; margin: 6px 0; }
-.portada .portada-boton { display: inline-block; margin: 14px 6px 0; padding: 12px 18px; background: var(--crema); color: var(--tinta); border: 4px solid var(--tinta);
-  border-radius: 14px; font: inherit; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 4px 4px 0 var(--tinta); text-decoration: none; }
-.portada .portada-boton:hover, .portada .portada-boton:focus-visible { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--tinta); outline: none; }
+.portada .portada-boton { display: inline-block; margin: 14px 6px 0; padding: 12px 20px; background: #133c61; color: #eaf3f5; border: 1px solid #63cde8;
+  border-radius: 6px; font: inherit; font-weight: bold; font-size: 16px; cursor: pointer; text-decoration: none; text-shadow: none; transition: background-color .15s; }
+.portada .portada-boton:hover { background: #24507a; }
+.portada .portada-boton:focus-visible { outline: 2px solid #63cde8; outline-offset: 3px; }
 .portada .medidor { position: fixed; top: 15vh; bottom: 15vh; width: 70px; display: flex; flex-direction: column; align-items: center;
   font-size: 12px; color: rgba(255, 255, 255, .8); pointer-events: none; }
 .portada .medidor.izq { left: 12px; } .portada .medidor.der { right: 12px; }
