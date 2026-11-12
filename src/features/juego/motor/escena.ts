@@ -67,12 +67,20 @@ export function crearMotor(lienzo: HTMLCanvasElement): Motor {
     escena.background = null;
   };
 
+  // ?depurar=1 guarda en window.__juego cuántas piezas y triángulos se dibujan por cuadro (para medir rendimiento)
+  const depurar = new URLSearchParams(location.search).has("depurar")
+    ? (calls: number, tris: number) => { (window as unknown as { __juego?: unknown }).__juego = { calls, tris }; }
+    : null;
+  // el contorno dibuja la escena dos veces: el conteo se reinicia a mano una vez por cuadro
+  renderer.info.autoReset = false;
   const reloj = new THREE.Clock();
   renderer.setAnimationLoop(() => {
     const dt = Math.min(0.1, reloj.getDelta());
     if (!actual) return;
     actual.actualizar(dt, reloj.elapsedTime);
+    renderer.info.reset();
     contorno.render(escena, camara);
+    if (depurar) depurar(renderer.info.render.calls, renderer.info.render.triangles);
   });
 
   const motor: Motor = {

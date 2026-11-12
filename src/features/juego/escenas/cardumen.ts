@@ -67,7 +67,9 @@ export interface OpcionesCardumen {
 interface Parche { p: Personaje; zona: ZonaMar; activo: boolean; espera: number; fase: number }
 interface Seguidor { p: Personaje; ox: number; oy: number; oz: number; fase: number }
 
-function crearMundo(escena: THREE.Scene): { capaOxigeno: THREE.Mesh; superficie: THREE.Mesh } {
+interface Mundo { capaOxigeno: THREE.Mesh; animar(t: number): void }
+
+function crearMundo(escena: THREE.Scene): Mundo {
   escena.background = AGUA_FRIA.clone();
   escena.fog = new THREE.Fog(AGUA_FRIA.getHex(), 12, 46);
   escena.add(new THREE.HemisphereLight(0xe6f6ff, 0x1d3a4a, 1.15));
@@ -76,9 +78,17 @@ function crearMundo(escena: THREE.Scene): { capaOxigeno: THREE.Mesh; superficie:
   escena.add(sol);
 
   const largo = -Z_MIN + 60;
-  const fondo = new THREE.Mesh(new THREE.PlaneGeometry(80, largo, 20, 60).rotateX(-Math.PI / 2), toon(0xc2ad86));
-  const pf = fondo.geometry.getAttribute("position");
-  for (let i = 0; i < pf.count; i++) pf.setY(i, Math.random() * 0.5 + Math.max(0, pf.getX(i) - 6) * 0.9); // sube hacia la costa
+  // fondo de arena con ondulaciones que sube hacia la costa; manchas más oscuras de limo
+  const fondo = new THREE.Mesh(new THREE.PlaneGeometry(80, largo, 40, 120).rotateX(-Math.PI / 2), toon(0xffffff, { vertexColors: true }));
+  const pf = fondo.geometry.getAttribute("position"), colores = new Float32Array(pf.count * 3);
+  const arena = new THREE.Color(0xd2bb8e), limo = new THREE.Color(0x9c8f6f), cf = new THREE.Color();
+  for (let i = 0; i < pf.count; i++) {
+    const x = pf.getX(i), z = pf.getZ(i);
+    pf.setY(i, Math.sin(x * 0.9 + Math.sin(z * 0.15) * 2) * 0.12 + Math.random() * 0.25 + Math.max(0, x - 6) * 0.9);
+    cf.copy(arena).lerp(limo, (Math.sin(x * 0.21) * Math.cos(z * 0.13) + 1) * 0.35);
+    colores.set([cf.r, cf.g, cf.b], i * 3);
+  }
+  fondo.geometry.setAttribute("color", new THREE.BufferAttribute(colores, 3));
   fondo.geometry.computeVertexNormals();
   fondo.position.set(0, -14, Z_MIN / 2);
   escena.add(fondo);
@@ -86,12 +96,67 @@ function crearMundo(escena: THREE.Scene): { capaOxigeno: THREE.Mesh; superficie:
   const tierra = new THREE.Mesh(new THREE.BoxGeometry(20, 6, largo), toon(0xd9b98a)); // costa desértica
   tierra.position.set(22, 2, Z_MIN / 2);
   escena.add(tierra);
-  for (let i = 0; i < 40; i++) { // rocas
-    const r = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), toon(0x6d6a63));
-    r.position.set(azar(-18, 8), -13.6, azar(Z_MIN, Z_MAX));
-    r.scale.set(azar(0.8, 2.5), azar(0.5, 1.5), azar(0.8, 2.5));
-    escena.add(r);
+  // rocas, estrellas de mar y erizos: cada tipo es un solo dibujo repetido (instancias), con su contorno
+  const repetir = (geo: THREE.BufferGeometry, n: number, colores: number[], colocar: (i: number, pos: THREE.Vector3, esc: THREE.Vector3, rot: THREE.Euler) => void) => {
+    const malla = new THREE.InstancedMesh(geo, toon(0xffffff), n);
+    const m = new THREE.Matrix4(), pos = new THREE.Vector3(), esc = new THREE.Vector3(1, 1, 1), rot = new THREE.Euler(), q = new THREE.Quaternion(), col = new THREE.Color();
+    for (let i = 0; i < n; i++) {
+      esc.set(1, 1, 1); rot.set(0, 0, 0);
+      colocar(i, pos, esc, rot);
+      malla.setMatrixAt(i, m.compose(pos, q.setFromEuler(rot), esc));
+      malla.setColorAt(i, col.setHex(colores[i % colores.length]!));
+    }
+    escena.add(malla);
+  };
+  const enFondo = (x: number) => -14 + Math.max(0, x - 6) * 0.9;
+  repetir(new THREE.IcosahedronGeometry(1, 0), 60, [0x6d6a63, 0x5b5e5f, 0x7a6f62], (i, pos, esc, rot) => { // rocas, más juntas cerca de la costa
+    const x = i % 3 ? azar(0, 9) : azar(-18, 9);
+    pos.set(x, enFondo(x) + 0.4, azar(Z_MIN, Z_MAX));
+    esc.set(azar(0.8, 2.5), azar(0.5, 1.6), azar(0.8, 2.5));
+    rot.set(azar(0, 3), azar(0, 3), 0);
+  });
+  repetir(new THREE.ConeGeometry(0.4, 0.15, 5), 40, [0xe4572e, 0xf39c12, 0xd96aa7], (_i, pos) => { const x = azar(-16, 8); pos.set(x, enFondo(x) + 0.3, azar(Z_MIN, Z_MAX)); }); // estrellas de mar
+  repetir(new THREE.IcosahedronGeometry(0.3, 0), 30, [0x7b2d8e, 0x3b2a4f], (_i, pos) => { const x = azar(-16, 8); pos.set(x, enFondo(x) + 0.3, azar(Z_MIN, Z_MAX)); }); // erizos
+  // algas: un solo dibujo repetido (instancias); se mecen en la tarjeta gráfica, más arriba más se mueven
+  const N_ALGAS = 90;
+  const tiempoAlgas = { value: 0 };
+  const geoAlga = new THREE.CylinderGeometry(0.1, 0.16, 6, 5, 8).translate(0, 3, 0);
+  const matAlga = sinContorno(toon(0xffffff));
+  matAlga.onBeforeCompile = (sh) => {
+    sh.uniforms.uT = tiempoAlgas;
+    sh.vertexShader = "uniform float uT;\n" + sh.vertexShader.replace("#include <begin_vertex>",
+      "#include <begin_vertex>\nfloat fase = dot(instanceMatrix[3].xyz, vec3(0.7, 0.0, 1.3));\nfloat h = position.y / 6.0;\n" +
+      "transformed.x += sin(uT * 0.9 + fase + h * 2.5) * 0.7 * h * h;\ntransformed.z += cos(uT * 0.7 + fase) * 0.3 * h * h;");
+  };
+  const algas = new THREE.InstancedMesh(geoAlga, matAlga, N_ALGAS);
+  const verdes = [0x6b8f3a, 0x8a9a3b, 0x557a35].map((h) => new THREE.Color(h));
+  const m4 = new THREE.Matrix4(), escala = new THREE.Vector3(), q = new THREE.Quaternion(), pAlga = new THREE.Vector3();
+  for (let i = 0; i < N_ALGAS; i++) {
+    const x = i % 4 ? azar(1, 9) : azar(-14, 1);
+    pAlga.set(x, -14 + Math.max(0, x - 6) * 0.9, azar(Z_MIN, Z_MAX));
+    escala.set(azar(0.8, 1.3), azar(0.6, 1.4), azar(0.8, 1.3));
+    algas.setMatrixAt(i, m4.compose(pAlga, q, escala));
+    algas.setColorAt(i, verdes[i % 3]!);
   }
+  escena.add(algas);
+  // rayos de luz desde la superficie
+  const rayos: THREE.Mesh[] = [];
+  for (let i = 0; i < 14; i++) {
+    const r = new THREE.Mesh(new THREE.CylinderGeometry(0.5, azar(2, 3.5), 14, 7, 1, true),
+      sinContorno(new THREE.MeshBasicMaterial({ color: 0xe6f8ff, transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })));
+    r.position.set(azar(-16, 8), -7, azar(Z_MIN, Z_MAX));
+    r.rotation.z = 0.18;
+    escena.add(r);
+    rayos.push(r);
+  }
+  // plancton y partículas en suspensión
+  const n = 2500, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) pos.set([azar(-18, 10), azar(-13.5, -0.3), azar(Z_MIN, Z_MAX)], i * 3);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const plancton = new THREE.Points(geo, sinContorno(new THREE.PointsMaterial({ color: 0xe9fff4, size: 0.07, transparent: true, opacity: 0.6, depthWrite: false })));
+  escena.add(plancton);
+
   const superficie = new THREE.Mesh(new THREE.PlaneGeometry(80, largo).rotateX(Math.PI / 2),
     sinContorno(new THREE.MeshBasicMaterial({ color: 0xbfe9f5, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false })));
   superficie.position.set(0, 0, Z_MIN / 2);
@@ -110,7 +175,15 @@ function crearMundo(escena: THREE.Scene): { capaOxigeno: THREE.Mesh; superficie:
     s.position.set(-4, -1.6, -i * LARGO_ZONA - 2);
     escena.add(s);
   });
-  return { capaOxigeno, superficie };
+
+  return {
+    capaOxigeno,
+    animar(t) {
+      tiempoAlgas.value = t;
+      rayos.forEach((r, i) => { (r.material as THREE.MeshBasicMaterial).opacity = 0.045 + 0.025 * Math.sin(t * 0.7 + i); });
+      plancton.position.y = Math.sin(t * 0.3) * 0.3;
+    },
+  };
 }
 
 function crearBolichera(): THREE.Group {
@@ -125,18 +198,19 @@ function crearBolichera(): THREE.Group {
 export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardumen, o: OpcionesCardumen): (motor: Motor) => Escena {
   return (motor) => {
     const { escena, camara, renderer } = motor;
-    const { capaOxigeno } = crearMundo(escena);
+    const mundo = crearMundo(escena);
+    const { capaOxigeno } = mundo;
     const c = L.crearCardumen(o.anio, o.peces, o.estrategia, o.mesFin);
     const inicial = o.peces;
 
-    const anchi = crearPersonaje(escena, dibujarAnchi(), { ancho: 2.2, alto: 2.2 });
+    const anchi = crearPersonaje(escena, dibujarAnchi(), { ancho: 2.6, alto: 2.6 });
     anchi.posicion.set(-3, -3, centroZona(ZONA_INICIAL));
     const seguidor = crearSeguidor(camara, renderer.domElement, anchi.posicion, { distancia: 15, giro: 0.9 });
 
     // el cardumen: un dibujo por cada PECES_POR_DIBUJO peces
     const dibujoPez = dibujarAnchoveta();
     const peces: Seguidor[] = Array.from({ length: DIBUJOS_MAX }, () => {
-      const p = crearPersonaje(escena, dibujoPez, { ancho: 0.9, alto: 0.9 });
+      const p = crearPersonaje(escena, dibujoPez, { ancho: azar(1.15, 1.45), alto: azar(1.15, 1.45) });
       p.posicion.copy(anchi.posicion);
       return { p, ox: azar(-1, 1), oy: azar(-1, 1), oz: azar(-1, 1), fase: azar(0, 6) };
     });
@@ -179,8 +253,9 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
     const ave = { estado: "espera" as "espera" | "aviso" | "picada", t: azar(5, 9), objetivo: new THREE.Vector3() };
 
     const lobo = crearPersonaje(escena, dibujarLobo(), { ancho: 3.6, alto: 3.6 });
-    lobo.posicion.set(-10, -6, centroZona(ZONA_INICIAL) - 10);
-    const loboEstado = { pausa: 0, rumbo: new THREE.Vector3(1, 0, 0), vel: new THREE.Vector3() };
+    lobo.posicion.set(-12, -7, centroZona(ZONA_INICIAL) - 26);
+    // al empezar el año el lobo marino espera un poco antes de cazar
+    const loboEstado = { pausa: 10, rumbo: new THREE.Vector3(1, 0, 0), vel: new THREE.Vector3() };
 
     const barco = crearBolichera();
     barco.visible = false;
@@ -342,7 +417,14 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
         }
 
         // animaciones que siguen aunque el juego esté en pausa
-        for (const pa of parches) if (pa.activo) { pa.p.posicion.y += Math.sin(t * 1.5 + pa.fase) * 0.003; pa.p.sprite.material.rotation = Math.sin(t + pa.fase) * 0.2; }
+        // solo se dibujan las manchas de la zona actual y las vecinas: las demás las tapa la niebla
+        const zi = ZONAS_PERU.indexOf(zona as (typeof ZONAS_PERU)[number]);
+        for (const pa of parches) {
+          const cerca = Math.abs(ZONAS_PERU.indexOf(pa.zona as (typeof ZONAS_PERU)[number]) - zi) <= 1;
+          pa.p.sprite.visible = pa.activo && cerca;
+          if (pa.p.sprite.visible) { pa.p.posicion.y += Math.sin(t * 1.5 + pa.fase) * 0.003; pa.p.sprite.material.rotation = Math.sin(t + pa.fase) * 0.2; }
+        }
+        mundo.animar(t);
         lobo.animar(t, loboEstado.vel, seguidor.derecha, 5);
         guanay.animar(t, quieto, seguidor.derecha, 1);
         barco.position.y = Math.sin(t * 1.2) * 0.1;
