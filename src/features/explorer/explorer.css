@@ -90,21 +90,6 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .siguiente-paso strong { color: var(--hielo); }
 .vista-nota { font-size: .74rem; }
 .timeline-topline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
-.timeline-regions { display: flex; grid-column: 1 / -1; flex-direction: row; flex-wrap: nowrap; justify-content: flex-start; gap: 4px; align-items: center; color: var(--niebla); font-size: var(--texto-control); }
-.timeline-regions button {
-  font: inherit; padding: 3px 9px; white-space: nowrap;
-}
-.timeline-regions button:hover, .timeline-regions button:focus-visible { background: var(--control-fondo-hover); }
-.timeline-regions button:disabled { cursor: not-allowed; opacity: .5; }
-.timeline-regions button:focus-visible { outline: 3px solid var(--frio); outline-offset: 1px; }
-.relato-tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--linea); }
-.relato-tab { flex: 1; padding: 9px 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--niebla); font: inherit; cursor: pointer; }
-.relato-tab:hover, .relato-tab:focus-visible { color: var(--hielo); background: rgba(36, 80, 122, .25); }
-.relato-tab[aria-selected="true"] { color: var(--hielo); border-bottom-color: var(--fito); }
-.relato-tab:focus-visible { outline: 2px solid var(--frio); outline-offset: -2px; }
-@media (max-width: 900px) {
-  .timeline-regions { flex-wrap: wrap; }
-}
 .variable-meta { color: var(--tenue); font-size: var(--texto-pequeno); }
 .timeline-unavailable { color: var(--tenue); font-size: var(--texto-secundario); }
 .etq { position: absolute; width: 0; height: 0; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; transition: opacity .25s; font: 700 13px/1.2 var(--sans); }
@@ -192,9 +177,6 @@ table.eventos-nino { width: 100%; border-collapse: separate; border-spacing: 4px
 
 /* ---------- pantallas de celular ---------- */
 @media (max-width: 640px) {
-  .app-header { padding: 8px 10px; gap: 8px; }
-  .app-brand span:last-child { display: none; }
-  .app-nav a { padding: 5px 9px; font-size: .9rem; }
   .ley-marcas { display: none; }
   .timeline-events button { font-size: .66rem; padding: 0 5px; }
 }

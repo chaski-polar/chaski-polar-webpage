@@ -34,9 +34,9 @@ export default function Relato() {
   }
   const zona = panel.tipo === 'zona' ? panel.z : undefined
   return <>
-    <div className="relato-tabs" role="tablist" aria-label="Contenido de la barra lateral">
-      <button className="relato-tab" type="button" role="tab" aria-selected={sidebarTab === 'parametro'} aria-controls="relato-panel-parametro" onClick={() => setSidebarTab('parametro')}>Parámetro</button>
-      <button className="relato-tab" type="button" role="tab" aria-selected={sidebarTab === 'biologia'} aria-controls="relato-panel-biologia" onClick={() => setSidebarTab('biologia')}>Respuesta biológica</button>
+    <div className="mb-4 flex gap-1 border-b border-ocean-700" role="tablist" aria-label="Contenido de la barra lateral">
+      <button className="flex-1 border-0 border-b-2 border-transparent bg-transparent px-2.5 py-2 text-ice-300 transition-colors hover:bg-ocean-800/40 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current aria-selected:border-phytoplankton aria-selected:text-ice-100" type="button" role="tab" aria-selected={sidebarTab === 'parametro'} aria-controls="relato-panel-parametro" onClick={() => setSidebarTab('parametro')}>Parámetro</button>
+      <button className="flex-1 border-0 border-b-2 border-transparent bg-transparent px-2.5 py-2 text-ice-300 transition-colors hover:bg-ocean-800/40 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current aria-selected:border-phytoplankton aria-selected:text-ice-100" type="button" role="tab" aria-selected={sidebarTab === 'biologia'} aria-controls="relato-panel-biologia" onClick={() => setSidebarTab('biologia')}>Respuesta biológica de la anchoveta</button>
     </div>
     {sidebarTab === 'biologia'
       ? <div className="relato-contenido" id="relato-panel-biologia" role="tabpanel" key={`biologia-${clave}`} ref={raiz}><Biologia zona={zona} /></div>
