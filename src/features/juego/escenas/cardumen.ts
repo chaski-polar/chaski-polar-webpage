@@ -19,7 +19,7 @@ const LARGO_ZONA = 30;
 const X_MIN = -16, X_MAX = 9;
 const Y_MIN = -12.5, Y_MAX = -0.6;
 const Z_MAX = 0, Z_MIN = -LARGO_ZONA * ZONAS_PERU.length;
-const VELOCIDAD = 7, VELOCIDAD_VERTICAL = 4;
+const VELOCIDAD = 7, VELOCIDAD_VERTICAL = 6;
 // impulso: un arranque corto para escapar de redes y aves, que cuesta energía
 const IMPULSO = { fuerza: 2.3, dura: 0.55, espera: 2.5, energia: 0.06 };
 const ZONA_INICIAL: ZonaMar = "chimbote";
@@ -49,6 +49,9 @@ export interface Hud {
   radar: { zona: ZonaMar; alimento: number }[];
   /** 0 = listo; 1 = recién usado */
   impulsoEspera: number;
+  /** profundidad de Anchi y del límite de la zona sin oxígeno (en unidades de la escena; 0 = superficie) */
+  y: number;
+  yOxigeno: number;
 }
 export const useHud = create<{ hud: Hud | null; poner(h: Hud | null): void }>((set) => ({ hud: null, poner: (hud) => set({ hud }) }));
 
@@ -283,7 +286,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
       anio: c.anio, mes: c.mes, zona: m.zona, peces: Math.round(c.peces), inicial, energia: c.energia, alimento: m.alimento, origen: m.origen,
       anomaliaTemp: (() => { const i = mar.indice(c.anio, c.mes + 1); return i >= 0 ? mar.estado(m.zona, i).anomaliaTemp : null; })(),
       nino12: m.nino12, temporada: m.temporada, compacto: c.compacto, bajoOxigeno: bajoOx, avanceMes: c.tMes / L.SEGUNDOS_POR_MES,
-      radar: ZONAS_PERU.map((zona) => ({ zona, alimento: condicionesMes.get(zona)?.alimento ?? 1 })), impulsoEspera: Math.max(0, impulso.espera / IMPULSO.espera),
+      radar: ZONAS_PERU.map((zona) => ({ zona, alimento: condicionesMes.get(zona)?.alimento ?? 1 })), impulsoEspera: Math.max(0, impulso.espera / IMPULSO.espera), y: anchi.posicion.y, yOxigeno: yOxActual,
     });
 
     return {
@@ -312,9 +315,13 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
         anchi.posicion.x = THREE.MathUtils.clamp(anchi.posicion.x, X_MIN, X_MAX);
         anchi.posicion.y = THREE.MathUtils.clamp(anchi.posicion.y, Y_MIN, Y_MAX);
         anchi.posicion.z = THREE.MathUtils.clamp(anchi.posicion.z, Z_MIN + 0.5, Z_MAX - 0.5);
-        seguidor.seguir(anchi.posicion);
+        seguidor.seguir(anchi.posicion, vel.y);
         tmp.set(vel.x, 0, vel.z);
         anchi.animar(t, tmp, seguidor.derecha, VELOCIDAD);
+        // al subir o bajar, Anchi apunta la cabeza hacia donde va (según mire a la derecha o a la izquierda)
+        const haciaDer = tmp.dot(seguidor.derecha) >= 0 ? 1 : -1;
+        const cabeceo = THREE.MathUtils.clamp(vel.y * 0.07, -0.45, 0.45) * haciaDer;
+        anchi.sprite.material.rotation = cabeceo;
 
         // la zona sin oxígeno sube o baja poco a poco según El Niño
         const yOx = L.limiteOxigeno(m.nino12);
@@ -339,6 +346,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
           tmp.set(anchi.posicion.x + f.ox * radio + Math.sin(t * 1.3 + f.fase) * 0.3, anchi.posicion.y + f.oy * radio * 0.5, anchi.posicion.z + f.oz * radio);
           f.p.posicion.lerp(tmp, Math.min(1, dt * (2.5 + (k % 5) * 0.4)));
           f.p.animar(t, vel, seguidor.derecha, VELOCIDAD);
+          f.p.sprite.material.rotation = cabeceo;
         });
 
         if (!detenido) {

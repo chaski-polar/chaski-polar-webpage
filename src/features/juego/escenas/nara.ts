@@ -106,7 +106,7 @@ export function escenaNara(entrada: Entrada, eventos: EventosNara, pausa: () => 
 
     const nara = crearPersonaje(escena, sprite("nara", dibujarNara), { ancho: 5, alto: 4.7, suelo: 0 });
     nara.posicion.set(aX(INICIO.lon), 1.6, aZ(INICIO.lat));
-    const seguidor = crearSeguidor(camara, renderer.domElement, nara.posicion, { distancia: 26, giro: 0.6 });
+    const seguidor = crearSeguidor(camara, renderer.domElement, nara.posicion, { distancia: 26, giro: 0.6, inclinacionVertical: 0 });
 
     const vel = new THREE.Vector3(), mov = new THREE.Vector3(), siguiente = new THREE.Vector3();
     let grasa = 1, descanso = 0, tEstado = 0, fin = false, flechasPuestas = false, puntoSig = 0;

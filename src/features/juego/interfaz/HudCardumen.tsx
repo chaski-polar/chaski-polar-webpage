@@ -2,6 +2,9 @@ import type { Entrada } from '../motor/entrada'
 import { NOMBRE_ZONA } from '../motor/mar'
 import { useHud } from '../escenas/cardumen'
 
+// cada unidad de la escena equivale a unos 10 m; el fondo está a 14 unidades
+const METROS = 10, FONDO = 14
+
 export const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 const n0 = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 0 })
 const n1 = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 1, signDisplay: 'exceptZero' })
@@ -23,6 +26,14 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
   const tocar = (boton: 'subir' | 'bajar', activo: boolean) => { if (entrada) entrada.botones[boton] = activo }
 
   return <>
+    <div className="juego-profundidad" aria-label={`Profundidad: ${Math.round(-hud.y * METROS)} metros; la zona sin oxígeno empieza a ${Math.round(-hud.yOxigeno * METROS)} metros`}>
+      <span className="etiqueta">0 m</span>
+      <div className="riel">
+        <div className="sin-oxigeno" style={{ top: `${(-hud.yOxigeno / FONDO) * 100}%` }}><span>sin oxígeno</span></div>
+        <div className="anchi" style={{ top: `${(-hud.y / FONDO) * 100}%` }}><span>{Math.round(-hud.y * METROS)} m</span></div>
+      </div>
+      <span className="etiqueta">{Math.round(FONDO * METROS)} m</span>
+    </div>
     <div className="juego-fecha juego-caja">
       <b>{MESES[hud.mes]} {hud.anio}</b> · {NOMBRE_ZONA[hud.zona]}
       <Barra valor={hud.avanceMes} color="#a3bccb" etiqueta="Avance del mes" />
@@ -57,7 +68,7 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
       <button type="button" className="juego-caja juego-impulso" disabled={hud.impulsoEspera > 0} onClick={() => entrada?.pedirImpulso()}
         style={{ ['--carga' as string]: `${(1 - hud.impulsoEspera) * 100}%` }}>Impulso <small>(Shift)</small></button>
       <button type="button" className={`juego-caja${compacto ? ' activo' : ''}`} onClick={alternar} aria-pressed={compacto}>
-        {compacto ? 'Compacto' : 'Disperso'} <small>(C)</small>
+        {compacto ? 'Compacto' : 'Disperso'} <small>(F)</small>
       </button>
       <button type="button" className="juego-caja solo-tactil" aria-label="Subir"
         onPointerDown={() => tocar('subir', true)} onPointerUp={() => tocar('subir', false)} onPointerLeave={() => tocar('subir', false)}>▲</button>

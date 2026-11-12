@@ -88,7 +88,7 @@ export function introCardumen(mar: Mar, anio: number, primera: boolean): Linea[]
   if (contexto) lineas.push(contexto);
   if (primera) lineas.unshift(
     { quien: "gaia", texto: "Anchi, tú guías al cardumen durante un año. Come las manchas verdes: es el fitoplancton que mide ORBI desde el espacio." },
-    { quien: "gaia", texto: "Nada con WASD o flechas; Q sube y E baja. Con C juntas al cardumen: así se protege de los depredadores, pero come menos." },
+    { quien: "gaia", texto: "W, A, S y D te mueven hacia donde mira la cámara; Espacio sube y C baja. Shift da un impulso. Con F juntas al cardumen: se protege mejor, pero come menos." },
     { quien: "gaia", texto: "Cada zona de la costa tiene su propia comida cada mes. Si una zona se queda sin alimento, busca en otra." },
   );
   return lineas;

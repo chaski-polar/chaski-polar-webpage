@@ -1,4 +1,5 @@
-/* Controles: teclado (WASD o flechas; Q y E para subir y bajar) y, en pantallas táctiles, una palanca
+/* Controles (como en los juegos de nado en 3D): WASD o flechas para nadar según la cámara, Espacio o Q para subir,
+   C o E para bajar, Shift para el impulso y, en pantallas táctiles, una palanca
    virtual abajo a la izquierda y botones en pantalla. Devuelve la dirección pedida: x hacia la derecha
    y y hacia adelante, cada una entre -1 y 1. */
 
@@ -26,7 +27,9 @@ export function crearEntrada(contenedor: HTMLElement): Entrada {
     const k = e.key.toLowerCase();
     teclas.add(k);
     if (k === "shift" && !e.repeat) impulsoPedido = true;
-    if (k.startsWith("arrow")) e.preventDefault(); // que las flechas no muevan la página
+    if (k.startsWith("arrow") || k === " ") e.preventDefault(); // que las flechas y Espacio no muevan la página
+    // Espacio sirve para subir: no debe "presionar" el botón que quedó con el foco (Menú, Sonido…)
+    if (k === " " && document.activeElement instanceof HTMLButtonElement && !document.activeElement.closest(".juego-dialogo, .juego-informe, .juego-escritorio, .juego-menu")) document.activeElement.blur();
   };
   const subir = (e: KeyboardEvent) => teclas.delete(e.key.toLowerCase());
   const soltarTodo = () => teclas.clear();
@@ -69,7 +72,7 @@ export function crearEntrada(contenedor: HTMLElement): Entrada {
     botones,
     impulso() { const pedido = impulsoPedido; impulsoPedido = false; return pedido; },
     pedirImpulso() { impulsoPedido = true; },
-    vertical: () => (teclas.has("q") || botones.subir ? 1 : 0) - (teclas.has("e") || botones.bajar ? 1 : 0),
+    vertical: () => (teclas.has(" ") || teclas.has("q") || botones.subir ? 1 : 0) - (teclas.has("c") || teclas.has("e") || botones.bajar ? 1 : 0),
     direccion() {
       let x = (hay(DERECHA) ? 1 : 0) - (hay(IZQUIERDA) ? 1 : 0) + palanca.x;
       let y = (hay(ARRIBA) ? 1 : 0) - (hay(ABAJO) ? 1 : 0) + palanca.y;

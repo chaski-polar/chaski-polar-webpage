@@ -122,7 +122,7 @@ export function escenaLumi(entrada: Entrada, eventos: EventosLumi, pausa: () => 
     lumi.posicion.set(-4.5, -6, 0); // en un claro entre las placas de hielo
     const halo = new THREE.Sprite(sinContorno(new THREE.SpriteMaterial({ map: texturaHalo(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })));
     escena.add(halo);
-    const seguidor = crearSeguidor(camara, renderer.domElement, lumi.posicion, { distancia: 14, giro: 0.5, inclinacion: 1.5, inclinacionLimites: [1.35, 1.75] }); // casi de lado: la cámara queda bajo el agua
+    const seguidor = crearSeguidor(camara, renderer.domElement, lumi.posicion, { distancia: 14, giro: 0.5, inclinacion: 1.5, inclinacionLimites: [1.35, 1.75], inclinacionVertical: 0 }); // casi de lado: la cámara queda bajo el agua
     const dibujo = sprite("lumi", dibujarLumi);
     const hijas: Personaje[] = [];
 

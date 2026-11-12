@@ -252,3 +252,52 @@
 .juego button.juego-caja, .juego a.juego-caja, .juego .bandeja, .juego .sello-boton, .juego .juego-sonido, .juego .juego-botones .solo-tactil {
   border-radius: 6px !important; box-shadow: none !important; }
 .juego .bandeja { box-shadow: none !important; }
+
+/* galería de sprites (?sprites=1) y pixel art sin suavizar */
+.juego .juego-galeria { display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; overflow: auto; height: 100%; align-content: flex-start;
+  background: var(--oceano-900); touch-action: pan-y; }
+.juego .juego-galeria figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.juego .juego-galeria figure > div { display: flex; gap: 12px; }
+.juego .juego-galeria img, .juego .juego-dialogo-retrato, .juego .juego-protagonistas img { image-rendering: pixelated; }
+
+/* ---- sistema visual propio (no "vidrio" genérico): paneles sólidos con borde definido, como los recuadros
+   de la hoja de sprites del equipo; esquinas de 4 px; sin sombras; títulos en frase normal ---- */
+.juego .juego-caja { background: #0c2c4a; border: 2px solid #2f5f8f; border-radius: 4px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.juego button.juego-caja, .juego a.juego-caja, .juego .bandeja, .juego .sello-boton, .juego .juego-sonido, .juego .juego-botones .solo-tactil {
+  border-radius: 4px !important; box-shadow: none !important; }
+.juego button.juego-caja, .juego a.juego-caja { background: #133c61; border: 2px solid #2f5f8f; }
+.juego button.juego-caja:hover, .juego a.juego-caja:hover { background: #1d4a75; border-color: #63cde8; }
+.juego .principal, .juego button.juego-caja.principal, .juego a.juego-caja.principal { background: #3fc28c; border-color: #2a8a63; color: #071e33; }
+.juego button.juego-caja.principal:hover, .juego a.juego-caja.principal:hover { background: #5fd6a3; border-color: #2a8a63; }
+.juego .activo, .juego button.juego-caja.activo { background: #1f5c4a; border-color: #3fc28c; }
+.juego .juego-sonido { width: auto; padding: 0 10px !important; font-size: 13px; font-weight: 700; }
+.juego button.juego-dialogo { background: #0c2c4a; border: 2px solid #2f5f8f; border-radius: 4px; }
+.juego button.juego-dialogo:hover { background: #0f3456; }
+.juego .juego-dialogo-retrato { border-radius: 2px; border: 2px solid #2f5f8f; background: #133c61; }
+.juego .juego-dialogo-texto b { font-family: var(--serif); font-size: 16px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+.juego .juego-objetivo b, .juego .juego-mar > b, .juego .juego-radar-titulo, .juego .juego-informe h3 {
+  font-family: var(--serif); font-size: 14px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+.juego .juego-menu-caja { background: #0c2c4a; }
+.juego .juego-menu-caja h1 { font-weight: 600; }
+.juego .juego-palanca { border: 2px solid #2f5f8f; }
+.juego .juego-barra { border-radius: 2px; }
+.juego .juego-barra > div { border-radius: 0; }
+/* sellos del escritorio: botones azules con la tinta del color del sello */
+.juego .sello-boton { background: #133c61; border-width: 2px; }
+.juego .sello-boton.verde { color: #6fe0a8; }
+.juego .sello-boton.rojo { color: #ff9b85; }
+.juego .escritorio-sellos { border-radius: 4px; border-width: 2px; border-color: #2f5f8f; background: #0c2c4a; }
+.juego .escritorio-cabecera { background: #0c2c4a; border-bottom: 2px solid #2f5f8f; }
+.juego .bandeja { background: #133c61; border: 2px solid #2f5f8f; }
+.juego .bandeja.llena { background: #1f5c4a; border-color: #3fc28c; color: #eaf3f5; }
+.juego .juego-informe { border-radius: 4px; border: 2px solid #2f5f8f; box-shadow: none; background: #0c2c4a; }
+
+/* medidor de profundidad del cardumen: dónde está Anchi y dónde empieza la zona sin oxígeno */
+.juego .juego-profundidad { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 5; height: 42vh; width: 74px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: var(--hielo-300); pointer-events: none; }
+.juego .juego-profundidad .riel { position: relative; flex: 1; width: 10px; background: #0c2c4a; border: 2px solid #2f5f8f; border-radius: 2px; }
+.juego .juego-profundidad .sin-oxigeno { position: absolute; left: -2px; right: -2px; bottom: -2px; background: rgba(140, 50, 70, .75); border-top: 2px solid #ff9b85; }
+.juego .juego-profundidad .sin-oxigeno span { position: absolute; right: 14px; top: -8px; white-space: nowrap; color: #ff9b85; }
+.juego .juego-profundidad .anchi { position: absolute; left: -6px; width: 18px; height: 4px; margin-top: -2px; background: #eaf3f5; }
+.juego .juego-profundidad .anchi span { position: absolute; right: 22px; top: -7px; white-space: nowrap; color: #eaf3f5; font-weight: 700; }
+@media (max-width: 640px) { .juego .juego-profundidad { top: 46%; height: 30vh; right: 4px; } }
