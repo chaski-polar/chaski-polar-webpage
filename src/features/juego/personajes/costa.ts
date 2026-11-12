@@ -60,12 +60,12 @@ export const dibujarLobo = (): HTMLCanvasElement => lienzo((g) => {
   for (const dy of [-4, 2, 8]) { g.beginPath(); g.moveTo(226, 130); g.lineTo(250, 128 + dy); g.stroke(); } // bigotes
 });
 
-/** Letrero con el nombre de una zona */
+/** Letrero con el nombre de una zona, con los colores de la página */
 export const dibujarLetrero = (texto: string): HTMLCanvasElement => lienzo((g) => {
-  g.font = "bold 44px Trebuchet MS, sans-serif";
-  const w = Math.min(500, g.measureText(texto).width + 48);
+  g.font = "600 46px Newsreader, Georgia, serif";
+  const w = Math.min(500, g.measureText(texto).width + 56);
   const x = (512 - w) / 2;
-  g.fillStyle = TINTA; g.beginPath(); g.roundRect(x + 6, 22, w, 84, 16); g.fill();
-  g.fillStyle = "#fbf6ea"; g.strokeStyle = TINTA; g.lineWidth = 6; g.beginPath(); g.roundRect(x, 16, w, 84, 16); g.fill(); g.stroke();
-  g.fillStyle = TINTA; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(texto, 256, 60);
+  g.fillStyle = "rgba(7,30,51,0.88)"; g.strokeStyle = "rgba(99,205,232,0.7)"; g.lineWidth = 3;
+  g.beginPath(); g.roundRect(x, 18, w, 88, 10); g.fill(); g.stroke();
+  g.fillStyle = "#eaf3f5"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(texto, 256, 64);
 }, 512, 128);

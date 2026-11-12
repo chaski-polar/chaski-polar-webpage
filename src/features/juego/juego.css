@@ -228,3 +228,27 @@
   .juego .escritorio-sellos .ayuda { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .juego .sello { animation: none; } }
+
+/* radar de ORBI, impulso y cartel del mes */
+.juego .juego-radar { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--borde); display: grid; gap: 2px; }
+.juego .juego-radar-titulo { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--corriente); }
+.juego .juego-radar .fila { display: grid; grid-template-columns: 62px 1fr 36px; gap: 6px; align-items: center; font-size: 11px; color: var(--hielo-300); }
+.juego .juego-radar .fila.aqui { color: var(--hielo-100); font-weight: 700; }
+.juego .juego-radar .fila.aqui span:first-child::before { content: "▶ "; color: var(--verde); }
+.juego .juego-radar .pista { height: 6px; background: rgba(234, 243, 245, .12); border-radius: 2px; overflow: hidden; }
+.juego .juego-radar .pista span { display: block; height: 100%; }
+.juego .juego-radar b { text-align: right; font-weight: 600; }
+.juego .juego-impulso { position: relative; overflow: hidden; }
+.juego .juego-impulso::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: var(--carga); background: var(--verde); }
+.juego .juego-cartel { position: absolute; top: 22%; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  pointer-events: none; text-shadow: 0 2px 14px rgba(0, 0, 0, .8); animation: juego-cartel 2.2s ease-out both; }
+.juego .juego-cartel b { font-family: var(--serif); font-size: 40px; font-weight: 500; }
+.juego .juego-cartel span { font-size: 15px; color: var(--hielo-300); }
+@keyframes juego-cartel { 0% { opacity: 0; transform: translate(-50%, 8px); } 15%, 75% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+@media (max-width: 640px) { .juego .juego-cartel b { font-size: 28px; } .juego .juego-radar { display: none; } }
+@media (prefers-reduced-motion: reduce) { .juego .juego-cartel { animation: none; } }
+
+/* botones: esquinas poco redondeadas y sin sombras */
+.juego button.juego-caja, .juego a.juego-caja, .juego .bandeja, .juego .sello-boton, .juego .juego-sonido, .juego .juego-botones .solo-tactil {
+  border-radius: 6px !important; box-shadow: none !important; }
+.juego .bandeja { box-shadow: none !important; }

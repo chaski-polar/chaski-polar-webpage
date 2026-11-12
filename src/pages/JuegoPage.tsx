@@ -43,7 +43,7 @@ const AYUDA: Record<EscenaPrologo | 'cardumen', string> = {
   lumi: 'W/S o ↑/↓: subir y bajar · A/D o ←/→: a los lados',
   kiri: 'WASD o flechas: nadar',
   nara: 'WASD o flechas: nadar',
-  cardumen: 'WASD o flechas: nadar · Q/E: subir y bajar · C: juntar',
+  cardumen: 'WASD o flechas: nadar · Q/E: subir y bajar · Shift: impulso · C: juntar',
 }
 
 /** Juego: mundo 3D con personajes dibujados en 2D */
@@ -60,6 +60,8 @@ export default function JuegoPage() {
   const [estadoLumi, setEstadoLumi] = useState<EstadoLumi | null>(null)
   const [estadoNara, setEstadoNara] = useState<EstadoNara | null>(null)
   const [aviso, setAviso] = useState<string | null>(null)
+  const [cartel, setCartel] = useState<{ mes: string; detalle: string } | null>(null)
+  const temporizadorCartel = useRef(0)
   const [compacto, setCompacto] = useState(false)
   const compactoRef = useRef(false)
   const [resultados, setResultados] = useState<ResultadoAnio[]>([])
@@ -176,6 +178,13 @@ export default function JuegoPage() {
       presentado.current = true
       motor.usar(escenaCardumen(mar, entrada, {
         aviso: avisar,
+        mes: (k, m) => {
+          const nombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+          const nino = m.nino12 == null ? '' : `Niño 1+2: ${m.nino12 > 0 ? '+' : ''}${m.nino12.toFixed(1).replace('.', ',')} °C`
+          setCartel({ mes: `${nombres[k]} ${anio}`, detalle: [nino, m.temporada === 'veda' ? 'veda de pesca' : m.temporada === 'abierta' ? 'temporada de pesca' : ''].filter(Boolean).join(' · ') })
+          clearTimeout(temporizadorCartel.current)
+          temporizadorCartel.current = window.setTimeout(() => setCartel(null), 2200)
+        },
         hito: (id, m) => {
           if (hitos.current.has(id)) return
           hitos.current.add(id)
@@ -243,6 +252,7 @@ export default function JuegoPage() {
     {pantalla.tipo === 'cardumen' && <HudCardumen entrada={entrada} compacto={compacto} alternar={() => setCompacto((x) => !x)} />}
 
     <div className={`juego-aviso${aviso ? ' visible' : ''}`} aria-live="assertive">{aviso}</div>
+    {pantalla.tipo === 'cardumen' && cartel && <div className="juego-cartel" role="status"><b>{cartel.mes}</b>{cartel.detalle && <span>{cartel.detalle}</span>}</div>}
     {ayuda && <p className="juego-ayuda"><span className="solo-teclado">{ayuda} · </span>Arrastrar: girar la cámara</p>}
     <Dialogo />
 

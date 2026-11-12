@@ -8,6 +8,9 @@ export interface Entrada {
   vertical(): number;
   /** botones en pantalla para subir y bajar (los activa la interfaz táctil) */
   readonly botones: { subir: boolean; bajar: boolean };
+  /** true una sola vez después de pedir un impulso (Shift o el botón en pantalla) */
+  impulso(): boolean;
+  pedirImpulso(): void;
   destruir(): void;
 }
 
@@ -16,11 +19,13 @@ const IZQUIERDA = new Set(["a", "arrowleft"]), DERECHA = new Set(["d", "arrowrig
 
 export function crearEntrada(contenedor: HTMLElement): Entrada {
   const teclas = new Set<string>();
+  let impulsoPedido = false;
   const escribe = (e: KeyboardEvent) => e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
   const bajar = (e: KeyboardEvent) => {
     if (escribe(e)) return;
     const k = e.key.toLowerCase();
     teclas.add(k);
+    if (k === "shift" && !e.repeat) impulsoPedido = true;
     if (k.startsWith("arrow")) e.preventDefault(); // que las flechas no muevan la página
   };
   const subir = (e: KeyboardEvent) => teclas.delete(e.key.toLowerCase());
@@ -62,6 +67,8 @@ export function crearEntrada(contenedor: HTMLElement): Entrada {
   const botones = { subir: false, bajar: false };
   return {
     botones,
+    impulso() { const pedido = impulsoPedido; impulsoPedido = false; return pedido; },
+    pedirImpulso() { impulsoPedido = true; },
     vertical: () => (teclas.has("q") || botones.subir ? 1 : 0) - (teclas.has("e") || botones.bajar ? 1 : 0),
     direccion() {
       let x = (hay(DERECHA) ? 1 : 0) - (hay(IZQUIERDA) ? 1 : 0) + palanca.x;

@@ -43,9 +43,19 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
       {hud.anomaliaTemp != null && <div>Temperatura: {n1.format(hud.anomaliaTemp)} °C frente a lo normal</div>}
       {hud.nino12 != null && <div className={hud.nino12 >= 1 ? 'malo' : ''}>Niño 1+2: {n1.format(hud.nino12)} °C{hud.nino12 >= 1 ? ' · El Niño' : ''}</div>}
       <div>Pesca: {TEXTO_TEMPORADA[hud.temporada]}</div>
+      <div className="juego-radar" aria-label="Radar de ORBI: comida de cada zona este mes">
+        <span className="juego-radar-titulo">Radar de ORBI · comida por zona</span>
+        {hud.radar.map((r) => <div key={r.zona} className={`fila${r.zona === hud.zona ? ' aqui' : ''}`}>
+          <span>{NOMBRE_ZONA[r.zona]}</span>
+          <span className="pista"><span style={{ width: `${Math.min(100, r.alimento * 50)}%`, background: r.alimento < 0.6 ? '#ff9b85' : r.alimento > 1.2 ? '#3fc28c' : '#63cde8' }} /></span>
+          <b>{Math.round(r.alimento * 100)} %</b>
+        </div>)}
+      </div>
     </div>
 
     <div className="juego-botones">
+      <button type="button" className="juego-caja juego-impulso" disabled={hud.impulsoEspera > 0} onClick={() => entrada?.pedirImpulso()}
+        style={{ ['--carga' as string]: `${(1 - hud.impulsoEspera) * 100}%` }}>Impulso <small>(Shift)</small></button>
       <button type="button" className={`juego-caja${compacto ? ' activo' : ''}`} onClick={alternar} aria-pressed={compacto}>
         {compacto ? 'Compacto' : 'Disperso'} <small>(C)</small>
       </button>

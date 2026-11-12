@@ -20,6 +20,8 @@ const X_MIN = -16, X_MAX = 9;
 const Y_MIN = -12.5, Y_MAX = -0.6;
 const Z_MAX = 0, Z_MIN = -LARGO_ZONA * ZONAS_PERU.length;
 const VELOCIDAD = 7, VELOCIDAD_VERTICAL = 4;
+// impulso: un arranque corto para escapar de redes y aves, que cuesta energía
+const IMPULSO = { fuerza: 2.3, dura: 0.55, espera: 2.5, energia: 0.06 };
 const ZONA_INICIAL: ZonaMar = "chimbote";
 const PECES_POR_DIBUJO = 250, DIBUJOS_MAX = 40;
 const AGUA_FRIA = new THREE.Color(0x2a86ad), AGUA_CALIDA = new THREE.Color(0x5f8a63);
@@ -43,6 +45,10 @@ export interface Hud {
   compacto: boolean;
   bajoOxigeno: boolean;
   avanceMes: number;
+  /** comida de cada zona este mes, de norte a sur (el radar de ORBI) */
+  radar: { zona: ZonaMar; alimento: number }[];
+  /** 0 = listo; 1 = recién usado */
+  impulsoEspera: number;
 }
 export const useHud = create<{ hud: Hud | null; poner(h: Hud | null): void }>((set) => ({ hud: null, poner: (hud) => set({ hud }) }));
 
@@ -50,6 +56,8 @@ export interface EventosCardumen {
   aviso(texto: string): void;
   /** algo que merece un diálogo la primera vez que ocurre */
   hito(id: "nino" | "veda" | "oxigeno_alto" | "red" | "ave", mes: L.Mes): void;
+  /** empieza un mes nuevo */
+  mes?(mes: number, condiciones: L.Mes): void;
   fin(informe: L.Informe, historia: L.Mes[]): void;
 }
 
@@ -270,10 +278,12 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
     const colorAgua = new THREE.Color();
     let yOxActual = -9, hudT = 0, finAvisado = false;
 
+    const impulso = { activo: 0, espera: 0 };
     const publicarHud = (m: L.Mes, bajoOx: boolean) => useHud.getState().poner({
       anio: c.anio, mes: c.mes, zona: m.zona, peces: Math.round(c.peces), inicial, energia: c.energia, alimento: m.alimento, origen: m.origen,
       anomaliaTemp: (() => { const i = mar.indice(c.anio, c.mes + 1); return i >= 0 ? mar.estado(m.zona, i).anomaliaTemp : null; })(),
       nino12: m.nino12, temporada: m.temporada, compacto: c.compacto, bajoOxigeno: bajoOx, avanceMes: c.tMes / L.SEGUNDOS_POR_MES,
+      radar: ZONAS_PERU.map((zona) => ({ zona, alimento: condicionesMes.get(zona)?.alimento ?? 1 })), impulsoEspera: Math.max(0, impulso.espera / IMPULSO.espera),
     });
 
     return {
@@ -287,7 +297,15 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
         const d = detenido ? { x: 0, y: 0 } : entrada.direccion();
         mov.set(0, 0, 0).addScaledVector(seguidor.adelante, d.y).addScaledVector(seguidor.derecha, d.x);
         if (mov.lengthSq() > 1) mov.normalize();
-        mov.multiplyScalar(VELOCIDAD * c.estrategia.velocidad * (c.compacto ? 0.85 : 1));
+        // impulso: Shift o el botón en pantalla
+        impulso.espera = Math.max(0, impulso.espera - dt);
+        impulso.activo = Math.max(0, impulso.activo - dt);
+        if (entrada.impulso() && !detenido && impulso.espera <= 0 && c.energia > IMPULSO.energia) {
+          impulso.activo = IMPULSO.dura; impulso.espera = IMPULSO.espera;
+          c.energia -= IMPULSO.energia;
+          sonar("boton");
+        }
+        mov.multiplyScalar(VELOCIDAD * c.estrategia.velocidad * (c.compacto ? 0.85 : 1) * (impulso.activo > 0 ? IMPULSO.fuerza : 1));
         mov.y = detenido ? 0 : entrada.vertical() * VELOCIDAD_VERTICAL;
         vel.lerp(mov, 1 - Math.pow(0.003, dt));
         anchi.posicion.addScaledVector(vel, dt);
@@ -414,7 +432,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
           if (c.terminado && !finAvisado) {
             finAvisado = true;
             eventos.fin(L.informe(c, inicial), c.historia);
-          } else if (mesNuevo) prepararMes();
+          } else if (mesNuevo) { prepararMes(); eventos.mes?.(c.mes, condicionesMes.get(zonaEn(anchi.posicion.z))!); }
         }
 
         // animaciones que siguen aunque el juego esté en pausa
