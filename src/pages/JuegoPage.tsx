@@ -11,10 +11,11 @@ import { finalCampana, finKiri, finLumi, finNara, hitoCardumen, introCardumen, i
 import HudCardumen from '../features/juego/interfaz/HudCardumen'
 import { HudKiri, HudLumi, HudNara } from '../features/juego/interfaz/HudPrologo'
 import Final, { type ResultadoAnio } from '../features/juego/interfaz/Final'
-import Informe from '../features/juego/interfaz/Informe'
-import { anioDelMar, ESTRATEGIAS, mesesConDatos, PECES_INICIALES, type Estrategia, type Informe as DatosInforme, type Mes } from '../features/juego/logica/cardumen'
+import Escritorio from '../features/juego/interfaz/Escritorio'
+import { ESTRATEGIAS, mesesConDatos, PECES_INICIALES, type Estrategia, type Informe as DatosInforme, type Mes } from '../features/juego/logica/cardumen'
 import { crearEntrada, type Entrada } from '../features/juego/motor/entrada'
 import { crearMotor, type Motor } from '../features/juego/motor/escena'
+import { crearTurno } from '../features/juego/logica/escritorio'
 import { crearMar, type Mar } from '../features/juego/motor/mar'
 import { protagonistas } from '../features/juego/personajes/galeria'
 import { precargarSprites } from '../features/juego/personajes/sprites'
@@ -245,10 +246,10 @@ export default function JuegoPage() {
     {ayuda && <p className="juego-ayuda"><span className="solo-teclado">{ayuda} · </span>Arrastrar: girar la cámara</p>}
     <Dialogo />
 
-    {pantalla.tipo === 'cardumen' && informe && mar && <Informe datos={informe.datos} historia={informe.historia}
-      mar={anioDelMar(mar, informe.datos.anio, informe.datos.mesesJugados)} siguiente={siguiente}
+    {pantalla.tipo === 'cardumen' && informe && mar && <Escritorio key={clave} datos={informe.datos}
+      turno={crearTurno(mar, informe.datos.anio, informe.datos.mesesJugados, pantalla.generacion)} siguiente={siguiente}
       final={pantalla.generacion === CAMPANA.length - 1}
-      alSeguir={(e) => siguiente && setPantalla({ tipo: 'cardumen', generacion: pantalla.generacion + 1, peces: siguiente.peces, estrategia: e.id, intento: Date.now() })}
+      alSeguir={(e, factor) => siguiente && setPantalla({ tipo: 'cardumen', generacion: pantalla.generacion + 1, peces: Math.round(Math.min(PECES_INICIALES, siguiente.peces * factor)), estrategia: e.id, intento: Date.now() })}
       alRepetir={() => setPantalla({ ...pantalla, intento: Date.now() })}
       alFinal={() => { setInforme(null); void useDialogo.getState().decir(finalCampana(mar)).then(() => setVerFinal(true)) }}
       alMenu={() => { setInforme(null); setPantalla({ tipo: 'menu' }) }} />}
