@@ -101,3 +101,20 @@
 }
 .juego .juego-menu-escenas { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; font-size: 14px; }
 .juego .juego-menu-escenas button.juego-caja { padding: 4px 12px; font-size: 14px; }
+
+/* informe: pregunta, diario y estrategias */
+.juego .juego-informe { max-height: calc(100vh - 32px); overflow-y: auto; }
+.juego .juego-informe h3 { margin: 16px 0 8px; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+.juego .juego-informe .cita { font-style: italic; }
+.juego .juego-informe .opciones { display: grid; gap: 8px; font-family: "Trebuchet MS", system-ui, sans-serif; }
+.juego .juego-estrategias .opciones { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.juego .juego-estrategias button { display: flex; flex-direction: column; gap: 4px; text-align: left; font-weight: normal !important; font-size: 13px; }
+.juego .juego-estrategias button b { font-size: 15px; }
+.juego .juego-estrategias button.activo { background: var(--sol); }
+.juego .juego-informe .acierto { color: #1e7a45; font-weight: bold; }
+.juego .juego-informe .error { color: #b3261e; font-weight: bold; }
+.juego .juego-diario { width: 100%; border-collapse: collapse; font-size: 13px; }
+.juego .juego-diario th, .juego .juego-diario td { border: 2px solid var(--tinta); padding: 6px 8px; text-align: left; vertical-align: top; }
+.juego .juego-diario th[scope="row"] { width: 30%; background: rgba(29, 43, 54, .08); }
+.juego .juego-aprendizajes { margin: 0; padding-left: 20px; list-style: disc; font-size: 14px; line-height: 1.5; }
+.juego button.juego-caja:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: 4px 4px 0 var(--tinta); }

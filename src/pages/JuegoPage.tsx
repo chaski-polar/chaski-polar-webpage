@@ -7,18 +7,20 @@ import { escenaCardumen } from '../features/juego/escenas/cardumen'
 import { escenaKiri } from '../features/juego/escenas/kiri'
 import { DIVISIONES_META, escenaLumi, type EstadoLumi } from '../features/juego/escenas/lumi'
 import { escenaNara, type EstadoNara } from '../features/juego/escenas/nara'
-import { finKiri, finLumi, finNara, hitoCardumen, introCardumen, introKiri, introLumi, introNara, META_KIRI, puntoNara } from '../features/juego/guion'
+import { finalCampana, finKiri, finLumi, finNara, hitoCardumen, introCardumen, introKiri, introLumi, introNara, META_KIRI, puntoNara } from '../features/juego/guion'
 import HudCardumen from '../features/juego/interfaz/HudCardumen'
 import { HudKiri, HudLumi, HudNara } from '../features/juego/interfaz/HudPrologo'
+import Final, { type ResultadoAnio } from '../features/juego/interfaz/Final'
 import Informe from '../features/juego/interfaz/Informe'
-import { PECES_INICIALES, type Informe as DatosInforme, type Mes } from '../features/juego/logica/cardumen'
+import { anioDelMar, ESTRATEGIAS, mesesConDatos, PECES_INICIALES, type Estrategia, type Informe as DatosInforme, type Mes } from '../features/juego/logica/cardumen'
 import { crearEntrada, type Entrada } from '../features/juego/motor/entrada'
 import { crearMotor, type Motor } from '../features/juego/motor/escena'
 import { crearMar, type Mar } from '../features/juego/motor/mar'
 import '../features/juego/juego.css'
 
-/** Años de la campaña: primero un año normal para aprender, luego El Niño 1997-98 */
-const CAMPANA = [2004, 1998] as const
+/** Años de la campaña: un año normal para aprender, El Niño 1997-98, la recuperación, dos Niños costeros
+    y el final con El Niño 2026 en curso (hasta el último mes con datos) */
+const CAMPANA = [2004, 1998, 2000, 2017, 2023, 2026] as const
 const parametro = (nombre: string) => Number(new URLSearchParams(location.search).get(nombre))
 // ?rapido=10 acelera el calendario del cardumen y ?generacion=2 empieza en el segundo año (solo para probar)
 const RAPIDEZ = Math.min(20, Math.max(1, parametro('rapido') || 1))
@@ -31,7 +33,7 @@ type Pantalla =
   | { tipo: 'menu' }
   /** historia: true si se juega todo seguido (prólogo y luego el cardumen) */
   | { tipo: 'prologo'; escena: EscenaPrologo; historia: boolean; intento: number }
-  | { tipo: 'cardumen'; generacion: number; peces: number; intento: number }
+  | { tipo: 'cardumen'; generacion: number; peces: number; estrategia: Estrategia['id']; intento: number }
 
 const AYUDA: Record<EscenaPrologo | 'cardumen', string> = {
   lumi: 'WASD o flechas: moverse · Q/E: subir y bajar',
@@ -56,6 +58,8 @@ export default function JuegoPage() {
   const [aviso, setAviso] = useState<string | null>(null)
   const [compacto, setCompacto] = useState(false)
   const compactoRef = useRef(false)
+  const [resultados, setResultados] = useState<ResultadoAnio[]>([])
+  const [verFinal, setVerFinal] = useState(false)
   const hitos = useRef(new Set<string>())
   const presentado = useRef(false)
 
@@ -91,7 +95,9 @@ export default function JuegoPage() {
   const empezarCampana = useCallback(() => {
     hitos.current.clear()
     presentado.current = false
-    setPantalla({ tipo: 'cardumen', generacion: GENERACION_INICIAL, peces: PECES_INICIALES, intento: Date.now() })
+    setResultados([])
+    setVerFinal(false)
+    setPantalla({ tipo: 'cardumen', generacion: GENERACION_INICIAL, peces: PECES_INICIALES, estrategia: 'ninguna', intento: Date.now() })
   }, [])
 
   // escena según la pantalla (solo cambia cuando cambia la clave)
@@ -161,8 +167,13 @@ export default function JuegoPage() {
           const lineas = hitoCardumen(id, m)
           if (lineas.length) void useDialogo.getState().decir(lineas)
         },
-        fin: (datos, historia) => setInforme({ datos, historia }),
-      }, { anio, peces: pantalla.peces, pausa: hayDialogo, compacto: () => compactoRef.current, rapidez: RAPIDEZ }))
+        fin: (datos, historia) => {
+          setInforme({ datos, historia })
+          const r: ResultadoAnio = { anio, inicial: datos.inicial, sobrevivientes: datos.sobrevivientes, estrategia: datos.estrategia }
+          setResultados((rs) => [...rs.filter((x) => x.anio !== anio), r])
+        },
+      }, { anio, peces: pantalla.peces, pausa: hayDialogo, compacto: () => compactoRef.current, rapidez: RAPIDEZ,
+        estrategia: ESTRATEGIAS[pantalla.estrategia], mesFin: mesesConDatos(mar, anio) }))
     } else {
       motor.usar(() => ({ actualizar: () => {}, destruir: () => {} }))
     }
@@ -186,14 +197,14 @@ export default function JuegoPage() {
   return <div className="juego" ref={contenedor}>
     <canvas className="juego-lienzo" ref={lienzo} aria-label="Escena del juego" />
     <Link className="juego-volver juego-caja" to="/">← Portada</Link>
-    {pantalla.tipo !== 'menu' && <button type="button" className="juego-menu-boton juego-caja" onClick={() => { setInforme(null); setPantalla({ tipo: 'menu' }) }}>Menú</button>}
+    {pantalla.tipo !== 'menu' && <button type="button" className="juego-menu-boton juego-caja" onClick={() => { setInforme(null); setVerFinal(false); setPantalla({ tipo: 'menu' }) }}>Menú</button>}
 
     {pantalla.tipo === 'menu' && mar && <div className="juego-menu">
       <div className="juego-menu-caja juego-caja">
         <h1>Cardumen</h1>
         <p>De la Antártida al mar peruano, en un océano que cambia con datos satelitales reales.</p>
         <button type="button" className="juego-caja principal" onClick={() => prologo('lumi', true)}>Jugar la historia completa</button>
-        <button type="button" className="juego-caja" onClick={empezarCampana}>Solo el cardumen (2004 y El Niño 1998)</button>
+        <button type="button" className="juego-caja" onClick={empezarCampana}>Solo el cardumen (1998–2026)</button>
         <p className="juego-menu-escenas">Escenas del prólogo:
           <button type="button" className="juego-caja" onClick={() => prologo('lumi', false)}>Lumi</button>
           <button type="button" className="juego-caja" onClick={() => prologo('kiri', false)}>Kiri</button>
@@ -212,10 +223,15 @@ export default function JuegoPage() {
     {ayuda && <p className="juego-ayuda"><span className="solo-teclado">{ayuda} · </span>Arrastrar: girar la cámara</p>}
     <Dialogo />
 
-    {pantalla.tipo === 'cardumen' && informe && <Informe datos={informe.datos} historia={informe.historia} siguiente={siguiente}
-      alSeguir={() => siguiente && setPantalla({ tipo: 'cardumen', generacion: pantalla.generacion + 1, peces: siguiente.peces, intento: Date.now() })}
+    {pantalla.tipo === 'cardumen' && informe && mar && <Informe datos={informe.datos} historia={informe.historia}
+      mar={anioDelMar(mar, informe.datos.anio, informe.datos.mesesJugados)} siguiente={siguiente}
+      final={pantalla.generacion === CAMPANA.length - 1}
+      alSeguir={(e) => siguiente && setPantalla({ tipo: 'cardumen', generacion: pantalla.generacion + 1, peces: siguiente.peces, estrategia: e.id, intento: Date.now() })}
       alRepetir={() => setPantalla({ ...pantalla, intento: Date.now() })}
+      alFinal={() => { setInforme(null); void useDialogo.getState().decir(finalCampana(mar)).then(() => setVerFinal(true)) }}
       alMenu={() => { setInforme(null); setPantalla({ tipo: 'menu' }) }} />}
+
+    {verFinal && <Final resultados={resultados} alRepetir={empezarCampana} alMenu={() => { setVerFinal(false); setPantalla({ tipo: 'menu' }) }} />}
 
     {!mar && <div className="juego-estado" role="status">{error ?? 'Cargando el mar…'}</div>}
   </div>

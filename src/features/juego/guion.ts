@@ -69,11 +69,23 @@ export const finNara: Linea[] = [
   { quien: "orbi", texto: "Mira ahí abajo: un cardumen de anchovetas. Anchi, te toca." },
 ];
 
+/** Contexto de cada año de la campaña */
+const CONTEXTO_ANIO: Record<number, Linea> = {
+  2004: { quien: "gaia", texto: "Un año de agua fría y comida abundante: buen momento para aprender." },
+  1998: { quien: "gaia", texto: "Es El Niño de 1997-98, uno de los más fuertes que se han medido. Prepárate." },
+  2000: { quien: "gaia", texto: "Después del gran Niño el agua volvió a enfriarse. El cardumen es más pequeño: toca reconstruirlo." },
+  2017: { quien: "gaia", texto: "Este año llega un Niño costero: un golpe corto y desigual a inicios de año, frente al Perú y Ecuador." },
+  2023: { quien: "gaia", texto: "Otro Niño costero, más largo. Ese año se suspendió la primera temporada de pesca de anchoveta." },
+  2026: { quien: "orbi", texto: "El Niño 2026 está en curso. Tengo datos hasta agosto: jugarás de enero a agosto." },
+};
+
 /** Lo que dicen los guías al empezar cada año del cardumen, con los datos reales de enero frente a Chimbote */
 export function introCardumen(mar: Mar, anio: number, primera: boolean): Linea[] {
   const e = mar.estado("chimbote", mar.indice(anio, 1));
   const temp = e.anomaliaTemp == null ? "" : ` el mar estaba ${n1.format(e.anomaliaTemp)} °C frente a lo normal y`;
   const lineas: Linea[] = [{ quien: "orbi", texto: `Año ${anio}. En enero, frente a Chimbote,${temp} la comida estaba al ${Math.round(e.alimento * 100)} % de lo normal.` }];
+  const contexto = CONTEXTO_ANIO[anio];
+  if (contexto) lineas.push(contexto);
   if (primera) lineas.unshift(
     { quien: "gaia", texto: "Anchi, tú guías al cardumen durante un año. Come las manchas verdes: es el fitoplancton que mide ORBI desde el espacio." },
     { quien: "gaia", texto: "Nada con WASD o flechas; Q sube y E baja. Con C juntas al cardumen: así se protege de los depredadores, pero come menos." },
@@ -94,4 +106,23 @@ export function hitoCardumen(id: string, m: Mes): Linea[] {
     case "red": return [{ quien: "gaia", texto: "¡Una bolichera tiende su red! Sal del círculo o baja más hondo de lo que llega la red. Juntos, el cardumen es más fácil de atrapar." }];
     default: return [];
   }
+}
+
+/** Cierre de la campaña con los datos reales de 2026 */
+export function finalCampana(mar: Mar): Linea[] {
+  const ene = mar.indice(2026, 1);
+  let max = -Infinity, mesMax = 1;
+  for (let m = 1; m <= 12; m++) {
+    const i = mar.indice(2026, m);
+    const n = i >= 0 ? mar.estado("chimbote", i).nino12 : null;
+    if (n != null && n > max) { max = n; mesMax = m; }
+  }
+  const inicio = ene >= 0 ? mar.estado("chimbote", ene).nino12 : null;
+  const lineas: Linea[] = [];
+  if (inicio != null && Number.isFinite(max)) lineas.push({ quien: "orbi", texto: `En 2026 el índice Niño 1+2 pasó de ${n1.format(inicio)} °C en enero a ${n1.format(max)} °C en ${MESES[mesMax - 1]}. La segunda temporada de pesca de anchoveta de 2026 se canceló: cuota cero.` });
+  lineas.push(
+    { quien: "gaia", texto: "Generación tras generación, el cardumen vivió los mismos años que midieron los satélites." },
+    { quien: "orbi", texto: "Esta historia aún no termina: los satélites siguen midiendo." },
+  );
+  return lineas;
 }
