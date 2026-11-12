@@ -1,9 +1,10 @@
 # Mar Peruano 360
 
-Sitio con dos páginas sobre el mar peruano y los datos satelitales que lo describen:
+Sitio con tres páginas sobre el mar peruano y los datos satelitales que lo describen:
 
 - **Portada (`/`):** un descenso con scroll desde la órbita del satélite hasta el fondo del mar. En cada capa aparece un resultado del análisis de datos.
 - **Explorador (`/explorer`):** un globo 3D con datos mes a mes de 1998 a 2026 (y escenarios de El Niño hasta febrero de 2027), mapa del satélite, recorrido guiado, historias, comparación de años, hallazgos y monitor de condiciones de la costa peruana.
+- **Juego (`/juego`):** Cardumen, con prólogo antártico, supervivencia de anchovetas e interfaz de bitácora oceanográfica. Entre generaciones se revisan expedientes en una cabina del puerto, con guía inicial, sellos y clasificación de documentos.
 
 Desde la portada se pasa al explorador con una transición continua: la cámara se acerca al globo y el explorador arranca con el mismo globo, el mismo giro y el mismo encuadre.
 

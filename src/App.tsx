@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 // cada página se descarga por separado: la portada no carga el globo, los gráficos ni los datos del explorador
 const PortadaPage = lazy(() => import('./pages/PortadaPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
+const JuegoPage = lazy(() => import('./pages/JuegoPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function AppRoutes() {
@@ -12,6 +13,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<PortadaPage />} />
         <Route path="/explorer" element={<HomePage />} />
+        <Route path="/juego" element={<JuegoPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>

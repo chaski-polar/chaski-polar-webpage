@@ -49,10 +49,11 @@ export default function Header() {
           From the Antarctic to the Peruvian sea
         </div>
       </div>
-      <nav className="app-nav pointer-events-auto ml-auto flex gap-1" aria-label="Sections">
+      <nav className="app-nav pointer-events-auto ml-auto flex gap-1 max-sm:[&>a]:px-2" aria-label="Sections">
         <Link className="rounded-pill px-3 py-1.5 no-underline transition-colors" to="/">Home</Link>
         <Link className="rounded-pill px-3 py-1.5 no-underline transition-colors" to="/explorer" onClick={irAExplorar} aria-current={seccion === 'explore' ? 'page' : undefined}>Explore</Link>
         <a className="rounded-pill px-3 py-1.5 no-underline transition-colors" href="#hallazgos" onClick={irAHallazgos} aria-current={seccion === 'findings' ? 'location' : undefined}>Findings</a>
+        <Link className="rounded-pill px-3 py-1.5 no-underline transition-colors" to="/juego">Game</Link>
       </nav>
     </header>
   </>

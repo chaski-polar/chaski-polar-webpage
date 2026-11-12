@@ -1,0 +1,62 @@
+/* Cabina del puerto: el espacio de espera queda separado de la mesa de documentos. */
+.juego .juego-escritorio.cabina-escritorio { display: block; padding-bottom: 150px; }
+.juego .cabina-escritorio .escritorio-cabecera { gap: 12px; background: #0a2332; }
+.juego .cabina-escritorio .escritorio-cabecera .cabina-ayuda { color: #c5d5ce; background: #153747; border-color: #55717b; }
+.juego .cabina-franja { display: grid; grid-template-columns: 1fr; gap: 18px; margin: 20px 20px 0; }
+.juego .cabina-franja.con-guia { grid-template-columns: minmax(350px, 1fr) minmax(330px, 1fr); align-items: stretch; }
+.juego .cabina-ventanilla { display: flex; gap: 20px; align-items: stretch; border: 1px solid #42616a; background: #0a2332; min-width: 0; }
+.juego .cabina-vista { width: 248px; flex: 0 0 248px; position: relative; display: flex; flex-direction: column; justify-content: flex-end; background: #122c3a; border-right: 1px solid #42616a; }
+.juego .cabina-placa { display: block; color: #c6d6cf; padding: 10px 12px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+.juego .cabina-personaje { width: 100%; height: auto; display: block; image-rendering: pixelated; }
+.juego .cabina-visita { padding: 18px 18px 16px 0; align-self: center; min-width: 0; }
+.juego .cabina-rotulo { margin: 0 0 6px; font: 10px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: #dfbc79; }
+.juego .cabina-visita h3 { font: 500 23px/1.15 var(--serif); margin: 0 0 10px; color: #edf1e7; }
+.juego .cabina-visita p:not(.cabina-rotulo) { font: 13px/1.55 var(--sans); margin: 0; color: #b7cecf; }
+.juego .cabina-visita p.cabina-estado { font-size: 11px; margin-top: 14px; color: #afcfba; }
+.juego .cabina-guia { background: #152f3b; color: #edf1e7; padding: 16px 18px; border: 1px solid #a69a70; min-width: 0; }
+.juego .cabina-guia-cabecera { display: flex; justify-content: space-between; gap: 12px; align-items: center; font: 11px var(--sans); color: #dfbc79; }
+.juego .cabina-guia h3 { display: flex; gap: 8px; align-items: center; margin: 12px 0 10px; font: 500 22px/1.2 var(--serif); color: #edf1e7; }
+.juego .cabina-guia h3:focus { outline: none; }
+.juego .cabina-guia p { font: 14px/1.6 var(--sans); color: #c5d5ce; margin: 0; }
+.juego .cabina-guia-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.juego .cabina-guia button { border: 1px solid #55717b; border-radius: 3px; padding: 8px 11px; background: #0a2332; color: #edf1e7; font: 12px var(--sans); cursor: pointer; box-shadow: none; }
+.juego .cabina-guia button:hover { background: #244452; border-color: #afcfba; }
+.juego .cabina-guia-cabecera button { padding: 5px 0; background: none; border: 0; color: #c5d5ce; text-decoration: underline; text-underline-offset: 3px; }
+.juego .cabina-instruccion { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 20px; margin: 20px 20px 0; padding-bottom: 12px; border-bottom: 1px solid #42616a; color: #edf1e7; font: 500 19px var(--serif); }
+.juego .cabina-instruccion span { color: #b7cecf; font: 12px/1.5 var(--sans); }
+.juego .cabina-mesa { position: relative; isolation: isolate; }
+.juego .cabina-escritorio .papel:focus-visible { outline: 3px solid #dfbc79; outline-offset: 4px; }
+.juego .cabina-escritorio .sello { display: flex; align-items: center; gap: 5px; }
+.juego .cabina-icono-sello { flex: none; display: inline-block; vertical-align: middle; }
+.juego .cabina-escritorio .sello-boton { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 50px; border-radius: 3px; box-shadow: none; }
+.juego .cabina-escritorio .escritorio-sellos { border-radius: 3px; background: #0a2332; }
+.juego .cabina-escritorio .escritorio-sellos .ayuda { line-height: 1.45; }
+.juego .cabina-escritorio .resultado { margin-top: 24px; }
+
+@media (max-width: 1150px) {
+  .juego .cabina-franja.con-guia { grid-template-columns: 1fr; }
+  .juego .cabina-guia h3 { margin-top: 8px; }
+}
+@media (max-width: 760px) {
+  .juego .juego-escritorio.cabina-escritorio { padding-bottom: 200px; }
+  .juego .cabina-franja { margin: 14px 12px 0; gap: 12px; }
+  .juego .cabina-ventanilla { gap: 12px; }
+  .juego .cabina-vista { flex-basis: 112px; width: 112px; }
+  .juego .cabina-placa { font-size: 9px; letter-spacing: .04em; padding: 8px; }
+  .juego .cabina-personaje { min-height: 96px; object-fit: cover; object-position: center; }
+  .juego .cabina-visita { padding: 12px 12px 12px 0; }
+  .juego .cabina-visita h3 { font-size: 19px; margin-bottom: 6px; }
+  .juego .cabina-visita p:not(.cabina-rotulo) { font-size: 11px; }
+  .juego .cabina-visita p.cabina-estado { font-size: 10px; margin-top: 8px; }
+  .juego .cabina-escritorio .escritorio-cabecera { padding: 10px 12px; gap: 8px; }
+  .juego .cabina-escritorio .escritorio-cabecera b { width: 100%; font-size: 18px; }
+  .juego .cabina-escritorio .escritorio-cabecera button { padding: 8px 10px; font-size: 12px; min-height: 40px; }
+  .juego .cabina-guia { padding: 14px; }
+  .juego .cabina-guia p { font-size: 13px; }
+  .juego .cabina-guia button { min-height: 40px; }
+  .juego .cabina-instruccion { margin: 18px 12px 0; }
+  .juego .cabina-mesa { display: flex; flex-direction: column; gap: 20px; align-items: center; min-height: 0 !important; padding: 24px 0 0; }
+  .juego .cabina-escritorio .papel { flex: none; box-sizing: border-box; }
+  .juego .cabina-escritorio .sello-boton { min-width: 0; flex: 1; padding: 10px; font-size: 12px; }
+  .juego .cabina-escritorio .escritorio-sellos { gap: 8px; }
+}

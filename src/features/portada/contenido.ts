@@ -22,7 +22,7 @@ export const SECCIONES: readonly Seccion[] = [
     de: 0, a: 0.05, principal: true,
     titulo: "Chaski Polar",
     texto: "From satellite to the seafloor of the Peruvian sea",
-    botones: [{ texto: "Enter the explorer →", accion: "entrar" }],
+    botones: [{ texto: "Enter the explorer →", accion: "entrar" }, { texto: "Play Cardumen", href: "/juego" }],
   },
   {
     de: 0.08, a: 0.19,
@@ -53,7 +53,7 @@ export const SECCIONES: readonly Seccion[] = [
     de: 0.9, a: 1.05,
     titulo: "200 m · The seafloor",
     texto: "Now explore the satellite data month by month, from 1998.",
-    botones: [{ texto: "Enter the explorer →", accion: "entrar" }],
+    botones: [{ texto: "Enter the explorer →", accion: "entrar" }, { texto: "Play Cardumen", href: "/juego" }],
   },
 ];
 
