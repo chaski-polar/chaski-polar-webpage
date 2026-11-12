@@ -23,15 +23,15 @@ export default function Punto({ lat, lng }: { lat: number; lng: number }) {
     <h2>{fmtCoord(lat, lng)}</h2>
     {dp && !dp.tierra && <>
       <div className="cifras">
-        <div className="cifra"><b className="num">{dp.chl == null ? 'sin dato' : `${nf(dp.chl < 1 ? 2 : 1).format(dp.chl)} mg/m³`}</b><span>clorofila en {mesLargo(modelo.mes(i))}{pc != null && `, ${nf(0).format(Math.abs(pc))} % ${pc >= 0 ? 'más' : 'menos'} que un ${MESES_LARGOS[modelo.mes(i).mes]} normal`}</span></div>
-        <div className="cifra"><b className="num">{dp.sst == null ? 'sin dato' : `${nf(1).format(dp.sst)} °C`}</b><span>temperatura del mar{dp.anom != null && `, ${signo(dp.anom)}${nf(1).format(Math.abs(dp.anom))} °C frente a lo normal`}</span></div>
+        <div className="cifra"><b className="num">{dp.chl == null ? 'no data' : `${nf(dp.chl < 1 ? 2 : 1).format(dp.chl)} mg/m³`}</b><span>chlorophyll in {mesLargo(modelo.mes(i))}{pc != null && `, ${nf(0).format(Math.abs(pc))} % ${pc >= 0 ? 'more' : 'less'} than a normal ${MESES_LARGOS[modelo.mes(i).mes]}`}</span></div>
+        <div className="cifra"><b className="num">{dp.sst == null ? 'no data' : `${nf(1).format(dp.sst)} °C`}</b><span>sea temperature{dp.anom != null && `, ${signo(dp.anom)}${nf(1).format(Math.abs(dp.anom))} °C from normal`}</span></div>
       </div>
       {dp.serie && <>
         <div className="grafico" aria-label="Clorofila mensual en este punto"><SerieMensual modelo={modelo} serie={dp.serie} color="#3fc28c" mesActual={i} alElegirMes={acciones.fijarMes} logaritmica /></div>
-        <p className="nota">Clorofila de la celda de medio grado del mapa (ESA OC-CCI v6), en escala logarítmica. Toca el gráfico para saltar a ese mes.</p>
+        <p className="nota">Chlorophyll from the map's half-degree cell (ESA OC-CCI v6), on a logarithmic scale. Tap the chart to jump to that month.</p>
       </>}
     </>}
-    {dp?.tierra && <p>Este punto cae en tierra o en un lugar donde el satélite nunca ve el mar, como el hielo permanente.</p>}
+    {dp?.tierra && <p>This point falls on land or where the satellite never sees the sea, such as permanent ice.</p>}
     <p>
       {dp ? `No es una de las ${modelo.ids.length} zonas de estudio.` : 'Aquí no hay mapa del satélite ni una zona de estudio.'}
       {cerca[0] && <> La zona más cercana es <strong>{modelo.zona(cerca[0].z).nombre}</strong>, a unos {km(cerca[0].d)} km.</>}

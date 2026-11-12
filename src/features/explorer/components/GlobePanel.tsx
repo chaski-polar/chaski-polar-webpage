@@ -72,11 +72,11 @@ export default function GlobePanel() {
   /* ---------- etiquetas de zonas, base y corrientes ---------- */
   const marcas = useMemo<Marca[]>(() => [
     ...modelo.ids.map((z): Marca => ({ z, lat: modelo.zona(z).lat, lng: modelo.zona(z).lon, texto: modelo.zona(z).nombre, lado: LADO[z] ?? 'der', soloCerca: AGRUPAR })),
-    { z: 'grupo-peru', lat: -11, lng: -78.2, texto: '5 zonas del Perú', lado: 'der', forma: 'grupo', soloLejos: AGRUPAR },
-    { z: 'grupo-antartida', lat: -62, lng: -62, texto: 'Península Antártica', lado: 'der-arriba', forma: 'grupo', soloLejos: AGRUPAR },
+    { z: 'grupo-peru', lat: -11, lng: -78.2, texto: '5 Peruvian zones', lado: 'der', forma: 'grupo', soloLejos: AGRUPAR },
+    { z: 'grupo-antartida', lat: -62, lng: -62, texto: 'Antarctic Peninsula', lado: 'der-arriba', forma: 'grupo', soloLejos: AGRUPAR },
     { z: 'base', ...BASE_MACHU_PICCHU, texto: 'Base Machu Picchu', lado: 'der-abajo', forma: 'base', soloCerca: AGRUPAR },
-    { z: 'rio-humboldt', lat: -27, lng: -78.4, texto: 'Corriente de Humboldt ↑', forma: 'rio' },
-    { z: 'rio-circumpolar', lat: -55.2, lng: -96, texto: 'Corriente Circumpolar →', forma: 'rio' },
+    { z: 'rio-humboldt', lat: -27, lng: -78.4, texto: 'Humboldt Current ↑', forma: 'rio' },
+    { z: 'rio-circumpolar', lat: -55.2, lng: -96, texto: 'Antarctic Circumpolar Current →', forma: 'rio' },
   ], [modelo])
   const elementos = useRef(new Map<Marca, HTMLElement>())
   // las etiquetas se crean una sola vez: sus manejadores leen siempre la versión más reciente
@@ -102,7 +102,7 @@ export default function GlobePanel() {
       if (!z || !el || !contenedor.current) { setLectura(null); return }
       const a = modelo.anomaliaTxt(z, v, month), x = modelo.valorZona(z, v, month)
       const r = contenedor.current.getBoundingClientRect(), b = el.getBoundingClientRect()
-      setLectura({ x: b.left - r.left + 16, y: b.top - r.top + 30, titulo: modelo.zona(z).nombre, detalle: [`${v.nombre}: ${x == null ? 'sin dato este mes' : modelo.valorTxt(v, x)}${a ? `, ${a.frase}` : ''}`, 'Toca para ver más'] })
+      setLectura({ x: b.left - r.left + 16, y: b.top - r.top + 30, titulo: modelo.zona(z).nombre, detalle: [`${v.nombre}: ${x == null ? 'no data this month' : modelo.valorTxt(v, x)}${a ? `, ${a.frase}` : ''}`, 'Tap to see more'] })
     }
   }, [acciones, interaccion, modelo, month, v])
 
@@ -244,7 +244,7 @@ export default function GlobePanel() {
   else if (mapaEstado === 'error') nota = 'El mapa del satélite no cargó en este navegador.'
   else if (mapaEstado !== 'listo') nota = 'Cargando el mapa del satélite…'
   else if (!v.mapa) nota = `${v.corto.charAt(0).toUpperCase() + v.corto.slice(1)}: solo hay datos por zona, sin mapa.`
-  else nota = `${view === 'satellite' ? 'Foto de la Tierra con el mapa del satélite' : 'Mapa del satélite mes a mes'}. ${punteroFino ? 'Pasa el cursor' : 'Toca el mar'} para leerlo.`
+  else nota = `${view === 'satellite' ? 'Earth imagery with the satellite map' : 'Monthly satellite map'}. ${punteroFino ? 'Hover' : 'Tap the sea'} to read it.`
 
   const textoVer = esAngosto() && panel.tipo !== 'general'
     ? panel.tipo === 'zona' ? `Ver los datos de ${modelo.zona(panel.z).nombre}` : panel.tipo === 'recorrido' ? `Leer el paso ${panel.paso + 1}` : 'Ver la explicación'
@@ -292,7 +292,7 @@ export default function GlobePanel() {
           pathDashLength={0.06}
           pathDashGap={0.02}
           pathDashAnimateTime={menosMovimiento ? 0 : 14000}
-          pathLabel={(d: object) => `<div class="tip"><b>${(d as Corriente).nombre}</b><br><i>Toca para saber qué hace</i></div>`}
+          pathLabel={(d: object) => `<div class="tip"><b>${(d as Corriente).nombre}</b><br><i>Tap to learn what it does</i></div>`}
           onPathClick={(d, ev) => { if (!desdeEtiqueta(ev)) { interaccion(); acciones.corriente((d as Corriente).id) } }}
           ringsData={anillos}
           ringColor={() => (t: number) => `rgba(99,205,232,${1 - t})`}
@@ -333,7 +333,7 @@ export default function GlobePanel() {
         {mapaActivo && <div className="estilos-mapa" role="group" aria-label="Estilo del mapa del satélite"><span>Mapa:</span>
           {(['bandas', 'celdas', 'suave'] as const).map((e) => <button className="control-pill" key={e} type="button" aria-pressed={mapStyle === e} onClick={() => setMapStyle(e)}>{e.charAt(0).toUpperCase() + e.slice(1)}</button>)}
         </div>}
-        <p className={`pista-globo${pistaOculta ? ' oculta' : ''}`}>Arrastra para girar. Toca una zona, una corriente o el mar.</p>
+        <p className={`pista-globo${pistaOculta ? ' oculta' : ''}`}>Drag to rotate. Tap a zone, current or the sea.</p>
       </div>
       {textoVer && <button className="btn ver-relato" type="button" onClick={() => document.getElementById('relato')?.scrollIntoView({ behavior: menosMovimiento ? 'auto' : 'smooth' })}>{textoVer}</button>}
       {lectura && <div className="lectura" aria-hidden="true" style={{ transform: `translate(${Math.max(8, lectura.x)}px, ${lectura.y}px)` }}><b>{lectura.titulo}</b>{lectura.detalle.map((d) => <small key={d}>{d}</small>)}</div>}

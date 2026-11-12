@@ -19,7 +19,7 @@ const CrucerosSection = lazy(() => import('../features/cruceros/CrucerosSection'
 
 /** Explorador: los datos se cargan solo al entrar a esta página */
 export default function HomePage() {
-  useEffect(() => { document.title = 'Mar Peruano 360 · Explorador' }, [])
+  useEffect(() => { document.title = 'Mar Peruano 360 · Explorer' }, [])
   return <DataProvider><Explorador /></DataProvider>
 }
 
@@ -36,16 +36,16 @@ function Explorador() {
           </Suspense>
           <main id="contenido">
             <section className="seccion pregunta">
-              <blockquote>¿Cómo se asocian los cambios del fitoplancton antártico con la vida marina del Perú?</blockquote>
+              <blockquote>How are changes in Antarctic phytoplankton associated with marine life in Peru?</blockquote>
               <div className="cuerpo">
                 <p>
-                  El <strong>fitoplancton</strong> son algas microscópicas que flotan en el mar. Son la base de la cadena: las come el zooplancton, al zooplancton lo come la anchoveta y a la anchoveta, las aves, los lobos marinos y la pesca.
+                  <strong>Phytoplankton</strong> are microscopic algae floating in the sea. They support the food web: zooplankton eat them, anchoveta eat zooplankton, and birds, sea lions and fisheries depend on anchoveta.
                 </p>
                 <p>
-                  Los satélites miden el fitoplancton por el color del agua: más verde quiere decir más <strong>clorofila</strong>. Aquí se juntan 27 años de esas mediciones para cinco zonas del Perú y dos de la Antártida, más temperatura, turbidez, viento, hielo marino, nutrientes y la pesca de cada año.
+                  Satellites estimate phytoplankton from the color of the water: greener means more <strong>chlorophyll</strong>. This explorer brings together 27 years of measurements for five Peruvian zones and two Antarctic zones, plus temperature, turbidity, wind, sea ice, nutrients and annual catches.
                 </p>
                 <p>
-                  La idea es buscar <strong>asociaciones</strong>. Que dos cosas cambien juntas no prueba que una cause a la otra, y una pesca más baja tampoco significa que la especie desaparezca.
+                  The goal is to find <strong>associations</strong>. Two things changing together does not prove that one causes the other, and lower catches do not mean the species has disappeared.
                 </p>
               </div>
             </section>
@@ -56,15 +56,15 @@ function Explorador() {
             <section className="seccion">
               <div className="llamada">
                 <div>
-                  <h2>El viaje completo</h2>
-                  <p>Vuelve a la portada y desciende desde la órbita del satélite hasta el fondo del mar peruano: fitoplancton, cardumen de anchoveta y la zona sin oxígeno, capa por capa.</p>
-                  <Link className="button-primary" to="/">Volver a la portada</Link>
+                  <h2>The complete journey</h2>
+                  <p>Return home and descend from satellite orbit to the seafloor: phytoplankton, anchoveta schools and the oxygen minimum zone, layer by layer.</p>
+                  <Link className="button-primary" to="/">Return home</Link>
                 </div>
               </div>
             </section>
             <FuentesSection />
           </main>
-          <footer className="pie">Mar Peruano 360 · Datos satelitales abiertos de la NASA, la ESA y la NOAA. Las relaciones que muestra esta página son asociaciones, no pruebas de causa.</footer>
+          <footer className="pie">Mar Peruano 360 · Open satellite data from NASA, ESA and NOAA. The relationships shown here are associations, not proof of causation.</footer>
         </ExplorerProvider>
       </DataState>
     </AppShell>

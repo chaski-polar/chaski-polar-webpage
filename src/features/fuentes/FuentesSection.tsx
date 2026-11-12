@@ -3,32 +3,32 @@ import type { ReactNode } from 'react'
 type Fuente = { dato: string; nasa?: string; fuente: ReactNode; periodo: string }
 
 const FUENTES: Fuente[] = [
-  { dato: 'Clorofila-a (fitoplancton)', nasa: 'Incluye sensores de la NASA', fuente: <><a href="https://climate.esa.int/en/projects/ocean-colour/">ESA Ocean Colour CCI v6</a>, vía ERDDAP de NOAA NEFSC. Mezcla varios satélites, entre ellos SeaWiFS y MODIS-Aqua de la NASA</>, periodo: '1998–2026' },
-  { dato: 'Mapa de clorofila sobre el globo (celdas de 0,5°)', nasa: 'Incluye sensores de la NASA', fuente: <>ESA Ocean Colour CCI v6 (<code>occci_V6_monthly_4km</code>), vía <a href="https://comet.nefsc.noaa.gov/erddap/griddap/occci_V6_monthly_4km.html">ERDDAP de NOAA NEFSC</a>; media geométrica de 4 puntos por celda</>, periodo: '1998–sep 2026' },
-  { dato: 'Mapa de temperatura sobre el globo (celdas de 1°)', fuente: <>NOAA Coral Reef Watch v3.1 (<code>CRW_sst_v3_1_monthly</code>), vía <a href="https://oceanwatch.pifsc.noaa.gov/erddap/griddap/CRW_sst_v3_1_monthly.html">NOAA OceanWatch</a>; anomalía frente a 1998–2020</>, periodo: '1998–oct 2026' },
-  { dato: 'Vista satelital del globo', nasa: 'Imagen de la NASA', fuente: <>NASA Blue Marble, en la versión que distribuye <a href="https://github.com/vasturiano/three-globe">three-globe</a></>, periodo: '—' },
-  { dato: 'Turbidez del agua (Kd490)', fuente: <>ESA Ocean Colour CCI v6, vía <a href="https://oceanwatch.pifsc.noaa.gov/erddap/">NOAA OceanWatch</a></>, periodo: '1998–2026' },
-  { dato: 'Temperatura del mar', fuente: 'NOAA Coral Reef Watch v3.1 (OceanWatch)', periodo: '1985–oct 2026' },
-  { dato: 'Salinidad', fuente: 'Satélite SMOS de la ESA (OceanWatch)', periodo: '2010–oct 2026' },
-  { dato: 'Corrientes y nivel del mar', nasa: 'OSCAR es un producto de la NASA', fuente: 'OSCAR (NASA/ESR) y NOAA/NESDIS (OceanWatch)', periodo: '1993–2018' },
-  { dato: 'Viento sobre el mar', fuente: 'ERA5 (ECMWF/Copernicus) en las zonas del Perú, solo puntos de mar; CCMP v2 de Remote Sensing Systems en la Antártida', periodo: '1998–sep 2026 (Perú); 1993–2018 (Antártida)' },
-  { dato: 'Aire en la Base Machu Picchu y la costa', nasa: 'Producto de la NASA', fuente: <><a href="https://power.larc.nasa.gov/">NASA POWER</a> (MERRA-2 y CERES)</>, periodo: '1984–2024' },
-  { dato: 'Nitrato, fosfato y silicato', fuente: <><a href="https://www.ncei.noaa.gov/access/world-ocean-atlas-2023/">World Ocean Atlas 2023</a>, NOAA NCEI (promedio histórico)</>, periodo: '1955–2022' },
-  { dato: 'Hielo marino antártico', fuente: <a href="https://nsidc.org/data/g02135">NSIDC Sea Ice Index G02135</a>, periodo: '1979–ago 2026' },
-  { dato: 'El Niño costero (Niño 1+2) y vientos antárticos (SAM)', fuente: <a href="https://psl.noaa.gov/data/climateindices/">NOAA PSL</a>, periodo: '1948–2026' },
-  { dato: 'Monitor de condiciones', fuente: 'Reanálisis CMEMS y OC-CCI; ICEN de IGP/ENFEN; Niño 1+2 de NOAA PSL/CPC; biomasa de anchoveta en intervalos de crucero de IMARPE', periodo: '1998–2026' },
-  { dato: 'Escenarios de El Niño (débil, central e intenso)', fuente: 'Construidos con la climatología mensual del monitor y sus pendientes históricas frente al ICEN, siguiendo una trayectoria asumida de El Niño. Son escenarios, no pronósticos', periodo: 'sep 2026–feb 2027' },
-  { dato: 'Pesca de anchoveta, concha de abanico, krill y otras', fuente: <a href="https://www.fao.org/fishery/en/collection/global_production">FAO Global Production 2026.1</a>, periodo: '1950–2024' },
-  { dato: 'Atlas del globo', fuente: <>Países de <a href="https://www.naturalearthdata.com/">Natural Earth</a> (1:110 m) y mapa de alturas de <a href="https://github.com/vasturiano/three-globe">three-globe</a>, pintados en bandas planas</>, periodo: '—' },
-  { dato: 'Referencias para contar El Niño', fuente: <><a href="https://science.nasa.gov/earth/earth-observatory/">NASA Earth Observatory</a> y <a href="https://svs.gsfc.nasa.gov/12176">NASA Scientific Visualization Studio</a></>, periodo: '—' },
+  { dato: 'Chlorophyll-a (phytoplankton)', nasa: 'Includes NASA sensors', fuente: <><a href="https://climate.esa.int/en/projects/ocean-colour/">ESA Ocean Colour CCI v6</a>, via NOAA NEFSC ERDDAP. Combines several satellites, including NASA SeaWiFS and MODIS-Aqua</>, periodo: '1998–2026' },
+  { dato: 'Globe chlorophyll map (0.5° cells)', nasa: 'Includes NASA sensors', fuente: <>ESA Ocean Colour CCI v6 (<code>occci_V6_monthly_4km</code>), via <a href="https://comet.nefsc.noaa.gov/erddap/griddap/occci_V6_monthly_4km.html">NOAA NEFSC ERDDAP</a>; geometric mean of 4 points per cell</>, periodo: '1998–Sep 2026' },
+  { dato: 'Globe temperature map (1° cells)', fuente: <>NOAA Coral Reef Watch v3.1 (<code>CRW_sst_v3_1_monthly</code>), via <a href="https://oceanwatch.pifsc.noaa.gov/erddap/griddap/CRW_sst_v3_1_monthly.html">NOAA OceanWatch</a>; anomaly relative to 1998–2020</>, periodo: '1998–Oct 2026' },
+  { dato: 'Globe satellite view', nasa: 'NASA imagery', fuente: <>NASA Blue Marble, distributed by <a href="https://github.com/vasturiano/three-globe">three-globe</a></>, periodo: '—' },
+  { dato: 'Water turbidity (Kd490)', fuente: <>ESA Ocean Colour CCI v6, via <a href="https://oceanwatch.pifsc.noaa.gov/erddap/">NOAA OceanWatch</a></>, periodo: '1998–2026' },
+  { dato: 'Sea temperature', fuente: 'NOAA Coral Reef Watch v3.1 (OceanWatch)', periodo: '1985–Oct 2026' },
+  { dato: 'Salinity', fuente: 'ESA SMOS satellite (OceanWatch)', periodo: '2010–Oct 2026' },
+  { dato: 'Currents and sea level', nasa: 'OSCAR is a NASA product', fuente: 'OSCAR (NASA/ESR) and NOAA/NESDIS (OceanWatch)', periodo: '1993–2018' },
+  { dato: 'Wind over the sea', fuente: 'ERA5 (ECMWF/Copernicus) in Peruvian zones, sea points only; CCMP v2 from Remote Sensing Systems in Antarctica', periodo: '1998–Sep 2026 (Peru); 1993–2018 (Antarctica)' },
+  { dato: 'Air at Machu Picchu Base and the coast', nasa: 'NASA product', fuente: <><a href="https://power.larc.nasa.gov/">NASA POWER</a> (MERRA-2 and CERES)</>, periodo: '1984–2024' },
+  { dato: 'Nitrate, phosphate and silicate', fuente: <><a href="https://www.ncei.noaa.gov/access/world-ocean-atlas-2023/">World Ocean Atlas 2023</a>, NOAA NCEI (historical average)</>, periodo: '1955–2022' },
+  { dato: 'Antarctic sea ice', fuente: <a href="https://nsidc.org/data/g02135">NSIDC Sea Ice Index G02135</a>, periodo: '1979–Aug 2026' },
+  { dato: 'Coastal El Niño (Niño 1+2) and Antarctic winds (SAM)', fuente: <a href="https://psl.noaa.gov/data/climateindices/">NOAA PSL</a>, periodo: '1948–2026' },
+  { dato: 'Conditions monitor', fuente: 'CMEMS and OC-CCI reanalyses; ICEN from IGP/ENFEN; Niño 1+2 from NOAA PSL/CPC; anchoveta biomass during IMARPE survey intervals', periodo: '1998–2026' },
+  { dato: 'El Niño scenarios (weak, central and intense)', fuente: 'Built from the monitor monthly climatology and historical slopes relative to ICEN, following an assumed El Niño trajectory. These are scenarios, not forecasts', periodo: 'Sep 2026–Feb 2027' },
+  { dato: 'Anchoveta, scallop, krill and other catches', fuente: <a href="https://www.fao.org/fishery/en/collection/global_production">FAO Global Production 2026.1</a>, periodo: '1950–2024' },
+  { dato: 'Globe atlas', fuente: <>Countries from <a href="https://www.naturalearthdata.com/">Natural Earth</a> (1:110m) and the elevation map from <a href="https://github.com/vasturiano/three-globe">three-globe</a>, painted in flat bands</>, periodo: '—' },
+  { dato: 'References for counting El Niño', fuente: <><a href="https://science.nasa.gov/earth/earth-observatory/">NASA Earth Observatory</a> and <a href="https://svs.gsfc.nasa.gov/12176">NASA Scientific Visualization Studio</a></>, periodo: '—' },
 ]
 
 /** Tabla de fuentes de datos */
 export default function FuentesSection() {
   return <section className="seccion" id="fuentes" aria-labelledby="t-fuentes">
     <div className="encabezado-seccion">
-      <h2 id="t-fuentes">Fuentes de datos</h2>
-      <p>Todo es de acceso libre y se descargó sin cuenta. Las zonas son cajas de latitud y longitud, y cada valor mensual es la mediana de los píxeles del satélite dentro de la caja. Los mapas del globo cubren del ecuador a los 70° S, entre los 92° y los 52° O.</p>
+      <h2 id="t-fuentes">Data sources</h2>
+      <p>Everything is openly available and was downloaded without an account. Zones are latitude–longitude boxes, and each monthly value is the median of satellite pixels inside the box. Globe maps cover the equator to 70° S, between 92° and 52° W.</p>
     </div>
     <div className="tabla-envoltura">
       <table className="fuentes">
@@ -40,6 +40,6 @@ export default function FuentesSection() {
         </tr>)}</tbody>
       </table>
     </div>
-    <p className="siguiente-paso"><strong>Siguiente paso posible:</strong> la misión <strong>PACE</strong> de la NASA (sensor OCI, con datos desde febrero de 2024) mide la clorofila y además distingue tipos de fitoplancton. Sus datos piden una cuenta gratuita de NASA Earthdata, por eso todavía no están aquí.</p>
+    <p className="siguiente-paso"><strong>Possible next step:</strong> NASA's <strong>PACE</strong> mission (OCI sensor, with data since February 2024) measures chlorophyll and distinguishes phytoplankton types. Its data require a free NASA Earthdata account, so they are not included here yet.</p>
   </section>
 }

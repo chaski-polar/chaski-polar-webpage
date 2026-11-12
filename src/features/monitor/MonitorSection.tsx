@@ -21,18 +21,18 @@ type VariableMonitor = {
 }
 
 const REGIONALES: VariableMonitor[] = [
-  { campo: 'chlorophyll_a_mg_m3', nombre: 'Clorofila-a / fitoplancton', unidad: 'mg/m³', color: '#3fc28c', dec: 2 },
-  { campo: 'sst_c', nombre: 'Temperatura superficial', unidad: '°C', color: '#f08a4b', dec: 1 },
-  { campo: 'sss_psu', nombre: 'Salinidad', unidad: 'PSU', color: '#9fe0f2', dec: 2 },
-  { campo: 'nitrate_mmol_m3', nombre: 'Nitrato', unidad: 'mmol/m³', color: '#63cde8', dec: 2 },
-  { campo: 'phosphate_mmol_m3', nombre: 'Fosfato', unidad: 'mmol/m³', color: '#a9dc6e', dec: 2 },
-  { campo: 'oxygen_ml_l', nombre: 'Oxígeno disuelto', unidad: 'ml/L', color: '#dde9f0', dec: 2 },
-  { campo: 'phytoplankton_carbon_mg_c_m3', nombre: 'Carbono fitoplanctónico', unidad: 'mg C/m³', color: '#a9dc6e', dec: 2 },
-  { campo: 'biomass_total_t', nombre: 'Biomasa observada en cruceros', unidad: 't', color: '#eaf3f5', dec: 0 },
-  { campo: 'nino12_anom_c', nombre: 'Anomalía Niño 1+2', unidad: '°C', color: '#ff9a62', dec: 1, grupo: 'Índices climáticos' },
-  { campo: 'oni_c', nombre: 'Índice ONI (Pacífico central)', unidad: '°C', color: '#ffb47a', dec: 2, grupo: 'Índices climáticos' },
-  { campo: 'sam_index', nombre: 'Modo Anular del Sur (SAM)', unidad: 'índice', color: '#9fe0f2', dec: 2, grupo: 'Índices climáticos' },
-  { campo: 'sea_ice_antarctic_mkm2', anomalia: 'sea_ice_antarctic_anom_mkm2', nombre: 'Hielo marino antártico', unidad: 'millones de km²', unidadAnomalia: 'millones de km²', color: '#dde9f0', dec: 2, grupo: 'Índices climáticos' },
+  { campo: 'chlorophyll_a_mg_m3', nombre: 'Chlorophyll-a / phytoplankton', unidad: 'mg/m³', color: '#3fc28c', dec: 2 },
+  { campo: 'sst_c', nombre: 'Sea surface temperature', unidad: '°C', color: '#f08a4b', dec: 1 },
+  { campo: 'sss_psu', nombre: 'Salinity', unidad: 'PSU', color: '#9fe0f2', dec: 2 },
+  { campo: 'nitrate_mmol_m3', nombre: 'Nitrate', unidad: 'mmol/m³', color: '#63cde8', dec: 2 },
+  { campo: 'phosphate_mmol_m3', nombre: 'Phosphate', unidad: 'mmol/m³', color: '#a9dc6e', dec: 2 },
+  { campo: 'oxygen_ml_l', nombre: 'Dissolved oxygen', unidad: 'ml/L', color: '#dde9f0', dec: 2 },
+  { campo: 'phytoplankton_carbon_mg_c_m3', nombre: 'Phytoplankton carbon', unidad: 'mg C/m³', color: '#a9dc6e', dec: 2 },
+  { campo: 'biomass_total_t', nombre: 'Biomass observed on surveys', unidad: 't', color: '#eaf3f5', dec: 0 },
+  { campo: 'nino12_anom_c', nombre: 'Niño 1+2 anomaly', unidad: '°C', color: '#ff9a62', dec: 1, grupo: 'Climate indices' },
+  { campo: 'oni_c', nombre: 'ONI index (central Pacific)', unidad: '°C', color: '#ffb47a', dec: 2, grupo: 'Climate indices' },
+  { campo: 'sam_index', nombre: 'Southern Annular Mode (SAM)', unidad: 'index', color: '#9fe0f2', dec: 2, grupo: 'Climate indices' },
+  { campo: 'sea_ice_antarctic_mkm2', anomalia: 'sea_ice_antarctic_anom_mkm2', nombre: 'Antarctic sea ice', unidad: 'million km²', unidadAnomalia: 'million km²', color: '#dde9f0', dec: 2, grupo: 'Climate indices' },
 ]
 
 /** Clorofila y temperatura de una zona, con su anomalía ya calculada */
@@ -40,8 +40,8 @@ function variablesDeZona(modelo: Modelo, z: IdZona): VariableMonitor[] {
   const c = modelo.claveMonitor(z)
   if (!c) return []
   return [
-    { campo: `chl_${c}_mg_m3`, anomalia: `chl_${c}_anom_pct`, nombre: 'Clorofila-a / fitoplancton', unidad: 'mg/m³', unidadAnomalia: '% frente a lo normal', color: '#3fc28c', dec: 2 },
-    { campo: `sst_${c}_c`, anomalia: `sst_${c}_anom_c`, nombre: 'Temperatura superficial', unidad: '°C', unidadAnomalia: '°C frente a lo normal', color: '#f08a4b', dec: 1 },
+    { campo: `chl_${c}_mg_m3`, anomalia: `chl_${c}_anom_pct`, nombre: 'Chlorophyll-a / phytoplankton', unidad: 'mg/m³', unidadAnomalia: '% from normal', color: '#3fc28c', dec: 2 },
+    { campo: `sst_${c}_c`, anomalia: `sst_${c}_anom_c`, nombre: 'Sea surface temperature', unidad: '°C', unidadAnomalia: '°C from normal', color: '#f08a4b', dec: 1 },
   ]
 }
 
@@ -57,7 +57,7 @@ export default function MonitorSection() {
   const { modelo } = useExplorer()
   const { section, monitorZone: zona, setMonitorZone } = useExplorerStore()
   // se guarda el nombre del dato: así, al cambiar de lugar, se conserva (por ejemplo, la clorofila)
-  const [elegida, setElegida] = useState('Clorofila-a / fitoplancton')
+  const [elegida, setElegida] = useState('Chlorophyll-a / phytoplankton')
   const [anomalia, setAnomalia] = useState(false)
   const registros = modelo.registrosMonitor
   const zonasConDatos = useMemo(() => modelo.ids.filter((z) => modelo.claveMonitor(z) && (section === 'austral' ? !esPeru(z) : section === 'humboldt' ? esPeru(z) : false)), [modelo, section])
@@ -67,7 +67,7 @@ export default function MonitorSection() {
       ? REGIONALES.filter((x) => ['chlorophyll_a_mg_m3', 'sst_c', 'sss_psu', 'nitrate_mmol_m3', 'phosphate_mmol_m3', 'oxygen_ml_l', 'biomass_total_t'].includes(x.campo))
       : REGIONALES.filter((x) => x.campo === 'biomass_total_t')
   const variables = zona ? variablesDeZona(modelo, zona) : regionales
-  if (section === 'pacifico_sur') return <section className="seccion"><div className="monitor monitor-vacio"><h2>Monitor del Pacífico Sur</h2><p>Las cajas del Pacífico Sur intermedio, subtropical y de transición hacia Humboldt todavía no están descargadas en este dataset. No se muestran series de otra región como reemplazo.</p></div></section>
+  if (section === 'pacifico_sur') return <section className="seccion"><div className="monitor monitor-vacio"><h2>South Pacific monitor</h2><p>The boxes for the intermediate, subtropical and Humboldt-transition South Pacific are not included in this dataset yet. No series from another region are shown as a replacement.</p></div></section>
   const v = variables.find((x) => x.nombre === elegida) ?? variables[0]!
   const esBiomasa = v.campo === 'biomass_total_t'
   const nombreLugar = zona ? modelo.zona(zona).nombre : 'la costa peruana'
@@ -114,15 +114,15 @@ export default function MonitorSection() {
     <div className="monitor" id="monitor" aria-labelledby="t-monitor">
       <div className="monitor-cabecera">
         <div>
-          <h2 id="t-monitor">Monitor de condiciones</h2>
-          <p>La señal ambiental mensual frente a la costa peruana, en promedio o zona por zona: temperatura, clorofila, nutrientes, biomasa observada en cruceros e índices climáticos. Al final se suman escenarios de El Niño hasta febrero de 2027.</p>
+          <h2 id="t-monitor">Conditions monitor</h2>
+          <p>Monthly environmental signals off the Peruvian coast, as an average or zone by zone: temperature, chlorophyll, nutrients, observed survey biomass and climate indices. El Niño scenarios through February 2027 are added at the end.</p>
         </div>
         <span className="monitor-meta">{registros[0]?.date.slice(0, 7)} → {registros.at(-1)?.date.slice(0, 7)} · {registros.length} meses{nEscenario > 0 ? ` + ${nEscenario} de escenario` : ''}</span>
       </div>
       <div className="monitor-controles" role="group" aria-label="Filtros del monitor">
-        <label>Lugar <select value={zona ?? ''} onChange={(e) => setMonitorZone(modelo.esZona(e.target.value) ? e.target.value : null)}>
-          <option value="">Costa peruana (promedio)</option>
-          <optgroup label="Zonas">{zonasConDatos.map((z) => <option key={z} value={z}>{modelo.zona(z).nombre}</option>)}</optgroup>
+        <label>Place <select value={zona ?? ''} onChange={(e) => setMonitorZone(modelo.esZona(e.target.value) ? e.target.value : null)}>
+          <option value="">Peruvian coast (average)</option>
+          <optgroup label="Zones">{zonasConDatos.map((z) => <option key={z} value={z}>{modelo.zona(z).nombre}</option>)}</optgroup>
         </select></label>
         <label>Variable <select value={v.nombre} onChange={(e) => setElegida(e.target.value)}>
           {grupos.map((g) => {
@@ -130,7 +130,7 @@ export default function MonitorSection() {
             return g ? <optgroup key={g} label={g}>{opciones}</optgroup> : opciones
           })}
         </select></label>
-        <label>Escala <select value={anomalia ? 'anomaly' : 'absolute'} onChange={(e) => setAnomalia(e.target.value === 'anomaly')}><option value="absolute">Valores</option><option value="anomaly">Diferencia con lo normal de cada mes</option></select></label>
+        <label>Scale <select value={anomalia ? 'anomaly' : 'absolute'} onChange={(e) => setAnomalia(e.target.value === 'anomaly')}><option value="absolute">Values</option><option value="anomaly">Difference from each month's normal</option></select></label>
       </div>
       <p className="monitor-estado" aria-live="polite">
         {conDato} de {datos.length - nEscenario} meses con dato de {v.nombre.toLowerCase()} en {nombreLugar}. {esBiomasa ? 'La línea une observaciones de crucero solo para visualización; los puntos claros son los meses observados.' : zona ? 'Mediana mensual de los píxeles del satélite dentro de la zona.' : 'La serie ambiental es continua dentro del periodo descargado.'}
@@ -152,12 +152,12 @@ export default function MonitorSection() {
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-      <div className="monitor-notas" aria-label="Resumen del monitor">
-        <div className="monitor-nota"><b>{ultimo ? `${fmt(ultimo[esBiomasa ? 'biomass_total_t_interpolated' : v.campo], v.dec)} ${v.unidad}` : '—'}</b><span>último valor observado{ultimo ? ` (${ultimo.date.slice(0, 7)})` : ''}</span></div>
-        <div className="monitor-nota"><b>{registros.filter((r) => r.biomass_observed).length}</b><span>meses con biomasa observada</span></div>
-        <div className="monitor-nota"><b>{nino ? `${fmt(nino.nino12_anom_c, 1)} °C` : '—'}</b><span>Niño 1+2 en el último mes observado{nino ? ` (${nino.date.slice(0, 7)})` : ''}</span></div>
+      <div className="monitor-notas" aria-label="Monitor summary">
+        <div className="monitor-nota"><b>{ultimo ? `${fmt(ultimo[esBiomasa ? 'biomass_total_t_interpolated' : v.campo], v.dec)} ${v.unidad}` : '—'}</b><span>latest observed value{ultimo ? ` (${ultimo.date.slice(0, 7)})` : ''}</span></div>
+        <div className="monitor-nota"><b>{registros.filter((r) => r.biomass_observed).length}</b><span>months with observed biomass</span></div>
+        <div className="monitor-nota"><b>{nino ? `${fmt(nino.nino12_anom_c, 1)} °C` : '—'}</b><span>Niño 1+2 in the latest observed month{nino ? ` (${nino.date.slice(0, 7)})` : ''}</span></div>
       </div>
-      <p className="monitor-aviso"><strong>Cómo leerlo:</strong> las variables ambientales de la costa provienen de reanálisis/modelos y OC-CCI; las de cada zona, de la clorofila OC-CCI y la temperatura de NOAA Coral Reef Watch. La biomasa solo aparece durante intervalos de crucero IMARPE. Los escenarios de El Niño se construyen con la climatología mensual y las pendientes históricas frente al ICEN: no son observaciones ni pronósticos. Este monitor describe asociaciones y cobertura de datos, no es una alerta ni una predicción pesquera.</p>
+      <p className="monitor-aviso"><strong>How to read it:</strong> coastal environmental variables come from reanalyses/models and OC-CCI; zone-level variables come from OC-CCI chlorophyll and NOAA Coral Reef Watch temperature. Biomass appears only during IMARPE survey intervals. El Niño scenarios use monthly climatology and historical slopes relative to ICEN: they are not observations or forecasts. This monitor describes associations and data coverage; it is not an alert or a fishing forecast.</p>
     </div>
   </section>
 }

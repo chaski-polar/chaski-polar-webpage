@@ -5,9 +5,9 @@ import { useData } from '../../contexts/DataContext'
 import type { Cruise } from '../../data/types'
 
 const STOCKS: { id: Cruise['stock']; nombre: string; color: string }[] = [
-  { id: 'toda_costa', nombre: 'Toda la costa', color: '#3fc28c' },
-  { id: 'norte_centro', nombre: 'Región norte-centro', color: '#63cde8' },
-  { id: 'sur', nombre: 'Región sur', color: '#f2e14c' },
+  { id: 'toda_costa', nombre: 'Entire coast', color: '#3fc28c' },
+  { id: 'norte_centro', nombre: 'North-central region', color: '#63cde8' },
+  { id: 'sur', nombre: 'Southern region', color: '#f2e14c' },
 ]
 
 /** Fecha "AAAA-MM(-DD)" como año con decimales */
@@ -38,12 +38,12 @@ export default function CrucerosSection({ id = 'cruceros', compacto = false, enc
   const desde = Math.min(...norteCentro.map((c) => c.anio))
   const ordenados = [...cruises].sort((a, b) => a.inicio.localeCompare(b.inicio) || a.stock.localeCompare(b.stock))
 
-  return <section className={`seccion${compacto ? ' cruceros-lateral' : ''}`} id={id} aria-labelledby={encabezado ? `t-${id}` : undefined} aria-label={encabezado ? undefined : 'Gráfico de biomasa de anchoveta por crucero de IMARPE'}>
+  return <section className={`seccion${compacto ? ' cruceros-lateral' : ''}`} id={id} aria-labelledby={encabezado ? `t-${id}` : undefined} aria-label={encabezado ? undefined : 'Anchoveta biomass by IMARPE survey'}>
     {encabezado && <div className="encabezado-seccion">
-      <h2 id={`t-${id}`}>La anchoveta en los cruceros de IMARPE</h2>
-      <p>Cada punto es la biomasa total de anchoveta que estimó un crucero acústico de IMARPE: toda la anchoveta que ve el barco, incluidos los juveniles. Las franjas naranjas marcan los meses en que el mar frente al norte del Perú (Niño 1+2) estuvo al menos 1 °C más cálido que lo normal. {minimo && <>En la región norte-centro, la cifra más baja desde {desde} es la del crucero {minimo.crucero}: <strong>{mt(minimo.biomasa_t)} millones de t</strong>{minimo.provisional ? ' (provisional)' : ''}.</>}</p>
+      <h2 id={`t-${id}`}>Anchoveta in IMARPE surveys</h2>
+      <p>Each point is the total anchoveta biomass estimated by an IMARPE acoustic survey, including juveniles. Orange bands mark months when the northern Peruvian sea (Niño 1+2) was at least 1 °C warmer than normal. {minimo && <>In the north-central region, the lowest value since {desde} is survey {minimo.crucero}: <strong>{mt(minimo.biomasa_t)} million t</strong>{minimo.provisional ? ' (provisional)' : ''}.</>}</p>
     </div>}
-    <div className="cruceros-grafico" role="img" aria-label="Biomasa de anchoveta por crucero de IMARPE, 1998 a 2026">
+    <div className="cruceros-grafico" role="img" aria-label="Anchoveta biomass by IMARPE survey, 1998 to 2026">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
@@ -54,7 +54,7 @@ export default function CrucerosSection({ id = 'cruceros', compacto = false, enc
             content={({ active, payload }) => {
               const c = active ? (payload?.[0]?.payload as (Cruise & { y: number }) | undefined) : undefined
               if (!c) return null
-              return <div className="tip"><b>Crucero {c.crucero}</b><br />{c.area}: {mt(c.biomasa_t)} millones de t<br /><small>{c.inicio} a {c.fin}{c.fecha_aproximada ? ' (fechas aproximadas)' : ''}{c.provisional ? ' · cifra provisional' : ''}</small></div>
+              return <div className="tip"><b>Survey {c.crucero}</b><br />{c.area}: {mt(c.biomasa_t)} million t<br /><small>{c.inicio} to {c.fin}{c.fecha_aproximada ? ' (approximate dates)' : ''}{c.provisional ? ' · provisional value' : ''}</small></div>
             }} />
           <Legend verticalAlign="bottom" wrapperStyle={{ fontSize: 12, color: '#a3bccb' }} />
           {STOCKS.map((s) => <Scatter key={s.id} name={s.nombre} data={puntos.filter((p) => p.stock === s.id)} fill={s.color} line={{ stroke: s.color, strokeOpacity: 0.35 }} isAnimationActive={false} />)}
@@ -62,10 +62,10 @@ export default function CrucerosSection({ id = 'cruceros', compacto = false, enc
       </ResponsiveContainer>
     </div>
     <details className="cruceros-tabla">
-      <summary>Ver los {cruises.length} registros y sus fuentes</summary>
+      <summary>View {cruises.length} records and sources</summary>
       <div className="tabla-envoltura">
         <table className="fuentes">
-          <thead><tr><th scope="col">Crucero</th><th scope="col">Fechas</th><th scope="col">Área</th><th scope="col">Biomasa (millones de t)</th><th scope="col">Fuente</th></tr></thead>
+          <thead><tr><th scope="col">Survey</th><th scope="col">Dates</th><th scope="col">Area</th><th scope="col">Biomass (million t)</th><th scope="col">Source</th></tr></thead>
           <tbody>{ordenados.map((c) => <tr key={`${c.crucero}-${c.stock}`}>
             <td>{c.crucero}</td>
             <td className="num">{c.inicio} a {c.fin}{c.fecha_aproximada && <small> · aproximadas</small>}</td>
@@ -76,6 +76,6 @@ export default function CrucerosSection({ id = 'cruceros', compacto = false, enc
         </table>
       </div>
     </details>
-    <p className="nota">Biomasa total por crucero (no es la biomasa desovante). Cuando el informe no da fechas exactas, se usa el día 15 de los meses del código del crucero. Las cifras marcadas como provisionales provienen de comunicados y pueden cambiar cuando IMARPE publique el informe.</p>
+    <p className="nota">Total biomass per survey (not spawning biomass). When a report does not provide exact dates, the 15th day of the coded months is used. Provisional figures come from announcements and may change when IMARPE publishes the report.</p>
   </section>
 }

@@ -31,7 +31,7 @@ export function crearSecciones(alEntrar: () => void): Interfaz {
 
   return {
     actualizar(progreso, y, enTransicion) {
-      etiqueta.textContent = y > 30 ? "ÓRBITA" : y > 0 ? "ALTURA" : "PROFUNDIDAD";
+  etiqueta.textContent = y > 30 ? "ORBIT" : y > 0 ? "ALTITUDE" : "DEPTH";
       valor.textContent = y > 30 ? "700 km" : y > 0 ? `${Math.round(y * 20)} m` : `${Math.round(-y * 5)} m`;
       marca.style.top = `calc(${progreso * 100}% - 6px)`;
       capa.textContent = nombreCapa(y);

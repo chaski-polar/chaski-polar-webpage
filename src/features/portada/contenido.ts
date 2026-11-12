@@ -21,47 +21,47 @@ export const SECCIONES: readonly Seccion[] = [
   {
     de: 0, a: 0.05, principal: true,
     titulo: "MAR PERUANO 360",
-    texto: "Del satélite al fondo del mar peruano",
-    botones: [{ texto: "Entrar al explorador →", accion: "entrar" }],
+    texto: "From satellite to the seafloor of the Peruvian sea",
+    botones: [{ texto: "Enter the explorer →", accion: "entrar" }],
   },
   {
     de: 0.08, a: 0.19,
-    titulo: "Visto desde el espacio",
-    texto: "Los satélites miden cada día la temperatura del mar y su color. Del color se estima la clorofila: el fitoplancton.",
+    titulo: "Seen from space",
+    texto: "Satellites measure sea temperature and color every day. Chlorophyll, and therefore phytoplankton, is estimated from that color.",
   },
   {
     de: 0.27, a: 0.39,
-    titulo: "La costa peruana",
-    texto: "El viento empuja el agua de la superficie mar afuera y hace subir agua fría y rica en nutrientes: el afloramiento. Por eso este mar es uno de los más productivos del mundo.",
+    titulo: "The Peruvian coast",
+    texto: "Wind pushes surface water offshore and brings up cold, nutrient-rich water: upwelling. That is why this sea is among the most productive in the world.",
   },
   {
     de: 0.43, a: 0.54,
-    titulo: "0–50 m · Fitoplancton",
-    texto: "Por cada grado que se calienta el mar, el fitoplancton cae entre 18 % y 33 % según la zona. Cuando se enfría, casi no se recupera.",
+    titulo: "0–50 m · Phytoplankton",
+    texto: "For every degree the sea warms, phytoplankton falls by 18% to 33%, depending on the zone. When it cools, it barely recovers.",
   },
   {
     de: 0.58, a: 0.69,
-    titulo: "25–45 m · El cardumen",
-    texto: "La anchoveta vive en esta capa y depende del fitoplancton y del zooplancton. En los años de El Niño su alimento se reduce en la costa central.",
+    titulo: "25–45 m · The school",
+    texto: "Anchoveta live in this layer and depend on phytoplankton and zooplankton. During El Niño years, their food declines along the central coast.",
   },
   {
     de: 0.74, a: 0.85,
-    titulo: "50–150 m · Zona sin oxígeno",
-    texto: "En años normales esta capa sube y aprieta al cardumen hacia la superficie. Con El Niño se hunde: hay más espacio, pero menos comida.",
+    titulo: "50–150 m · Oxygen minimum zone",
+    texto: "In normal years this layer rises and compresses the school toward the surface. During El Niño it sinks: there is more space, but less food.",
   },
   {
     de: 0.9, a: 1.05,
-    titulo: "200 m · El fondo",
-    texto: "Ahora explora los datos satelitales mes a mes, desde 1998.",
-    botones: [{ texto: "Entrar al explorador →", accion: "entrar" }],
+    titulo: "200 m · The seafloor",
+    texto: "Now explore the satellite data month by month, from 1998.",
+    botones: [{ texto: "Enter the explorer →", accion: "entrar" }],
   },
 ];
 
 // Nombre de la capa según la altura de la cámara (y = 0 es la superficie; 1 unidad = 5 m bajo el agua)
 export function nombreCapa(y: number): string {
-  if (y > 30) return "Espacio";
-  if (y > 0) return "Superficie";
-  if (y > -10) return "Luz y fitoplancton";
-  if (y > -30) return "Zona sin oxígeno";
-  return "Fondo";
+  if (y > 30) return "Space";
+  if (y > 0) return "Surface";
+  if (y > -10) return "Light and phytoplankton";
+  if (y > -30) return "Oxygen minimum zone";
+  return "Seafloor";
 }

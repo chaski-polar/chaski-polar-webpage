@@ -34,7 +34,7 @@ export function SerieMensual({ modelo, serie, color, mesActual, alElegirMes, log
       <Tooltip labelFormatter={(k) => etiquetaMes(modelo.mes(i0 + Number(k)))} formatter={(x, nombre) => [fmt(x), String(nombre)]} contentStyle={{ background: 'rgba(7,30,51,.96)', border: '1px solid #24507a', borderRadius: 8 }} />
       <Legend verticalAlign="bottom" height={24} wrapperStyle={{ fontSize: 12, color: '#a3bccb' }} />
       <Line name="Cada mes" dataKey="valor" stroke="rgba(163,188,203,0.45)" strokeWidth={1} dot={false} isAnimationActive={false} connectNulls={false} />
-      <Line name="Promedio de 12 meses" dataKey="media" stroke={color} strokeWidth={2.4} dot={false} isAnimationActive={false} connectNulls />
+      <Line name="12-month average" dataKey="media" stroke={color} strokeWidth={2.4} dot={false} isAnimationActive={false} connectNulls />
       <ReferenceLine x={mesActual - i0} stroke="rgba(234,243,245,0.75)" strokeDasharray="3 3" />
     </ComposedChart>
   </ResponsiveContainer>

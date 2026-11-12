@@ -36,7 +36,7 @@ export default function Comparar() {
     if (derecha.current) mapa.dibujarRegion(derecha.current, capa, reg, miDe(b), comparison.mes)
   })
 
-  if (!capa) return <><BotonVolver /><p>Elige fitoplancton o temperatura para comparar dos años.</p></>
+  if (!capa) return <><BotonVolver /><p>Choose phytoplankton or temperature to compare two years.</p></>
   const esChl = capa.esClorofila
   const va = mapa.promedioRegion(capa, reg, miDe(a), comparison.mes), vb = mapa.promedioRegion(capa, reg, miDe(b), comparison.mes)
   const mesN = MESES_LARGOS[comparison.mes] ?? ''
@@ -48,12 +48,12 @@ export default function Comparar() {
     if (esChl) { const p = (vb / va - 1) * 100; conclusion = <>En {nomB.toLowerCase()}, {reg.frase} tuvo <strong>{nf(0).format(Math.abs(p))} % {p >= 0 ? 'más' : 'menos'} clorofila</strong> que en {nomA.toLowerCase()}, en promedio de todas sus celdas con dato.</> }
     else { const d = vb - va; conclusion = <>Frente a lo normal, en {nomB.toLowerCase()} {reg.mar} estuvo en promedio <strong>{nf(1).format(Math.abs(d))} °C {d >= 0 ? 'más cálido' : 'más frío'}</strong> que en {nomA.toLowerCase()}.</> }
   }
-  const opciones = (conPromedio: boolean) => <>{conPromedio && esChl && <option value="prom">Promedio 1998–2020</option>}{anios.map((x) => <option key={x} value={x}>{x}</option>)}</>
+  const opciones = (conPromedio: boolean) => <>{conPromedio && esChl && <option value="prom">Average 1998–2020</option>}{anios.map((x) => <option key={x} value={x}>{x}</option>)}</>
 
   return <>
     <BotonVolver />
-    <h2>Comparar dos años</h2>
-    <p>El mismo mes en dos años distintos, celda por celda. {esChl ? 'Los colores son los del mapa del globo: amarillo y verde es mucho fitoplancton; morado, poco.' : 'Naranja es más cálido que lo normal; azul, más frío.'} El gris es un mes sin dato (nubes o hielo) y el verde grisáceo, tierra.</p>
+    <h2>Compare two years</h2>
+    <p>The same month in two different years, cell by cell. {esChl ? 'The colors match the globe map: yellow and green mean lots of phytoplankton; purple, little.' : 'Orange is warmer than normal; blue, colder.'} Gray means no data for the month (clouds or ice), and gray-green means land.</p>
     <div className="selectores">
       <label>Lugar<select value={comparison.region} onChange={(e) => acciones.comparar({ region: e.target.value as IdRegion })}>{Object.entries(REGIONES).map(([k, r]) => <option key={k} value={k}>{r.nombre}</option>)}</select></label>
       <label>Mes<select value={comparison.mes} onChange={(e) => acciones.comparar({ mes: Number(e.target.value) })}>{MESES_LARGOS.map((m, k) => <option key={m} value={k}>{m}</option>)}</select></label>
@@ -67,9 +67,9 @@ export default function Comparar() {
     <p>{conclusion}</p>
     <div className="chips">
       <button className="chip" type="button" aria-pressed={capa.clave === 'clorofila'} onClick={() => setVariable('clorofila_mg_m3')}>Fitoplancton</button>
-      <button className="chip" type="button" aria-pressed={capa.clave === 'temperatura'} onClick={() => setVariable('temperatura_superficial_C')}>Temperatura</button>
-      <button className="chip" type="button" onClick={() => acciones.fijarMes(modelo.idxMes(b, comparison.mes))}>Ver {nomB.toLowerCase()} en el globo</button>
+      <button className="chip" type="button" aria-pressed={capa.clave === 'temperatura'} onClick={() => setVariable('temperatura_superficial_C')}>Temperature</button>
+      <button className="chip" type="button" onClick={() => acciones.fijarMes(modelo.idxMes(b, comparison.mes))}>View {nomB.toLowerCase()} on the globe</button>
     </div>
-    <p className="nota" style={{ marginTop: 16 }}>{esChl ? 'Clorofila-a de ESA OC-CCI v6 en celdas de medio grado; el promedio es la media geométrica de 1998 a 2020.' : 'Anomalía de la temperatura de NOAA Coral Reef Watch en celdas de un grado, frente al promedio 1998–2020 de cada mes.'}</p>
+    <p className="nota" style={{ marginTop: 16 }}>{esChl ? 'ESA OC-CCI v6 chlorophyll-a in half-degree cells; the average is the geometric mean from 1998 to 2020.' : 'NOAA Coral Reef Watch temperature anomaly in one-degree cells, relative to the 1998–2020 average for each month.'}</p>
   </>
 }

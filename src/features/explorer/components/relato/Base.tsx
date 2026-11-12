@@ -27,10 +27,10 @@ export default function Base() {
   return <>
     <BotonVolver />
     <h2>Base Machu Picchu</h2>
-    <div className="region">Ensenada Mackellar, isla Rey Jorge, Antártida</div>
-    <p>Es la base científica del Perú en la Antártida. Funciona en el verano austral, cuando llegan las expediciones peruanas a estudiar el mar, el hielo y la vida antártica.</p>
+    <div className="region">Mackellar Inlet, King George Island, Antarctica</div>
+    <p>It is Peru's scientific base in Antarctica. It operates during the austral summer, when Peruvian expeditions arrive to study the sea, ice and Antarctic life.</p>
     <div className="cifras">
-      <div className="cifra"><b className="num">{prom < 0 ? '−' : ''}{nf(1).format(Math.abs(prom))} °C</b><span>temperatura promedio del aire, {filas[0]?.anio ?? '—'}–{filas.at(-1)?.anio ?? '—'}</span></div>
+      <div className="cifra"><b className="num">{prom < 0 ? '−' : ''}{nf(1).format(Math.abs(prom))} °C</b><span>average air temperature, {filas[0]?.anio ?? '—'}–{filas.at(-1)?.anio ?? '—'}</span></div>
       <div className="cifra"><b className="num">{signo(pend)}{nf(2).format(Math.abs(pend * 10))} °C</b><span>tendencia por década</span></div>
     </div>
     <div className="grafico" aria-label="Temperatura anual del aire en la Base Machu Picchu">
@@ -41,12 +41,12 @@ export default function Base() {
         <Bar dataKey="t" radius={2} isAnimationActive={false}>{filas.map((f) => <Cell key={f.anio} fill={colorDiverge((f.t - prom) / 1.2, 0.9)} />)}</Bar>
       </BarChart></ResponsiveContainer>
     </div>
-    <p className="nota">Aire a 2 m del suelo, NASA POWER (MERRA-2). La tendencia es débil: los inviernos cambian mucho de un año a otro.</p>
+    <p className="nota">Air at 2 m above ground, NASA POWER (MERRA-2). The trend is weak: winters vary greatly from year to year.</p>
     <h3>¿Qué quieres ver?</h3>
     <div className="chips">
-      <button className="chip" type="button" onClick={() => acciones.irAZona('antartida_rey_jorge')}>El mar de Rey Jorge</button>
-      <button className="chip" type="button" onClick={() => acciones.irAZona('antartida_peninsula')}>La Península Antártica</button>
-      <button className="chip" type="button" onClick={() => acciones.historia('antartida2023')}>La Antártida en 2023</button>
+      <button className="chip" type="button" onClick={() => acciones.irAZona('antartida_rey_jorge')}>King George waters</button>
+      <button className="chip" type="button" onClick={() => acciones.irAZona('antartida_peninsula')}>Antarctic Peninsula</button>
+      <button className="chip" type="button" onClick={() => acciones.historia('antartida2023')}>Antarctica in 2023</button>
     </div>
   </>
 }

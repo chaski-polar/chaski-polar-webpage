@@ -1,7 +1,7 @@
-/* Formato de números, fechas y coordenadas en español */
+/* English formatting for numbers, dates and coordinates */
 
-export const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "set", "oct", "nov", "dic"] as const;
-export const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "setiembre", "octubre", "noviembre", "diciembre"] as const;
+export const MESES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+export const MESES_LARGOS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] as const;
 
 /** Un mes del calendario: año y mes (0 = enero) */
 export interface Mes {
@@ -40,7 +40,7 @@ export function mesesEntre(desde: string, hasta: string): number {
 }
 
 export const etiquetaMes = (x: Mes): string => `${MESES[x.mes]} ${x.anio}`;
-export const mesLargo = (x: Mes): string => `${MESES_LARGOS[x.mes]} de ${x.anio}`;
+export const mesLargo = (x: Mes): string => `${MESES_LARGOS[x.mes]} ${x.anio}`;
 export const claveMes = (x: Mes): string => `${x.anio}-${String(x.mes + 1).padStart(2, "0")}`;
 
 export const fmtCoord = (lat: number, lng: number): string =>

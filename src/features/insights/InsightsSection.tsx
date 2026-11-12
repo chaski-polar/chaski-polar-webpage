@@ -48,13 +48,13 @@ export default function InsightsSection() {
 
   return <section className="seccion" id="hallazgos" aria-labelledby="t-hallazgos">
     <div className="encabezado-seccion">
-      <h2 id="t-hallazgos">Lo que muestran los datos</h2>
-      <p>Cuatro resultados calculados con las series de esta página (1998–2024). El número grande es la correlación <em>r</em>: va de −1 a 1, y cerca de 0 significa que no hay relación lineal. Son asociaciones exploratorias, no pruebas de causa.</p>
+      <h2 id="t-hallazgos">What the data shows</h2>
+      <p>Four results calculated from this page's series (1998–2024). The large number is the <em>r</em> correlation: it ranges from −1 to 1, and values near 0 mean there is no linear relationship. These are exploratory associations, not proof of causation.</p>
     </div>
 
-    <Hallazgo titulo="La costa manda: El Niño frente al Perú" cifra={`r = ${fmtR(d.r1)}`} detalle="temperatura de Niño 1+2 frente a la pesca de anchoveta"
-      texto="Cuando el mar frente al Perú se calienta (barras naranjas), sube menos agua fría y rica en nutrientes, hay menos fitoplancton y la pesca de anchoveta cae. Se ve en 1998, 2015–2016 y 2023. La pesca también depende de cuotas y vedas."
-      etiqueta="Gráfico: anomalía de temperatura Niño 1+2 en barras y pesca de anchoveta del Perú en línea, 1998 a 2024">
+    <Hallazgo titulo="The coast leads: El Niño off Peru" cifra={`r = ${fmtR(d.r1)}`} detalle="Niño 1+2 temperature versus anchoveta landings"
+      texto="When the sea off Peru warms (orange bars), less cold, nutrient-rich water rises, phytoplankton declines and anchoveta landings fall. This appears in 1998, 2015–2016 and 2023. Fishing also depends on quotas and closures."
+      etiqueta="Chart: Niño 1+2 temperature anomaly bars and Peruvian anchoveta landings line, 1998 to 2024">
       <ComposedChart data={d.anual} margin={{ top: 6, right: 0, bottom: 0, left: -8 }}>
         <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
         <XAxis dataKey="anio" {...eje} minTickGap={16} />
@@ -62,14 +62,14 @@ export default function InsightsSection() {
         <YAxis yAxisId="p" orientation="right" {...eje} label={{ value: 'millones de t', angle: 90, fill: '#a3bccb', position: 'insideRight' }} />
         <Tooltip {...tip} formatter={(x, n) => [n1(x), String(n)]} />
         <Legend {...leyenda} />
-        <Bar yAxisId="t" dataKey="nino12" name="Niño 1+2 (°C sobre lo normal)" radius={3} isAnimationActive={false}>{d.anual.map((r) => <Cell key={r.anio} fill={(r.nino12 ?? 0) > 0 ? '#f08a4b' : '#2b6cb0'} />)}</Bar>
-        <Line yAxisId="p" dataKey="anchoveta" name="Anchoveta pescada (millones de t)" stroke="#3fc28c" strokeWidth={2.5} dot={{ r: 2.5 }} isAnimationActive={false} />
+        <Bar yAxisId="t" dataKey="nino12" name="Niño 1+2 (°C above normal)" radius={3} isAnimationActive={false}>{d.anual.map((r) => <Cell key={r.anio} fill={(r.nino12 ?? 0) > 0 ? '#f08a4b' : '#2b6cb0'} />)}</Bar>
+        <Line yAxisId="p" dataKey="anchoveta" name="Anchoveta landings (million t)" stroke="#3fc28c" strokeWidth={2.5} dot={{ r: 2.5 }} isAnimationActive={false} />
       </ComposedChart>
     </Hallazgo>
 
-    <Hallazgo titulo="La Antártida va a su propio ritmo" cifra={`r = ${fmtR(d.r2)}`} detalle="fitoplancton de Rey Jorge frente al de Chimbote"
-      texto="Los años con mucho fitoplancton en la isla Rey Jorge no coinciden con los del Perú. En 2023 la Antártida tuvo un pico y el Perú, por El Niño, una caída. Si hay un vínculo, no es directo ni del mismo año."
-      etiqueta="Gráfico: anomalía de clorofila en Rey Jorge y en Chimbote, 1998 a 2024">
+    <Hallazgo titulo="Antarctica follows its own rhythm" cifra={`r = ${fmtR(d.r2)}`} detalle="Rey Jorge phytoplankton versus Chimbote"
+      texto="Years with high phytoplankton on Rey Jorge do not match Peru. In 2023 Antarctica peaked while Peru fell during El Niño. If there is a link, it is neither direct nor from the same year."
+      etiqueta="Chart: chlorophyll anomaly on Rey Jorge and Chimbote, 1998 to 2024">
       <ComposedChart data={d.anual} margin={{ top: 6, right: 8, bottom: 0, left: -8 }}>
         <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
         <XAxis dataKey="anio" {...eje} minTickGap={16} />
@@ -81,9 +81,9 @@ export default function InsightsSection() {
       </ComposedChart>
     </Hallazgo>
 
-    <Hallazgo titulo="El hielo marino antártico se desplomó desde 2016" cifra={d.h23 == null ? '—' : nf(1).format(Math.abs(d.h23))} detalle="millones de km² por debajo de lo normal en 2023"
-      texto="El hielo que rodea la Antártida fue estable o creció hasta 2015 y luego cayó a mínimos históricos. Bajo ese hielo vive el krill, la base de la cadena antártica. La pesca de krill (línea) depende más de los barcos y las cuotas que del hielo."
-      etiqueta="Gráfico: anomalía anual de la extensión del hielo marino antártico y pesca mundial de krill, 1998 a 2024">
+    <Hallazgo titulo="Antarctic sea ice collapsed after 2016" cifra={d.h23 == null ? '—' : nf(1).format(Math.abs(d.h23))} detalle="million km² below normal in 2023"
+      texto="The ice surrounding Antarctica was stable or grew through 2015, then fell to historic lows. Krill, the base of the Antarctic food web, lives beneath that ice. Krill fishing (the line) depends more on vessels and quotas than on ice."
+      etiqueta="Chart: annual Antarctic sea ice extent anomaly and global krill fishing, 1998 to 2024">
       <ComposedChart data={d.anual} margin={{ top: 6, right: 0, bottom: 0, left: -8 }}>
         <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
         <XAxis dataKey="anio" {...eje} minTickGap={16} />
@@ -91,14 +91,14 @@ export default function InsightsSection() {
         <YAxis yAxisId="k" orientation="right" {...eje} label={{ value: 'miles de t', angle: 90, fill: '#a3bccb', position: 'insideRight' }} />
         <Tooltip {...tip} formatter={(x, n) => [n1(x), String(n)]} />
         <Legend {...leyenda} />
-        <Bar yAxisId="h" dataKey="hielo" name="Hielo marino (millones de km² frente a lo normal)" radius={3} isAnimationActive={false}>{d.anual.map((r) => <Cell key={r.anio} fill={(r.hielo ?? 0) < 0 ? 'rgba(99,205,232,0.45)' : '#63cde8'} />)}</Bar>
-        <Line yAxisId="k" dataKey="krill" name="Krill pescado en el mundo (miles de t)" stroke="#eaf3f5" strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />
+        <Bar yAxisId="h" dataKey="hielo" name="Sea ice (million km² from normal)" radius={3} isAnimationActive={false}>{d.anual.map((r) => <Cell key={r.anio} fill={(r.hielo ?? 0) < 0 ? 'rgba(99,205,232,0.45)' : '#63cde8'} />)}</Bar>
+        <Line yAxisId="k" dataKey="krill" name="Krill caught worldwide (thousand t)" stroke="#eaf3f5" strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />
       </ComposedChart>
     </Hallazgo>
 
-    <Hallazgo titulo="Mucho nitrato, poco fitoplancton" cifra={d.veces == null ? '—' : `${nf(0).format(d.veces)} veces`} detalle="más nitrato en Rey Jorge que en Chimbote"
-      texto="El agua antártica tiene muchísimos nutrientes y aun así menos fitoplancton que la costa peruana. Allí falta hierro y luz en invierno. Frente al Perú el viento hace subir agua profunda con nutrientes y hay sol todo el año."
-      etiqueta="Gráfico de barras: nitrato en superficie y clorofila promedio por zona">
+    <Hallazgo titulo="High nitrate, little phytoplankton" cifra={d.veces == null ? '—' : `${nf(0).format(d.veces)} times`} detalle="more nitrate at Rey Jorge than at Chimbote"
+      texto="Antarctic water has abundant nutrients and still less phytoplankton than the Peruvian coast. Iron and light are scarce there in winter. Off Peru, wind brings deep nutrient-rich water to the surface, and sunlight is available year-round."
+      etiqueta="Bar chart: surface nitrate and average chlorophyll by zone">
       <ComposedChart data={d.zonas} margin={{ top: 6, right: 0, bottom: 0, left: -8 }}>
         <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
         <XAxis dataKey="nombre" {...eje} interval={0} tick={{ fill: '#a3bccb', fontSize: 10 }} />
@@ -106,8 +106,8 @@ export default function InsightsSection() {
         <YAxis yAxisId="c" orientation="right" {...eje} label={{ value: 'mg/m³', angle: 90, fill: '#a3bccb', position: 'insideRight' }} />
         <Tooltip {...tip} formatter={(x, n) => [n1(x), String(n)]} />
         <Legend {...leyenda} />
-        <Bar yAxisId="n" dataKey="nitrato" name="Nitrato en superficie (µmol/kg)" fill="#63cde8" radius={3} isAnimationActive={false} />
-        <Bar yAxisId="c" dataKey="clorofila" name="Clorofila promedio (mg/m³)" fill="#3fc28c" radius={3} isAnimationActive={false} />
+        <Bar yAxisId="n" dataKey="nitrato" name="Surface nitrate (µmol/kg)" fill="#63cde8" radius={3} isAnimationActive={false} />
+        <Bar yAxisId="c" dataKey="clorofila" name="Average chlorophyll (mg/m³)" fill="#3fc28c" radius={3} isAnimationActive={false} />
       </ComposedChart>
     </Hallazgo>
 

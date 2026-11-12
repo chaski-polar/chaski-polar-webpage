@@ -24,6 +24,15 @@ export interface EventoNino {
 
 export const ZONA_CHIMBOTE: IdZona = "peru_centro_norte_chimbote";
 export const ZONA_REY_JORGE: IdZona = "antartida_rey_jorge";
+const ZONA_EN: Partial<Record<IdZona, { nombre: string; region: string }>> = {
+  peru_norte_paita_sechura: { nombre: 'Paita and Sechura', region: 'Piura' },
+  peru_centro_norte_chimbote: { nombre: 'Chimbote and Samanco', region: 'Áncash' },
+  peru_centro_callao: { nombre: 'Callao', region: 'Lima' },
+  peru_sur_pisco: { nombre: 'Pisco and Paracas', region: 'Ica' },
+  peru_sur_ilo: { nombre: 'Ilo', region: 'Moquegua' },
+  antartida_rey_jorge: { nombre: 'King George Island', region: 'Antarctica (South Shetland)' },
+  antartida_peninsula: { nombre: 'Antarctic Peninsula', region: 'Antarctica' },
+};
 export const esPeru = (z: string): boolean => z.startsWith("peru");
 
 const CAMPOS_ESCENARIO = new Set<CampoMonitor>(["sst_c", "sss_psu", "chlorophyll_a_mg_m3", "nitrate_mmol_m3", "phosphate_mmol_m3", "oxygen_ml_l", "phytoplankton_carbon_mg_c_m3", "nino12_anom_c", "icen"]);
@@ -142,7 +151,8 @@ export class Modelo {
   }
 
   zona(z: IdZona): Zona {
-    return this.zonas[z];
+    const zona = this.zonas[z], en = ZONA_EN[z];
+    return en ? { ...zona, ...en } : zona;
   }
   esZona(z: string | null | undefined): z is IdZona {
     return z != null && z in this.zonas;
@@ -223,14 +233,14 @@ export class Modelo {
       const a = esPeru(z) ? null : v.indice === "hielo" ? this.D.indices.hielo_anom[i] : this.D.indices.sam[i];
       if (a == null) return null;
       return v.indice === "hielo"
-        ? { corto: `${signo(a)}${nf(1).format(Math.abs(a))}`, frase: `${nf(2).format(Math.abs(a))} millones de km² ${a >= 0 ? "por encima" : "por debajo"} de lo normal`, valor: a }
+        ? { corto: `${signo(a)}${nf(1).format(Math.abs(a))}`, frase: `${nf(2).format(Math.abs(a))} million km² ${a >= 0 ? "above" : "below"} normal`, valor: a }
         : { corto: `${signo(a)}${nf(v.dec).format(Math.abs(a))}`, frase: `${nf(v.dec).format(Math.abs(a))} puntos del índice SAM/AAO`, valor: a };
     }
     const x = this.valorSerie(z, v.id, i);
     if (x == null) return null;
     if (v.modo === "directo") {
       const d = x * (v.factor ?? 1);
-      return { corto: `${signo(d)}${nf(v.dec).format(Math.abs(d))} ${v.unidad}`, frase: `${nf(v.dec).format(Math.abs(d))} ${v.unidad} ${d >= 0 ? "por encima" : "por debajo"} de lo normal`, valor: d };
+      return { corto: `${signo(d)}${nf(v.dec).format(Math.abs(d))} ${v.unidad}`, frase: `${nf(v.dec).format(Math.abs(d))} ${v.unidad} ${d >= 0 ? "above" : "below"} normal`, valor: d };
     }
     const c = this.climatologia(z, v.id)[this.mes(i).mes];
     if (c == null) return null;

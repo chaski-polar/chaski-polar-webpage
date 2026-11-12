@@ -10,7 +10,7 @@ export function Rico({ texto }: { texto: string }): ReactNode {
   return texto.split(/\*\*(.+?)\*\*/g).map((parte, k) => (k % 2 ? <strong key={k}>{parte}</strong> : parte))
 }
 
-export function BotonVolver({ texto = 'Volver a todas las zonas' }: { texto?: string }) {
+export function BotonVolver({ texto = 'Back to all zones' }: { texto?: string }) {
   const { general } = useAcciones()
   return <button className="volver" type="button" onClick={() => general()}>{texto}</button>
 }
@@ -20,7 +20,7 @@ export function ChipsVariables({ zona }: { zona: IdZona | null }) {
   const { modelo } = useExplorer()
   const { section, variable, setVariable } = useExplorerStore()
   if (section === 'pacifico_sur') return null
-  return <div className="chips" role="group" aria-label="Cambiar el dato">
+  return <div className="chips" role="group" aria-label="Change variable">
     {variablesDeSeccion(section).filter((v) => modelo.tieneDato(zona, v)).map((v) =>
       <button key={v.id} className="chip" type="button" aria-pressed={v.id === variable} onClick={() => setVariable(v.id)}>{v.nombre.replace(/ \(.*\)/, '')}</button>)}
   </div>
@@ -30,7 +30,7 @@ export function ChipsVariables({ zona }: { zona: IdZona | null }) {
 export function ChipsEventos() {
   const { modelo } = useExplorer()
   const { fijarMes, nino2026 } = useAcciones()
-  return <div className="chips" role="group" aria-label="Saltar a un evento de El Niño">
+  return <div className="chips" role="group" aria-label="Jump to an El Niño event">
     {modelo.eventosNino().map((e) => <button key={e.anio} className="chip" type="button" onClick={() => {
       if (e.anio === 2026) { nino2026(); return }
       const st = useExplorerStore.getState()

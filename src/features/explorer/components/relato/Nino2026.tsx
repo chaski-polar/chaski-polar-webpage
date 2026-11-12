@@ -66,10 +66,10 @@ export default function Nino2026() {
 
   return <>
     <BotonVolver />
-    <h2>El Niño 2026, en curso</h2>
-    <div className="region">Costa del Perú · datos observados hasta {mesLargo(modelo.mes(modelo.ultimoObservado))}</div>
+    <h2>El Niño 2026, ongoing</h2>
+    <div className="region">Peruvian coast · observed data through {mesLargo(modelo.mes(modelo.ultimoObservado))}</div>
     <div className="cifras">
-      {pico != null && <div className="cifra"><b className="num">{signo(modelo.nino[pico] as number)}{nf(2).format(Math.abs(modelo.nino[pico] as number))} °C</b><span>Niño 1+2 en {mesLargo(modelo.mes(pico))}: el mar frente al norte del Perú, sobre lo normal</span></div>}
+      {pico != null && <div className="cifra"><b className="num">{signo(modelo.nino[pico] as number)}{nf(2).format(Math.abs(modelo.nino[pico] as number))} °C</b><span>Niño 1+2 in {mesLargo(modelo.mes(pico))}: sea off northern Peru, above normal</span></div>}
       {d.icen?.icen != null && <div className="cifra"><b className="num">{signo(d.icen.icen)}{nf(2).format(Math.abs(d.icen.icen))} °C</b><span>índice costero ICEN de {d.icen.date.slice(0, 7)} (IGP/ENFEN)</span></div>}
     </div>
     <div className="grafico" role="img" aria-label="Niño 1+2 mensual desde 2025 y escenarios hasta febrero de 2027">
@@ -88,29 +88,29 @@ export default function Nino2026() {
     </div>
     <p className="nota">Niño 1+2 de NOAA PSL. Desde {d.inicioEsc != null ? etiquetaMes(modelo.mes(d.inicioEsc)) : 'septiembre de 2026'} la línea discontinua y la banda son escenarios construidos con la climatología y una trayectoria asumida de El Niño: no son observaciones ni pronósticos.</p>
 
-    <h3>¿Qué pasaría con el fitoplancton?</h3>
-    <p>Comparado con un mes normal, la clorofila de la costa en los meses de escenario{d.finEsc != null && d.inicioEsc != null ? ` (${etiquetaMes(modelo.mes(d.inicioEsc))} a ${etiquetaMes(modelo.mes(d.finEsc))})` : ''} quedaría en promedio:</p>
+    <h3>What would happen to phytoplankton?</h3>
+    <p>Compared with a normal month, coastal chlorophyll during the scenario months{d.finEsc != null && d.inicioEsc != null ? ` (${etiquetaMes(modelo.mes(d.inicioEsc))} to ${etiquetaMes(modelo.mes(d.finEsc))})` : ''} would average:</p>
     <div className="cifras">{d.clorofila.map((e) => <div className="cifra" key={e.id}><b className="num">{e.cambio == null ? '—' : pct(e.cambio)}</b><span>escenario {e.nombre}</span></div>)}</div>
-    <p className="nota">Clorofila del monitor (reanálisis CMEMS para toda la costa). {nota ?? ''} {prediccion ? `La predicción por zona está ${prediccion.estado}.` : ''}</p>
+    <p className="nota">Monitor chlorophyll (CMEMS reanalysis for the entire coast). {nota ?? ''} {prediccion ? `The zone-level prediction is ${prediccion.estado}.` : ''}</p>
 
     {ultimo && <>
-      <h3>La anchoveta este año</h3>
+      <h3>Anchoveta this year</h3>
       <p>El crucero {ultimo.crucero} estimó <strong>{nf(2).format(ultimo.biomasa_t / 1e6)} millones de t</strong> en la región norte-centro{ultimo.provisional ? ' (cifra provisional)' : ''}.{promAnteriores ? ` Es ${nf(0).format(Math.abs((ultimo.biomasa_t / promAnteriores - 1) * 100))} % ${ultimo.biomasa_t < promAnteriores ? 'menos' : 'más'} que el promedio de los cruceros de primavera anteriores de esa región (${anteriores.map((c) => c.anio).join(', ')}).` : ''}</p>
     </>}
 
-    <h3>El fitoplancton durante el calor</h3>
-    <p>Cambio de la clorofila frente a lo normal en cada zona, de mayo a {mesLargo(modelo.mes(modelo.ultimoSeries))}{d.zonas.some((x) => x.cambio != null) ? '' : ' (sin datos todavía)'}. Entre paréntesis, el último mes.</p>
+    <h3>Phytoplankton during the warm period</h3>
+    <p>Change in chlorophyll relative to normal in each zone, from May to {mesLargo(modelo.mes(modelo.ultimoSeries))}{d.zonas.some((x) => x.cambio != null) ? '' : ' (no data yet)'}. The latest month appears in parentheses.</p>
     <ul className="lista-zonas">{d.zonas.map(({ z, a, cambio }) => <li key={z}><button className="fila-zona" type="button" onClick={() => acciones.irAZona(z)}>
       <span className="punto" style={{ background: cambio == null ? undefined : cambio < 0 ? 'var(--nino)' : 'var(--fito)' }} />
-      <span>{modelo.zona(z).nombre}<small>{a ? `${a.corto} en ${mesLargo(modelo.mes(modelo.ultimoSeries))}` : 'sin dato el último mes'}</small></span>
+      <span>{modelo.zona(z).nombre}<small>{a ? `${a.corto} in ${mesLargo(modelo.mes(modelo.ultimoSeries))}` : 'no data in the latest month'}</small></span>
       <span className="valor">{cambio == null ? '—' : pct(cambio)}</span>
     </button></li>)}</ul>
-    <p className="nota">Promedio de la clorofila (ESA OC-CCI) de mayo a {mesLargo(modelo.mes(modelo.ultimoSeries))} comparado con el mismo mes de un año normal (1998–2025). Es parcial: el evento sigue.</p>
+    <p className="nota">Average chlorophyll (ESA OC-CCI) from May to {mesLargo(modelo.mes(modelo.ultimoSeries))}, compared with the same month in a normal year (1998–2025). This is partial: the event is ongoing.</p>
 
     <div className="acciones-relato">
-      <button className="btn" type="button" onClick={() => { useExplorerStore.getState().setMonitorZone(null); document.getElementById('monitor')?.scrollIntoView({ behavior: 'smooth' }) }}>Ver el monitor</button>
-      <a className="btn" href="#eventos-nino">Comparar con otros El Niño</a>
-      <a className="btn" href="#cruceros">Ver los cruceros</a>
+      <button className="btn" type="button" onClick={() => { useExplorerStore.getState().setMonitorZone(null); document.getElementById('monitor')?.scrollIntoView({ behavior: 'smooth' }) }}>View the monitor</button>
+      <a className="btn" href="#eventos-nino">Compare with other El Niño events</a>
+      <a className="btn" href="#cruceros">View the surveys</a>
     </div>
   </>
 }

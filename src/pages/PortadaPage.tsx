@@ -20,9 +20,9 @@ export default function PortadaPage() {
   }, [navigate])
 
   return <div className="portada">
-    <canvas id="escena" aria-label="Descenso desde el espacio hasta el fondo del mar peruano" />
+    <canvas id="escena" aria-label="Descent from space to the seafloor of the Peruvian sea" />
     <div className="portada-largo" />
-    <div className="medidor izq" aria-hidden="true"><span id="mEtiqueta">ÓRBITA</span><div className="riel"><div className="marca" id="marca" /></div><b id="mValor">700 km</b></div>
+    <div className="medidor izq" aria-hidden="true"><span id="mEtiqueta">ORBIT</span><div className="riel"><div className="marca" id="marca" /></div><b id="mValor">700 km</b></div>
     <div className="medidor der" aria-hidden="true"><span>CAPA</span><div className="riel" /><b id="mCapa">Espacio</b></div>
     <main id="secciones" />
     <div className="portada-pista" id="pista">Desliza para descender ↓</div>

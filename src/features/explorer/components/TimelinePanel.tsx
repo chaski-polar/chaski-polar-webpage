@@ -51,20 +51,20 @@ export function TimelinePanel() {
     acciones.irARegion(next === 'austral' ? 'antartida' : 'peru')
   }
 
-  return <section className="timeline-panel" aria-label="Línea de tiempo del globo">
+  return <section className="timeline-panel" aria-label="Globe timeline">
     <div className="timeline-topline">
-      <label className="timeline-variable"><span>{opciones.length ? 'Dato' : 'Pacífico Sur'}</span>{opciones.length
+      <label className="timeline-variable"><span>{opciones.length ? 'Variable' : 'South Pacific'}</span>{opciones.length
         ? <select value={variable} onChange={(e) => setVariable(e.target.value)}>{opciones.map((x) => <option key={x.id} value={x.id}>{x.nombre} · {x.unidad}</option>)}</select>
         : <span className="timeline-unavailable">Sin parámetros regionales disponibles</span>}</label>
       <div className="timeline-regions order-3 basis-full flex flex-row flex-wrap items-center justify-start gap-1 text-control text-ice-300" role="group" aria-label="Apartados de exploración">
-        <span>Zonas:</span>
-        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Océano Austral y Antártida</button>
-        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt y mar peruano</button>
+        <span>Zones:</span>
+        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Southern Ocean & Antarctica</button>
+        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-800 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt & Peruvian sea</button>
       </div>
       <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>
     {opciones.length > 0 && <div className="timeline-controls">
-      <button className="play-button" type="button" aria-label={playing ? 'Pausar animación' : 'Reproducir meses'} onClick={() => setPlaying(!playing)}>{playing ? 'Ⅱ' : '▶'}</button>
+    <button className="play-button" type="button" aria-label={playing ? 'Pause animation' : 'Play months'} onClick={() => setPlaying(!playing)}>{playing ? 'Ⅱ' : '▶'}</button>
       <div className="timeline-track">
         <div className="timeline-events" role="group" aria-label="Saltar a un evento de El Niño">{eventos.map((e, k) =>
           <button key={e.anio} type="button" style={{ left: posicion(e.i), transform: desplazamiento(k) }} aria-current={month === e.i} title={`${e.nombre} (pico en ${mesLargo(modelo.mes(e.i))})`}
@@ -86,9 +86,9 @@ function Leyenda() {
   const v = variablePorId(useExplorerStore((s) => s.variable))
   const clorofila = v.mapa === 'clorofila'
   const [min, max] = clorofila
-    ? ['poco fitoplancton', 'mucho fitoplancton (alimento)']
-    : v.mapa === 'temperatura' ? ['más frío que lo normal', 'más caliente que lo normal']
-      : ['por debajo de lo normal', 'por encima']
+    ? ['low phytoplankton', 'high phytoplankton (food)']
+    : v.mapa === 'temperatura' ? ['colder than normal', 'warmer than normal']
+      : ['below normal', 'above normal']
   const valores = [0.03, 0.1, 0.3, 1, 3, 10]
   return <div className="timeline-legend" aria-hidden="true">
     <span>{min}</span>

@@ -14,22 +14,22 @@ export default function Biologia({ zona }: { zona?: IdZona }) {
   const pesca = modelo.pescaAnio(2024)
 
   if (!disponible) return <>
-    <h2>Respuesta biológica</h2>
-    <p>No hay datos de anchoveta para las zonas antárticas. La biomasa hidroacústica disponible corresponde a cruceros y stocks del Perú.</p>
+    <h2>Anchoveta biological response</h2>
+    <p>No anchoveta data is available for Antarctic zones. The available hydroacoustic biomass comes from Peruvian surveys and stocks.</p>
   </>
 
   return <>
-    <h2>Respuesta biológica de la anchoveta</h2>
-    {zona && <p className="region">Datos disponibles a escala de Perú/stock, no como medición propia de {modelo.zona(zona).nombre}.</p>}
+    <h2>Anchoveta biological response</h2>
+    {zona && <p className="region">Data is available at the Peru/stock scale, not as a measurement specific to {modelo.zona(zona).nombre}.</p>}
     <CrucerosSection id="cruceros-lateral" compacto={true} encabezado={false} />
     <div className="cifras">
-      <div className="cifra"><b className="num">{cruises.length}</b><span>registros de biomasa total por crucero IMARPE</span></div>
-      <div className="cifra"><b className="num">{ultimo ? `${nf(1).format(ultimo.biomasa_t / 1e6)} M t` : 'sin dato'}</b><span>{ultimo ? `último registro ${ultimo.crucero}` : 'biomasa hidroacústica'}</span></div>
+      <div className="cifra"><b className="num">{cruises.length}</b><span>total biomass records from IMARPE surveys</span></div>
+      <div className="cifra"><b className="num">{ultimo ? `${nf(1).format(ultimo.biomasa_t / 1e6)} M t` : 'no data'}</b><span>{ultimo ? `latest record: ${ultimo.crucero}` : 'hydroacoustic biomass'}</span></div>
     </div>
-    <p className="nota">La biomasa de crucero es una observación irregular y no se interpola como una medición mensual. El gráfico detallado se conserva también en la sección inferior.</p>
-    <h3>Actividad pesquera</h3>
-    <p>{pesca == null ? 'No hay desembarque anual disponible para 2024.' : `Desembarques de anchoveta del Perú: ${nf(0).format(pesca)} t en 2024.`} Es actividad pesquera y no equivale a biomasa.</p>
-    <h3>Datos aún no disponibles</h3>
-    <p className="nota">Biomasa evaluada RAM Legacy, biomasa desovante histórica, distribución espacial de anchoveta y NASC/densidad acústica no están cargados en los archivos del explorador.</p>
+    <p className="nota">Survey biomass is an irregular observation and is not interpolated as a monthly measurement. The detailed chart is also kept in the lower section.</p>
+    <h3>Fishing activity</h3>
+    <p>{pesca == null ? 'No annual landing data is available for 2024.' : `Peruvian anchoveta landings: ${nf(0).format(pesca)} t in 2024.`} This is fishing activity, not biomass.</p>
+    <h3>Data not yet available</h3>
+    <p className="nota">RAM Legacy assessed biomass, historical spawning biomass, anchoveta spatial distribution and NASC/acoustic density are not loaded in the explorer files.</p>
   </>
 }

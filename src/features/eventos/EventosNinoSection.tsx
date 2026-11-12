@@ -23,7 +23,7 @@ function colorCambio(p: number): string {
   return p < 0 ? `rgba(240,138,75,${a})` : `rgba(63,194,140,${a})`
 }
 
-/** Cada El Niño, zona por zona: cuánto cambió la clorofila frente a lo normal */
+/** Each El Niño, zone by zone: how chlorophyll changed relative to normal */
 export default function EventosNinoSection() {
   const { modelo } = useExplorer()
   const acciones = useAcciones()
@@ -50,29 +50,29 @@ export default function EventosNinoSection() {
 
   return <section className="seccion" id="eventos-nino" aria-labelledby="t-eventos">
     <div className="encabezado-seccion">
-      <h2 id="t-eventos">Cada El Niño, zona por zona</h2>
-      <p>Cuánto cambió el fitoplancton (clorofila) frente a lo normal durante cada El Niño en las cinco zonas de la costa peruana. Naranja es una caída; verde, un aumento. {vulnerables?.resumen ?? ''}</p>
+      <h2 id="t-eventos">Each El Niño, zone by zone</h2>
+      <p>How phytoplankton (chlorophyll) changed relative to normal during each El Niño in the five zones along the Peruvian coast. Orange means a decline; green, an increase. {vulnerables?.resumen ?? ''}</p>
     </div>
     <div className="tabla-envoltura">
       <table className="eventos-nino">
         <thead><tr><th scope="col">El Niño</th>{ZONAS_PERU.map((c) => <th scope="col" key={c}>{zonas[c]?.nombre ?? c}</th>)}</tr></thead>
         <tbody>
           {eventos.map((e) => <tr key={e.nombre}>
-            <th scope="row">{e.nombre}{periodo(e.nombre) && <small>{periodo(e.nombre)}</small>}{e.nombre.includes('2026') && <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ver en el globo</button>}</th>
+            <th scope="row">{e.nombre}{periodo(e.nombre) && <small>{periodo(e.nombre)}</small>}{e.nombre.includes('2026') && <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>View on the globe</button>}</th>
             {e.cambio_clorofila_pct
               ? ZONAS_PERU.map((c) => {
                 const p = e.cambio_clorofila_pct?.[c]
-                return <td key={c}>{p == null ? '—' : <button type="button" style={{ background: colorCambio(p) }} onClick={() => ir(e.nombre, c)} title={`Ver ${zonas[c]?.nombre ?? c} en el globo`}>{signo(p)}{nf(0).format(Math.abs(p))} %</button>}</td>
+                return <td key={c}>{p == null ? '—' : <button type="button" style={{ background: colorCambio(p) }} onClick={() => ir(e.nombre, c)} title={`View ${zonas[c]?.nombre ?? c} on the globe`}>{signo(p)}{nf(0).format(Math.abs(p))} %</button>}</td>
               })
-              : <td colSpan={ZONAS_PERU.length} className="evento-nota">{e.nota ?? 'Sin datos todavía.'} <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Ver El Niño 2026 en el globo</button></td>}
+              : <td colSpan={ZONAS_PERU.length} className="evento-nota">{e.nota ?? 'No data yet.'} <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>View El Niño 2026 on the globe</button></td>}
           </tr>)}
           <tr className="fila-promedio">
-            <th scope="row">Promedio de los eventos<small>sin 2026, que sigue en curso</small></th>
+            <th scope="row">Event average<small>excluding 2026, which is ongoing</small></th>
             {promedio.map(({ c, p }) => <td key={c}>{p == null ? '—' : <span style={{ background: colorCambio(p) }}>{signo(p)}{nf(0).format(Math.abs(p))} %</span>}</td>)}
           </tr>
         </tbody>
       </table>
     </div>
-    <p className="nota">Promedio de la clorofila (OC-CCI) en los meses indicados de cada evento, comparada con el mismo mes de un año normal (media geométrica). Toca una celda para ver esa zona en el globo. Es una asociación con El Niño, no una medida de su causa.</p>
+    <p className="nota">Average OC-CCI chlorophyll during the indicated months of each event, compared with the same month in a normal year (geometric mean). Tap a cell to view that zone on the globe. This is an association with El Niño, not a measure of its cause.</p>
   </section>
 }
