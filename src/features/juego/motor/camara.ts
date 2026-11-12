@@ -15,19 +15,25 @@ export interface OpcionesSeguidor {
   distancia?: number;
   /** cuánto se puede girar a cada lado (radianes) */
   giro?: number;
+  /** ángulo desde la vertical: 0 = mirar desde arriba, π/2 = de lado. Por defecto, tres cuartos */
+  inclinacion?: number;
+  /** cuánto se puede inclinar hacia arriba y hacia abajo [mínimo, máximo] */
+  inclinacionLimites?: [number, number];
 }
 
 export function crearSeguidor(camara: THREE.PerspectiveCamera, elemento: HTMLElement, inicio: THREE.Vector3, opciones: OpcionesSeguidor = {}): Seguidor {
   const distancia = opciones.distancia ?? 14;
   const giro = opciones.giro ?? 1.2;
-  camara.position.copy(inicio).add(new THREE.Vector3(0, distancia * 0.36, distancia * 0.93));
+  const inclinacion = opciones.inclinacion ?? 1.2;
+  const [polarMin, polarMax] = opciones.inclinacionLimites ?? [0.75, 1.5];
+  camara.position.copy(inicio).add(new THREE.Vector3(0, distancia * Math.cos(inclinacion), distancia * Math.sin(inclinacion)));
   const controles = new OrbitControls(camara, elemento);
   controles.enablePan = false;
   controles.enableDamping = true;
   controles.minDistance = distancia * 0.45;
   controles.maxDistance = distancia * 1.45;
-  controles.minPolarAngle = 0.75;
-  controles.maxPolarAngle = 1.5;
+  controles.minPolarAngle = polarMin;
+  controles.maxPolarAngle = polarMax;
   controles.minAzimuthAngle = -giro;
   controles.maxAzimuthAngle = giro;
   controles.target.copy(inicio);

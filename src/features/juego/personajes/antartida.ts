@@ -61,3 +61,65 @@ export const dibujarFito = (): HTMLCanvasElement => lienzo((g) => {
   g.fillStyle = TINTA; g.beginPath(); g.arc(116, 124, 6, 0, 7); g.arc(142, 124, 6, 0, 7); g.fill();
   g.lineWidth = 5; g.beginPath(); g.arc(129, 138, 10, 0.2, Math.PI - 0.2); g.stroke();
 });
+
+/** Lumi, una diatomea: caja de vidrio con cloroplastos verdes (vista de lado) */
+export const dibujarLumi = (): HTMLCanvasElement => lienzo((g) => {
+  const caja: Forma[] = [(c) => c.roundRect(40, 70, 176, 116, 50)];
+  silueta(g, caja, 14);
+  rellenar(g, caja, "#d9f3e6");
+  g.save();
+  recortar(g, caja);
+  g.fillStyle = "#b5e3cc"; g.fillRect(140, 60, 90, 140); // sombra
+  g.fillStyle = "#e9f8f1"; g.fillRect(40, 118, 176, 18); // banda donde se unen las dos mitades de la caja
+  for (const [x, y, r] of [[78, 98, 14], [110, 160, 12], [176, 96, 12], [186, 156, 14], [70, 158, 10]] as const) { // cloroplastos
+    g.fillStyle = "#4fb36f"; g.beginPath(); g.ellipse(x, y, r * 1.4, r, 0.4, 0, 7); g.fill();
+  }
+  g.restore();
+  g.strokeStyle = TINTA; g.lineWidth = 4;
+  g.beginPath(); g.moveTo(44, 118); g.lineTo(212, 118); g.moveTo(44, 136); g.lineTo(212, 136); g.stroke();
+  for (let x = 62; x < 210; x += 18) { g.beginPath(); g.moveTo(x, 74); g.lineTo(x, 82); g.moveTo(x, 174); g.lineTo(x, 182); g.stroke(); } // poros del vidrio
+  ojo(g, 110, 112, 15); ojo(g, 150, 112, 15);
+  rubor(g, 96, 142, 0.8); rubor(g, 166, 142, 0.8);
+  g.lineWidth = 4; g.beginPath(); g.arc(130, 140, 9, 0.3, Math.PI - 0.3); g.stroke();
+});
+
+/** Nutriente: una chispa azul (nitrato, fosfato y silicato que suben del fondo) */
+export const dibujarNutriente = (): HTMLCanvasElement => lienzo((g) => {
+  const estrella: Forma[] = [(c) => {
+    for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 22 : 54; const x = 64 + Math.cos(a) * r, y = 64 + Math.sin(a) * r; if (i) c.lineTo(x, y); else c.moveTo(x, y); }
+    c.closePath();
+  }];
+  silueta(g, estrella, 10);
+  rellenar(g, estrella, "#7fd3ff");
+  g.fillStyle = "#e6f7ff"; g.beginPath(); g.arc(56, 54, 9, 0, 7); g.fill();
+}, 128, 128);
+
+/** Nara, la ballena jorobada (mira a la derecha): aletas pectorales largas y blancas, surcos en la garganta */
+export const dibujarNara = (): HTMLCanvasElement => lienzo((g) => {
+  const cuerpo: Forma[] = [
+    (c) => { c.moveTo(40, 128); c.quadraticCurveTo(120, 70, 250, 104); c.quadraticCurveTo(268, 128, 250, 150); c.quadraticCurveTo(140, 186, 40, 140); c.closePath(); },
+    (c) => { c.moveTo(48, 132); c.quadraticCurveTo(20, 96, 6, 92); c.quadraticCurveTo(22, 124, 6, 166); c.quadraticCurveTo(24, 160, 48, 138); c.closePath(); }, // cola
+    (c) => { c.moveTo(118, 84); c.lineTo(132, 66); c.lineTo(140, 84); c.closePath(); }, // joroba y aleta dorsal
+  ];
+  const aleta: Forma[] = [(c) => { c.moveTo(178, 150); c.quadraticCurveTo(160, 200, 116, 226); c.quadraticCurveTo(150, 214, 194, 156); c.closePath(); }];
+  silueta(g, [...cuerpo, ...aleta], 14);
+  rellenar(g, cuerpo, "#33475b");
+  g.save();
+  recortar(g, cuerpo);
+  g.fillStyle = "#26374a"; g.fillRect(0, 70, 300, 40); // lomo más oscuro
+  g.fillStyle = "#dfe7ec"; g.beginPath(); g.ellipse(200, 160, 60, 18, -0.15, 0, 7); g.fill(); // garganta clara
+  g.strokeStyle = "#9fb0bd"; g.lineWidth = 3;
+  for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(150, 152 + k * 6); g.quadraticCurveTo(200, 160 + k * 5, 248, 142 + k * 4); g.stroke(); } // surcos
+  g.restore();
+  rellenar(g, aleta, "#eef3f6");
+  g.fillStyle = "#c9d5dc"; g.beginPath(); g.ellipse(150, 196, 14, 6, -0.9, 0, 7); g.fill();
+  ojo(g, 212, 124, 9);
+  g.fillStyle = "#56697a"; for (const [x, y] of [[236, 112], [226, 104], [242, 122]] as const) { g.beginPath(); g.arc(x, y, 3.5, 0, 7); g.fill(); } // tubérculos de la cabeza
+  rubor(g, 214, 142, 0.6);
+}, 272, 256);
+
+/** Flecha de corriente (apunta hacia arriba del lienzo) */
+export const dibujarFlecha = (): HTMLCanvasElement => lienzo((g) => {
+  g.fillStyle = "rgba(255,255,255,0.85)"; g.strokeStyle = "rgba(29,43,54,0.7)"; g.lineWidth = 6;
+  g.beginPath(); g.moveTo(64, 8); g.lineTo(112, 64); g.lineTo(82, 64); g.lineTo(82, 120); g.lineTo(46, 120); g.lineTo(46, 64); g.lineTo(16, 64); g.closePath(); g.fill(); g.stroke();
+}, 128, 128);
