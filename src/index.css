@@ -21,15 +21,17 @@
 @layer components {
   /* barra azul sólida con borde fino: el contenido que pasa por debajo no se mezcla con el texto del encabezado */
   .app-header { background: rgb(7 30 51 / .96); border-bottom: 1px solid rgb(36 80 122 / .7); backdrop-filter: blur(8px); }
-  /* opciones: sin borde, en gris azulado; la activa se marca con fondo claro y texto azul oscuro */
-  .app-nav a { font-size: .95rem; color: var(--color-ice-300); }
-  .app-nav a:hover { background-color: rgb(163 188 203 / .14); color: var(--color-ice-100); }
-  .app-nav a[aria-current="page"] { background-color: var(--color-ice-100); color: var(--color-ocean-950); font-weight: 700; }
   .data-state { @apply grid min-h-screen place-content-center gap-2 bg-ocean-950 p-8 text-center text-ice-100; }
   .button-primary { @apply inline-flex items-center justify-center gap-2 rounded-pill border border-ocean-700 bg-ocean-800 px-5 py-3 font-bold text-ice-100 no-underline transition-colors transition-transform; }
   .button-primary:hover { @apply bg-ocean-700; }
   .button-primary:active { @apply scale-95; }
 }
+
+/* opciones del encabezado: sin borde, en gris azulado; la activa, en fondo claro con texto azul oscuro.
+   Van fuera de @layer para ganarle a `a:hover` de estilos.css, que si no las pondría blancas al pasar el cursor */
+.app-nav a { font-size: .95rem; color: var(--color-ice-300); transition: background-color .15s, color .15s; }
+.app-nav a:hover { background-color: rgb(163 188 203 / .14); color: var(--color-ice-100); }
+.app-nav a[aria-current], .app-nav a[aria-current]:hover { background-color: var(--color-ice-100); color: var(--color-ocean-950); font-weight: 700; }
 
 :root {
   font-family: var(--font-body);
