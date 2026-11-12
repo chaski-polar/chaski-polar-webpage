@@ -1,8 +1,13 @@
-/* Controles: teclado (WASD o flechas) y, en pantallas táctiles, una palanca virtual abajo a la izquierda.
-   Devuelve la dirección pedida: x hacia la derecha y y hacia adelante, cada una entre -1 y 1. */
+/* Controles: teclado (WASD o flechas; Q y E para subir y bajar) y, en pantallas táctiles, una palanca
+   virtual abajo a la izquierda y botones en pantalla. Devuelve la dirección pedida: x hacia la derecha
+   y y hacia adelante, cada una entre -1 y 1. */
 
 export interface Entrada {
   direccion(): { x: number; y: number };
+  /** 1 subir, -1 bajar, 0 quieto */
+  vertical(): number;
+  /** botones en pantalla para subir y bajar (los activa la interfaz táctil) */
+  readonly botones: { subir: boolean; bajar: boolean };
   destruir(): void;
 }
 
@@ -54,7 +59,10 @@ export function crearEntrada(contenedor: HTMLElement): Entrada {
   base.addEventListener("pointercancel", terminar);
 
   const hay = (grupo: Set<string>) => [...grupo].some((k) => teclas.has(k));
+  const botones = { subir: false, bajar: false };
   return {
+    botones,
+    vertical: () => (teclas.has("q") || botones.subir ? 1 : 0) - (teclas.has("e") || botones.bajar ? 1 : 0),
     direccion() {
       let x = (hay(DERECHA) ? 1 : 0) - (hay(IZQUIERDA) ? 1 : 0) + palanca.x;
       let y = (hay(ARRIBA) ? 1 : 0) - (hay(ABAJO) ? 1 : 0) + palanca.y;

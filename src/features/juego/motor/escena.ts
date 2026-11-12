@@ -69,7 +69,7 @@ export function crearMotor(lienzo: HTMLCanvasElement): Motor {
 
   const reloj = new THREE.Clock();
   renderer.setAnimationLoop(() => {
-    const dt = Math.min(0.05, reloj.getDelta());
+    const dt = Math.min(0.1, reloj.getDelta());
     if (!actual) return;
     actual.actualizar(dt, reloj.elapsedTime);
     contorno.render(escena, camara);

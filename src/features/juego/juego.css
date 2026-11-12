@@ -52,3 +52,50 @@
 @media (prefers-reduced-motion: reduce) {
   .juego .juego-dialogo-seguir { animation: none; }
 }
+
+/* menú */
+.juego .juego-menu { position: absolute; inset: 0; display: grid; place-items: center; z-index: 7; padding: 16px;
+  background: radial-gradient(circle at 50% 40%, #2a86ad, #0b3a5c); }
+.juego .juego-menu-caja { width: min(460px, 100%); padding: 22px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.juego .juego-menu-caja h1 { margin: 0; font-size: 40px; letter-spacing: 2px; }
+.juego .juego-menu-caja p { margin: 0; line-height: 1.45; }
+.juego .juego-menu-caja .nota, .juego .juego-informe .nota { font-size: 12px; opacity: .75; }
+.juego button.juego-caja, .juego a.juego-caja { font: inherit; font-weight: bold; padding: 10px 14px; cursor: pointer; text-decoration: none; text-align: center; }
+.juego button.juego-caja:hover, .juego a.juego-caja:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--tinta); }
+.juego button.juego-caja:focus-visible, .juego a.juego-caja:focus-visible { outline: 3px solid var(--sol); outline-offset: 2px; }
+.juego .principal { background: var(--sol); }
+.juego .juego-menu-boton { position: absolute; top: 12px; left: 118px; z-index: 5; padding: 6px 12px !important; font-size: 14px; }
+
+/* panel del cardumen */
+.juego .juego-fecha { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; padding: 6px 14px; font-size: 15px; min-width: 200px; text-align: center; }
+.juego .juego-estado-cardumen { position: absolute; top: 12px; right: 12px; z-index: 5; width: 210px; padding: 8px 12px; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+.juego .juego-estado-cardumen small { opacity: .7; }
+.juego .juego-mar { position: absolute; top: 60px; left: 12px; z-index: 5; width: 270px; padding: 8px 12px; font-size: 13px; line-height: 1.45; }
+.juego .juego-mar small { opacity: .7; }
+.juego .juego-mar .malo { color: #b3261e; font-weight: bold; }
+.juego .juego-mar .bueno { color: #1e7a45; font-weight: bold; }
+.juego .juego-barra { height: 10px; border: 2px solid var(--tinta); border-radius: 6px; background: #fff; overflow: hidden; margin-top: 3px; }
+.juego .juego-barra > div { height: 100%; transition: width .2s; }
+.juego .juego-alerta { color: #b3261e; font-weight: bold; }
+.juego .juego-botones { position: absolute; right: 12px; bottom: 36px; z-index: 6; display: flex; gap: 8px; align-items: flex-end; }
+.juego .juego-botones .activo { background: var(--sol); }
+.juego .juego-botones .solo-tactil { display: none; width: 56px; height: 56px; font-size: 20px; }
+@media (pointer: coarse) { .juego .juego-botones .solo-tactil { display: block; } .juego .juego-botones small { display: none; } }
+
+/* informe de la temporada: un papel sobre el escritorio */
+.juego .juego-informe-fondo { position: absolute; inset: 0; z-index: 9; display: grid; place-items: center; padding: 16px; background: rgba(29, 43, 54, .55); overflow-y: auto; }
+.juego .juego-informe { width: min(560px, 100%); padding: 22px 24px; background: #f4ecd6; color: var(--tinta); border: 4px solid var(--tinta); border-radius: 6px;
+  box-shadow: 8px 8px 0 var(--tinta); font-family: "Courier New", ui-monospace, monospace; transform: rotate(-.6deg); }
+.juego .juego-informe h2 { margin: 0 0 12px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px double var(--tinta); padding-bottom: 8px; }
+.juego .juego-informe .fila { display: flex; gap: 6px; font-size: 15px; line-height: 1.7; }
+.juego .juego-informe .puntos { flex: 1; border-bottom: 2px dotted rgba(29, 43, 54, .5); margin-bottom: 7px; }
+.juego .juego-informe .total { border-top: 2px solid var(--tinta); margin-top: 4px; font-weight: bold; }
+.juego .juego-informe p { font-size: 14px; line-height: 1.5; margin: 10px 0 0; }
+.juego .juego-informe .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; font-family: "Trebuchet MS", system-ui, sans-serif; }
+
+@media (max-width: 640px) {
+  .juego .juego-mar { top: auto; bottom: 110px; left: 12px; right: 12px; width: auto; font-size: 12px; }
+  .juego .juego-estado-cardumen { top: 56px; width: 170px; font-size: 13px; }
+  .juego .juego-fecha { top: 12px; left: auto; right: 12px; transform: none; min-width: 0; font-size: 13px; }
+  .juego .juego-menu-boton { left: auto; right: 12px; top: 210px; }
+}
