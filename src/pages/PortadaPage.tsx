@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useExplorerStore } from '../features/explorer/store'
 import { montarPortada } from '../features/portada/montar'
 import '../features/portada/portada.css'
 
@@ -10,7 +11,12 @@ export default function PortadaPage() {
   useEffect(() => {
     document.title = 'Mar Peruano 360'
     // la pantalla sigue en negro mientras carga el explorador; el globo la aclara cuando está listo
-    return montarPortada(() => { document.documentElement.classList.add('entrando'); navigate('/explorer') })
+    // el explorador abre en la vista Satelital: la misma foto de la Tierra que se ve en la portada
+    return montarPortada(() => {
+      document.documentElement.classList.add('entrando')
+      useExplorerStore.getState().setView('satellite')
+      navigate('/explorer')
+    })
   }, [navigate])
 
   return <div className="portada">
