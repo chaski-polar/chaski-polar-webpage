@@ -57,6 +57,10 @@ export function crearMotor(lienzo: HTMLCanvasElement): Motor {
       if (o instanceof THREE.Mesh || o instanceof THREE.Points || o instanceof THREE.Sprite) {
         o.geometry.dispose();
         for (const m of [o.material].flat() as THREE.Material[]) {
+          // Todos los cuadros, también los que no estaban visibles al salir de la escena.
+          if (Array.isArray(m.userData.cuadros)) {
+            for (const t of m.userData.cuadros) if (t instanceof THREE.Texture) t.dispose();
+          }
           for (const valor of Object.values(m)) if (valor instanceof THREE.Texture && valor !== tonos) valor.dispose();
           m.dispose();
         }

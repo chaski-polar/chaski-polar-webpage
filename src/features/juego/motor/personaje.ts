@@ -1,8 +1,9 @@
-/* Personaje 2D en un mundo 3D: un dibujo plano que siempre mira a la cámara, con sombra en el suelo.
-   Se voltea según hacia dónde nada, rebota al moverse y se inclina un poco, como en Bug Fables. */
+/* Personaje 2D en un mundo 3D: conserva sus proporciones, mira a la cámara y se voltea al nadar.
+   El pixel art se anima por cuadros con filtrado nítido; la sombra en el suelo es opcional. */
 import * as THREE from "three";
 import { sinContorno } from "./escena";
 import { espejo, textura } from "./dibujo";
+import { cuadrosSprite } from '../personajes/sprites';
 
 export interface Personaje {
   readonly sprite: THREE.Sprite;
@@ -27,11 +28,26 @@ export interface OpcionesPersonaje {
 const sombraMat = sinContorno(new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false }));
 
 export function crearPersonaje(escena: THREE.Scene, dibujo: HTMLCanvasElement, o: OpcionesPersonaje): Personaje {
-  const derechaTex = textura(o.miraIzquierda ? espejo(dibujo) : dibujo);
-  const izquierdaTex = textura(o.miraIzquierda ? dibujo : espejo(dibujo));
-  const material = sinContorno(new THREE.SpriteMaterial({ map: derechaTex, transparent: true, alphaTest: 0.05 }));
+  const pixel = cuadrosSprite(dibujo);
+  const esPixel = dibujo.width <= 96;
+  const preparar = (c: HTMLCanvasElement) => {
+    const t = textura(c);
+    if (esPixel) {
+      t.magFilter = t.minFilter = THREE.NearestFilter;
+      t.generateMipmaps = false;
+    }
+    return t;
+  };
+  const derechaTex = pixel.map((c) => preparar(o.miraIzquierda ? espejo(c) : c));
+  const izquierdaTex = pixel.map((c) => preparar(o.miraIzquierda ? c : espejo(c)));
+  const material = sinContorno(new THREE.SpriteMaterial({ map: derechaTex[0], transparent: true, alphaTest: 0.05 }));
+  material.userData.cuadros = [...derechaTex, ...izquierdaTex];
+  const reducirMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(o.ancho, o.alto, 1);
+  // El rectángulo del personaje conserva las proporciones originales del dibujo.
+  const factor = Math.min(o.ancho / dibujo.width, o.alto / dibujo.height);
+  const ancho = dibujo.width * factor, alto = dibujo.height * factor;
+  sprite.scale.set(ancho, alto, 1);
   escena.add(sprite);
 
   let sombra: THREE.Mesh | null = null;
@@ -50,11 +66,12 @@ export function crearPersonaje(escena: THREE.Scene, dibujo: HTMLCanvasElement, o
     animar(t, vel, derecha, max) {
       if (vel.lengthSq() > 0.2) {
         haciaDerecha = vel.dot(derecha) >= 0;
-        material.map = haciaDerecha ? derechaTex : izquierdaTex;
       }
       const mueve = Math.min(1, vel.length() / Math.max(0.001, max));
-      sprite.scale.set(o.ancho * p.escala * (1 - 0.06 * mueve * Math.sin(t * 14)), o.alto * p.escala * (1 + 0.08 * mueve * Math.sin(t * 14)), 1);
-      material.rotation = (haciaDerecha ? -1 : 1) * 0.12 * mueve * Math.sin(t * 7);
+      const cuadro = reducirMovimiento ? 0 : Math.floor(t * (mueve > 0.1 ? 7 : 2)) % pixel.length;
+      material.map = (haciaDerecha ? derechaTex : izquierdaTex)[cuadro]!;
+      sprite.scale.set(ancho * p.escala, alto * p.escala, 1);
+      material.rotation = (haciaDerecha ? -1 : 1) * 0.035 * mueve * Math.sin(t * 7);
       if (sombra) sombra.position.set(sprite.position.x, sombra.position.y, sprite.position.z);
     },
     parpadear(activo, t) {
