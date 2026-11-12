@@ -2,6 +2,9 @@ import { useMemo, useRef, useState, type PointerEvent as EventoPuntero, type Rea
 import { ESTRATEGIAS, type Estrategia, type Informe as DatosInforme } from '../logica/cardumen'
 import { BANDEJAS, EFECTO_ACIERTO, EFECTO_ERROR, type Bandeja, type Decision, type Turno } from '../logica/escritorio'
 import { sonar } from '../motor/sonido'
+import Cabina, { IconoSello } from './Cabina'
+import GuiaEscritorio, { faltaGuiaEscritorio, recordarGuiaEscritorio, type ReferenciaGuia } from './GuiaEscritorio'
+import './cabina.css'
 
 const n0 = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 0 })
 const n1 = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 1, signDisplay: 'exceptZero' })
@@ -28,7 +31,11 @@ function Papel({ id, lugar, elegido, clase, titulo, children, alTomar, alMover, 
     arrastre.current = { x: e.clientX, y: e.clientY }
   }
   const soltar = (e: EventoPuntero<HTMLElement>) => { if (arrastre.current) alSoltar(id, e.clientX, e.clientY); arrastre.current = null }
-  return <article className={`papel${clase ? ` ${clase}` : ''}${elegido ? ' elegido' : ''}`} aria-label={titulo}
+  return <article className={`papel${clase ? ` ${clase}` : ''}${elegido ? ' elegido' : ''}`} aria-label={`${titulo}${elegido ? ', seleccionado' : ''}`}
+    tabIndex={0} data-papel={id} onKeyDown={(e) => {
+      if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return
+      e.preventDefault(); alTomar(id)
+    }}
     style={{ left: lugar.x, top: lugar.y, zIndex: lugar.z, ['--giro' as string]: `${lugar.giro}deg` }}
     onPointerDown={bajar} onPointerMove={mover} onPointerUp={soltar} onPointerCancel={soltar}>
     {children}
@@ -37,7 +44,7 @@ function Papel({ id, lugar, elegido, clase, titulo, children, alTomar, alMover, 
 
 function Sello({ texto, tipo }: { texto: string; tipo: Decision }) {
   const giro = useMemo(() => Math.round(Math.random() * 16 - 8), [])
-  return <div className={`sello sello-${tipo}`} style={{ ['--giro' as string]: `${giro}deg` }} aria-label={`Sellado: ${texto}`}>{texto}</div>
+  return <div className={`sello sello-${tipo}`} style={{ ['--giro' as string]: `${giro}deg` }} aria-label={`Sellado: ${texto}`}><IconoSello pequeno />{texto}</div>
 }
 
 /** Fin de año como en Papers, Please: papeles que se arrastran, se cruzan y se sellan */
@@ -54,7 +61,7 @@ export default function Escritorio({ turno, datos, siguiente, final, alSeguir, a
     const columnas = Math.max(1, Math.min(4, Math.floor((ancho - 24) / 340)))
     const paso = (ancho - 24 - 330) / Math.max(1, columnas - 1)
     return Object.fromEntries(ids.map((id, k) => [id, {
-      x: 12 + (k % columnas) * Math.min(360, paso) + Math.random() * 16, y: 70 + Math.floor(k / columnas) * 210 + Math.random() * 24, z: k + 1, giro: Math.random() * 5 - 2.5,
+      x: 12 + (k % columnas) * Math.min(360, paso) + Math.random() * 16, y: 30 + Math.floor(k / columnas) * 210 + Math.random() * 24, z: k + 1, giro: Math.random() * 5 - 2.5,
     }]))
   })
   const [elegido, setElegido] = useState<IdPapel | null>(null)
@@ -63,11 +70,18 @@ export default function Escritorio({ turno, datos, siguiente, final, alSeguir, a
   const [estrategia, setEstrategia] = useState<Estrategia['id'] | null>(null)
   const [firmado, setFirmado] = useState(false)
   const [entregado, setEntregado] = useState(false)
+  const [guia, setGuia] = useState<number | null>(() => faltaGuiaEscritorio() ? 0 : null)
   const zMax = useRef(ids.length)
   const bandejasRef = useRef<HTMLDivElement>(null)
+  const escritorioRef = useRef<HTMLDivElement>(null)
+  const cerrarGuia = () => { recordarGuiaEscritorio(); setGuia(null) }
+  const siguientePaso = (desde: number, hasta: number) => setGuia((g) => g === desde ? hasta : g)
 
   const tomar = (id: IdPapel) => { setElegido(id); setLugares((l) => ({ ...l, [id]: { ...l[id]!, z: ++zMax.current } })) }
-  const mover = (id: IdPapel, dx: number, dy: number) => setLugares((l) => ({ ...l, [id]: { ...l[id]!, x: l[id]!.x + dx, y: l[id]!.y + dy } }))
+  const mover = (id: IdPapel, dx: number, dy: number) => {
+    const ancho = escritorioRef.current?.clientWidth ?? 1200
+    setLugares((l) => ({ ...l, [id]: { ...l[id]!, x: Math.max(8, Math.min(Math.max(8, ancho - 350), l[id]!.x + dx)), y: Math.max(16, l[id]!.y + dy) } }))
+  }
   const soltar = (id: IdPapel, x: number, y: number) => {
     if (id !== 'carpeta' || !bandejasRef.current) return
     // ¿la carpeta cayó sobre una bandeja?
@@ -76,11 +90,28 @@ export default function Escritorio({ turno, datos, siguiente, final, alSeguir, a
       if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) { archivar(el.dataset.bandeja as Bandeja); return }
     }
   }
-  const archivar = (b: Bandeja) => { setBandeja(b); setElegido(null); sonar('boton') }
-  const sellar = (d: Decision) => { if (!elegido || !turno.expedientes.some((e) => e.id === elegido)) return; setSellos((s) => ({ ...s, [elegido]: d })); sonar('golpe') }
+  const archivar = (b: Bandeja) => { setBandeja(b); setElegido(null); siguientePaso(2, 3); sonar('boton') }
+  const sellar = (d: Decision) => { if (!elegido || !turno.expedientes.some((e) => e.id === elegido)) return; setSellos((s) => ({ ...s, [elegido]: d })); siguientePaso(1, 2); sonar('golpe') }
 
   const expElegido = turno.expedientes.find((e) => e.id === elegido)
+  const sinSello = turno.expedientes.filter((e) => !sellos[e.id])
+  const visita = expElegido ?? sinSello[0]
   const pendientes = turno.expedientes.filter((e) => !sellos[e.id]).length + (bandeja ? 0 : 1) + (siguiente && !firmado ? 1 : 0)
+  const mostrarPapel = (referencia: ReferenciaGuia) => {
+    const id = referencia === 'expediente' ? (sinSello[0]?.id ?? turno.expedientes[0]?.id) : referencia
+    if (!id) return
+    if (id === 'carpeta' && bandeja) {
+      const archivada = [...(bandejasRef.current?.querySelectorAll<HTMLButtonElement>('[data-bandeja]') ?? [])].find((el) => el.dataset.bandeja === bandeja)
+      archivada?.focus()
+      return
+    }
+    tomar(id)
+    requestAnimationFrame(() => {
+      const papel = [...(escritorioRef.current?.querySelectorAll<HTMLElement>('[data-papel]') ?? [])].find((el) => el.dataset.papel === id)
+      papel?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' })
+      papel?.focus({ preventScroll: true })
+    })
+  }
 
   // resultado del turno
   const aciertos = turno.expedientes.filter((e) => sellos[e.id] === e.correcta).length + (bandeja === turno.bandejaCorrecta ? 1 : 0)
@@ -140,12 +171,13 @@ export default function Escritorio({ turno, datos, siguiente, final, alSeguir, a
         <input type="radio" name="estrategia" checked={estrategia === id} onChange={() => { setEstrategia(id); setFirmado(false) }} />
         <span><b>{ESTRATEGIAS[id].nombre}</b> · {ESTRATEGIAS[id].ventaja} <i>{ESTRATEGIAS[id].costo}</i></span>
       </label>)}
-      {firmado ? <p className="firma">Anchi</p> : <button type="button" className="firmar" disabled={!estrategia} onClick={() => { setFirmado(true); sonar('boton') }}>Firmar</button>}
+      {firmado ? <p className="firma">Anchi</p> : <button type="button" className="firmar" disabled={!estrategia} onClick={() => { setFirmado(true); siguientePaso(3, 4); sonar('boton') }}>Firmar</button>}
     </> } } : {}),
   }
 
   if (entregado) {
-    return <div className="juego-escritorio" role="dialog" aria-modal="true" aria-labelledby="t-resultado">
+    return <div className="juego-escritorio cabina-escritorio" role="dialog" aria-modal="true" aria-labelledby="t-resultado">
+      <div className="cabina-franja"><Cabina expediente={visita} revisados={turno.expedientes.length} total={turno.expedientes.length} entregado /></div>
       <div className="resultado papel" style={{ ['--giro' as string]: '-0.6deg' }}>
         <h3 id="t-resultado">Resultado del turno · {turno.anio}</h3>
         <p>Decisiones correctas: <b>{aciertos} de {turno.expedientes.length + 1}</b>.</p>
@@ -163,15 +195,23 @@ export default function Escritorio({ turno, datos, siguiente, final, alSeguir, a
     </div>
   }
 
-  return <div className="juego-escritorio" role="dialog" aria-modal="true" aria-label={`Escritorio del analista, año ${turno.anio}`}>
+  return <div className="juego-escritorio cabina-escritorio" ref={escritorioRef} role="dialog" aria-modal="true" aria-label={`Escritorio del analista, año ${turno.anio}`}>
     <header className="escritorio-cabecera">
       <b>Escritorio del analista · {turno.anio}</b>
-      <span>{pendientes > 0 ? `${pendientes} pendiente${pendientes > 1 ? 's' : ''}` : 'Todo revisado'}</span>
-      <button type="button" className="juego-caja principal" disabled={pendientes > 0} onClick={() => { setEntregado(true); sonar('exito') }}>Entregar</button>
+      <span role="status">{pendientes > 0 ? `${pendientes} pendiente${pendientes > 1 ? 's' : ''}` : 'Todo revisado'}</span>
+      <button type="button" className="juego-caja cabina-ayuda" aria-controls="cabina-guia" aria-expanded={guia !== null} onClick={() => { setGuia(0); escritorioRef.current?.scrollTo({ top: 0, behavior: 'auto' }) }}>Cómo revisar</button>
+      <button type="button" className="juego-caja principal" disabled={pendientes > 0} onClick={() => { cerrarGuia(); setEntregado(true); sonar('exito') }}>Entregar</button>
     </header>
 
+    <div className={`cabina-franja${guia !== null ? ' con-guia' : ''}`}>
+      <Cabina expediente={visita} revisados={turno.expedientes.length - sinSello.length} total={turno.expedientes.length} />
+      {guia !== null && <GuiaEscritorio paso={guia} hayPlan={!!siguiente} alPaso={setGuia} alCerrar={cerrarGuia} alMostrar={mostrarPapel} />}
+    </div>
+    <p className="cabina-instruccion">Mesa de revisión <span>Selecciona un papel con clic o con Tab y Enter. Solo la carpeta del año se archiva en las bandejas.</span></p>
+    <div className="cabina-mesa" style={{ minHeight: Math.max(700, ...Object.values(lugares).map((l) => l.y + 440)) }}>
     {ids.filter((id) => !(id === 'carpeta' && bandeja)).map((id) => <Papel key={id} id={id} lugar={lugares[id]!} elegido={elegido === id} clase={papeles[id]!.clase} titulo={papeles[id]!.titulo}
       alTomar={tomar} alMover={mover} alSoltar={soltar}>{papeles[id]!.cuerpo}</Papel>)}
+    </div>
 
     <div className="escritorio-bandejas" ref={bandejasRef} aria-label="Bandejas para archivar la carpeta del año">
       {BANDEJAS.map((b) => <button key={b.id} type="button" data-bandeja={b.id} className={`bandeja${bandeja === b.id ? ' llena' : ''}`}
@@ -183,9 +223,9 @@ export default function Escritorio({ turno, datos, siguiente, final, alSeguir, a
     </div>
 
     <div className="escritorio-sellos" aria-label="Sellos">
-      <span className="ayuda">{expElegido ? `Sellar: ${expElegido.titulo}` : 'Elige un expediente para sellarlo'}</span>
-      <button type="button" className="sello-boton verde" disabled={!expElegido} onClick={() => sellar('si')}>{expElegido?.sellos.si ?? 'SÍ'}</button>
-      <button type="button" className="sello-boton rojo" disabled={!expElegido} onClick={() => sellar('no')}>{expElegido?.sellos.no ?? 'NO'}</button>
+      <span className="ayuda" role="status">{expElegido ? `Sellar: ${expElegido.titulo}` : 'Selecciona una solicitud, carta o nota para habilitar los sellos'}</span>
+      <button type="button" className="sello-boton verde" disabled={!expElegido} onClick={() => sellar('si')}><IconoSello /><span>{expElegido?.sellos.si ?? 'SÍ'}</span></button>
+      <button type="button" className="sello-boton rojo" disabled={!expElegido} onClick={() => sellar('no')}><IconoSello /><span>{expElegido?.sellos.no ?? 'NO'}</span></button>
     </div>
   </div>
 }
