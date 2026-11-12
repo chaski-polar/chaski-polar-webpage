@@ -19,7 +19,8 @@
 }
 
 @layer components {
-  .app-header { background: linear-gradient(180deg, rgb(7 30 51 / .94), rgb(7 30 51 / 0)); }
+  /* barra azul sólida con borde fino: el contenido que pasa por debajo no se mezcla con el texto del encabezado */
+  .app-header { background: rgb(7 30 51 / .96); border-bottom: 1px solid rgb(36 80 122 / .7); backdrop-filter: blur(8px); }
   .app-nav a[aria-current="page"] { @apply border border-ocean-700 bg-ocean-800 text-ice-100; }
   .data-state { @apply grid min-h-screen place-content-center gap-2 bg-ocean-950 p-8 text-center text-ice-100; }
   .button-primary { @apply inline-flex items-center justify-center gap-2 rounded-pill border border-ocean-700 bg-ocean-800 px-5 py-3 font-bold text-ice-100 no-underline transition-colors transition-transform; }
