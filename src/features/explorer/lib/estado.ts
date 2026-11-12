@@ -3,7 +3,7 @@ import type { IdZona } from "./tipos";
 
 export type IdCorriente = "humboldt" | "circumpolar";
 export type IdRegion = "peru" | "antartida";
-export type ExplorerSection = "austral" | "pacifico_sur" | "humboldt";
+export type ExplorerSection = "austral" | "pacifico_sur" | "humboldt" | "anchoveta";
 export type SidebarTab = "parametro" | "biologia";
 
 /** Bandas: clases con borde nítido. Celdas: cada celda de 0,5° tal cual. Suave: interpolado */

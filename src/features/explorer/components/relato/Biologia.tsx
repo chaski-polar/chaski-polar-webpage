@@ -29,7 +29,14 @@ export default function Biologia({ zona }: { zona?: IdZona }) {
     <p className="nota">Survey biomass is an irregular observation and is not interpolated as a monthly measurement. The detailed chart is also kept in the lower section.</p>
     <h3>Fishing activity</h3>
     <p>{pesca == null ? 'No annual landing data is available for 2024.' : `Peruvian anchoveta landings: ${nf(0).format(pesca)} t in 2024.`} This is fishing activity, not biomass.</p>
-    <h3>Data not yet available</h3>
-    <p className="nota">RAM Legacy assessed biomass, historical spawning biomass, anchoveta spatial distribution and NASC/acoustic density are not loaded in the explorer files.</p>
+    <h3>Indicators in this section</h3>
+    <ul className="indicadores">
+      <li data-ok="true"><b>Hydroacoustic biomass by survey</b><span>IMARPE surveys · shown above</span></li>
+      <li data-ok="true"><b>Landings (fishing activity, not biomass)</b><span>FAO annual series · shown above</span></li>
+      <li data-ok="false"><b>RAM Legacy assessed biomass</b><span>Not available: not loaded in the explorer</span></li>
+      <li data-ok="false"><b>Historical spawning biomass</b><span>Not available: not loaded in the explorer</span></li>
+      <li data-ok="false"><b>Spatial distribution of anchoveta</b><span>Not available: no spatial data loaded</span></li>
+      <li data-ok="false"><b>NASC / acoustic density</b><span>Not available: no acoustic density data loaded</span></li>
+    </ul>
   </>
 }

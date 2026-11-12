@@ -4,6 +4,7 @@ import { colorDiverge, colorRampa, DEGRADADO_DIVERGE, tClorofila } from '../../.
 import { etiquetaMes, mesLargo, nf } from '../../../lib/formato'
 import { useExplorer } from '../ExplorerContext'
 import { useAcciones } from '../hooks/useAcciones'
+import { NO_DISPONIBLE } from '../lib/regiones'
 import { variablePorId, variablesDeSeccion } from '../lib/variables'
 import { useExplorerStore } from '../store'
 
@@ -11,7 +12,7 @@ import { useExplorerStore } from '../store'
 export function TimelinePanel() {
   const { modelo } = useExplorer()
   const acciones = useAcciones()
-  const { section, variable, month, playing, setVariable, setMonth, setPlaying, setSection, setSidebarTab, setMonitorZone } = useExplorerStore()
+  const { section, variable, month, playing, setVariable, setMonth, setPlaying } = useExplorerStore()
   const v = variablePorId(variable)
   const opciones = variablesDeSeccion(section)
   const { i0, ultimo } = modelo
@@ -42,25 +43,16 @@ export function TimelinePanel() {
     if (opciones.length && !opciones.some((x) => x.id === variable)) setVariable(opciones[0]!.id)
   }, [opciones, setVariable, variable])
 
-  const elegirSeccion = (next: 'austral' | 'humboldt') => {
-    setSection(next)
-    setSidebarTab('parametro')
-    setMonitorZone(null)
-    const primera = variablesDeSeccion(next)[0]
-    if (primera) setVariable(primera.id)
-    acciones.irARegion(next === 'austral' ? 'antartida' : 'peru')
-  }
-
   return <section className="timeline-panel" aria-label="Globe timeline">
     <div className="timeline-topline">
-      <label className="timeline-variable"><span>{opciones.length ? 'Variable' : 'South Pacific'}</span>{opciones.length
-        ? <select value={variable} onChange={(e) => setVariable(e.target.value)}>{opciones.map((x) => <option key={x.id} value={x.id}>{x.nombre} · {x.unidad}</option>)}</select>
-        : <span className="timeline-unavailable">Sin parámetros regionales disponibles</span>}</label>
-      <div className="timeline-regions flex flex-row flex-wrap items-center justify-center gap-1 text-control text-ice-300" role="group" aria-label="Apartados de exploración">
-        <span>Zones:</span>
-        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-700/45 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Southern Ocean & Antarctica</button>
-        <button className="control-pill px-3 py-1.5 transition-colors hover:border-ice-300 hover:bg-ocean-700/45 hover:text-ice-100 focus-visible:outline-2 focus-visible:outline-current" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt & Peruvian sea</button>
-      </div>
+      {opciones.length
+        ? <label className="timeline-variable"><span>Variable</span><select value={variable} onChange={(e) => setVariable(e.target.value)}>
+          {opciones.map((x) => <option key={x.id} value={x.id}>{x.nombre} · {x.unidad}</option>)}
+          {(NO_DISPONIBLE[section] ?? []).map((n) => <option key={n} disabled>{n} · not available</option>)}
+        </select></label>
+        : <p className="timeline-unavailable">{section === 'anchoveta'
+          ? 'Anchoveta data is shown in the side panel, separate from the environmental variables.'
+          : `Not available for this area yet: ${(NO_DISPONIBLE[section] ?? []).join(', ').toLowerCase()}.`}</p>}
       <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>
     {opciones.length > 0 && <div className="timeline-controls">

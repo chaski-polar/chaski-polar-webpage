@@ -18,6 +18,7 @@ import type { IdZona } from '../lib/tipos'
 import { variablePorId } from '../lib/variables'
 import { useExplorerStore } from '../store'
 import { GlobeViewToggle } from './GlobeViewToggle'
+import RegionesPanel from './RegionesPanel'
 import Relato from './relato/Relato'
 import { TimelinePanel } from './TimelinePanel'
 
@@ -329,6 +330,7 @@ export default function GlobePanel() {
       </div>
       <div className="globe-toolbar">
         <GlobeViewToggle value={view} onChange={(x) => { interaccion(); setView(x) }} />
+        <RegionesPanel alElegir={interaccion} />
         <p className="vista-nota" aria-live="polite" title={nota}>{nota}</p>
         {mapaActivo && <div className="estilos-mapa" role="group" aria-label="Estilo del mapa del satélite"><span>Mapa:</span>
           {(['bandas', 'celdas', 'suave'] as const).map((e) => <button className="control-pill" key={e} type="button" aria-pressed={mapStyle === e} onClick={() => setMapStyle(e)}>{{ bandas: 'Bands', celdas: 'Cells', suave: 'Smooth' }[e]}</button>)}
