@@ -1,26 +1,37 @@
 /* Portada: todas las reglas van dentro de .portada para no mezclarse con el explorador */
 .portada { --tinta: #1d2b36; --crema: #f7f3e8; --acento: #ff8a5c; --oscuro: #02040a;
   background: var(--oscuro); color: #fff; font-family: var(--font-body); }
-.portada h1, .portada h2 { font-family: var(--font-display); font-weight: 500; line-height: 1.2; letter-spacing: normal; }
+.portada { --hud: "Rajdhani", "Arial Narrow", system-ui, sans-serif; --celeste: #8fe3f2; }
+.portada h1, .portada h2 { font-family: var(--hud); font-weight: 600; line-height: 1.05; text-transform: uppercase; }
 
 .portada #escena { position: fixed; inset: 0; display: block; }
 .portada .portada-largo { height: 900vh; }
 .portada .portada-seccion { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, 86vw); text-align: center;
   opacity: 0; pointer-events: none; text-shadow: 0 2px 12px rgba(0, 0, 0, .6); }
 .portada .portada-seccion.activa { pointer-events: auto; }
-.portada .portada-seccion h1 { font-family: var(--font-display); font-style: normal; font-weight: 500; color: #63cde8; font-size: clamp(36px, 6vw, 76px); margin: 0 0 8px; letter-spacing: 0; line-height: 1.05; }
-.portada .portada-seccion h2 { font-size: clamp(22px, 3.4vw, 34px); margin: 0 0 10px; color: var(--acento); }
+.portada .portada-seccion h1 { font-size: clamp(48px, 9vw, 112px); font-weight: 700; letter-spacing: .02em; margin: 0 0 14px; text-shadow: none; }
+.portada .portada-seccion h1 span { display: block; }
+.portada .portada-seccion h1 .t-contorno { color: transparent; -webkit-text-stroke: 2px var(--celeste); }
+.portada .portada-seccion h1 .t-relleno { color: var(--celeste); }
+.portada .portada-seccion h2 { font-size: clamp(26px, 4vw, 42px); letter-spacing: .03em; margin: 0 0 10px; color: var(--celeste); }
 .portada .portada-seccion p { font-size: 17px; line-height: 1.55; margin: 6px 0; }
-.portada .portada-boton { display: inline-block; margin: 14px 6px 0; padding: 12px 20px; background: #133c61; color: #eaf3f5; border: 1px solid #63cde8; border-radius: 6px; font: inherit; font-weight: bold; font-size: 16px; cursor: pointer; text-decoration: none; text-shadow: none; transition: background-color .15s; }
-.portada .portada-boton:hover { background: #24507a; }
+/* botones tipo panel de instrumentos: esquinas cortadas, letra técnica en mayúsculas */
+.portada .portada-boton { display: inline-block; margin: 16px 6px 0; padding: 11px 24px; background: rgba(7, 30, 51, .6); color: #eaf3f5; border: 1px solid #63cde8; border-radius: 0;
+  font: 700 15px var(--hud); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; text-decoration: none; text-shadow: none; transition: background-color .15s;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px)); }
+.portada .portada-boton:hover { background: rgba(99, 205, 232, .22); }
 .portada .portada-boton:focus-visible { outline: 2px solid #63cde8; outline-offset: 3px; }
-.portada .medidor { position: fixed; top: 15vh; bottom: 15vh; width: 70px; display: flex; flex-direction: column; align-items: center;
-  font-size: 12px; color: rgba(255, 255, 255, .8); pointer-events: none; }
-.portada .medidor.izq { left: 12px; } .portada .medidor.der { right: 12px; }
-.portada .medidor .riel { flex: 1; width: 2px; background: rgba(255, 255, 255, .25); position: relative; margin: 8px 0; }
-.portada .medidor .marca { position: absolute; left: -5px; width: 12px; height: 12px; border-radius: 50%; background: var(--acento); }
-.portada .medidor b { font-size: 15px; color: #fff; text-align: center; }
-.portada .portada-pista { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 13px; opacity: .8; }
+.portada .medidor { position: fixed; top: 15vh; bottom: 15vh; left: 18px; width: 14px; display: flex; justify-content: center; pointer-events: none; }
+.portada .medidor .riel { width: 2px; height: 100%; background: rgba(143, 227, 242, .3); position: relative; }
+.portada .medidor .marca { position: absolute; left: -5px; width: 12px; height: 12px; background: var(--celeste); transform: rotate(45deg); }
+.portada .portada-hud { position: fixed; left: 40px; bottom: 24px; display: grid; gap: 2px; min-width: 190px; padding: 10px 18px 10px 14px; background: rgba(7, 30, 51, .6);
+  border-left: 2px solid var(--celeste); font-family: var(--hud); text-transform: uppercase; pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); }
+.portada .hud-region { font-size: 12px; letter-spacing: .16em; color: var(--celeste); }
+.portada .hud-fila { display: flex; justify-content: space-between; gap: 18px; font-size: 15px; letter-spacing: .06em; }
+.portada .hud-fila i { font-style: normal; opacity: .65; }
+.portada .hud-fila b { font-weight: 600; text-align: right; }
+.portada .portada-pista { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); font: 600 13px var(--hud); letter-spacing: .2em; text-transform: uppercase; opacity: .8; }
 .portada .portada-velo { position: fixed; inset: 0; z-index: 50; background: var(--oscuro); opacity: 0; pointer-events: none; }
 
-@media (max-width: 640px) { .portada .medidor { display: none; } }
+@media (max-width: 640px) { .portada .medidor { display: none; } .portada .portada-hud { left: 12px; bottom: 12px; min-width: 150px; padding: 8px 12px; } .portada .portada-pista { bottom: 74px; } }

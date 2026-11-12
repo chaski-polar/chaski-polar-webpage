@@ -14,7 +14,13 @@ export function crearSecciones(alEntrar: () => void): Interfaz {
     const sec = document.createElement("section");
     sec.className = "portada-seccion";
     const titulo = document.createElement(s.principal ? "h1" : "h2");
-    titulo.textContent = s.titulo;
+    if (s.principal) {
+      const [a, ...resto] = s.titulo.split(" ");
+      const l1 = Object.assign(document.createElement("span"), { className: "t-contorno", textContent: a });
+      const l2 = Object.assign(document.createElement("span"), { className: "t-relleno", textContent: resto.join(" ") });
+      titulo.append(l1, l2);
+      titulo.setAttribute("aria-label", s.titulo);
+    } else titulo.textContent = s.titulo;
     const texto = document.createElement("p");
     texto.textContent = s.texto;
     sec.append(titulo, texto);
