@@ -14,12 +14,11 @@ const GlobePanel = lazy(() => import('../features/explorer/components/GlobePanel
 // las secciones con gráficos se descargan cuando el usuario se acerca a ellas
 const InsightsSection = lazy(() => import('../features/insights/InsightsSection'))
 const EventosNinoSection = lazy(() => import('../features/eventos/EventosNinoSection'))
-const MonitorSection = lazy(() => import('../features/monitor/MonitorSection'))
 const CrucerosSection = lazy(() => import('../features/cruceros/CrucerosSection'))
 
 /** Explorador: los datos se cargan solo al entrar a esta página */
 export default function HomePage() {
-  useEffect(() => { document.title = 'Mar Peruano 360 · Explorer' }, [])
+  useEffect(() => { document.title = 'Chaski Polar · Explorer' }, [])
   return <DataProvider><Explorador /></DataProvider>
 }
 
@@ -34,7 +33,7 @@ function Explorador() {
           </div>}>
             <GlobePanel />
           </Suspense>
-          <main id="contenido">
+          <main id="contenido" className="bg-black">
             <section className="seccion pregunta">
               <blockquote>How are changes in Antarctic phytoplankton associated with marine life in Peru?</blockquote>
               <div className="cuerpo">
@@ -51,7 +50,6 @@ function Explorador() {
             </section>
             <CargarAlVer id="hallazgos" alto={2600}><InsightsSection /></CargarAlVer>
             <CargarAlVer id="eventos-nino" alto={760}><EventosNinoSection /></CargarAlVer>
-            <CargarAlVer id="monitor" alto={980}><MonitorSection /></CargarAlVer>
             <CargarAlVer id="cruceros" alto={820}><CrucerosSection /></CargarAlVer>
             <section className="seccion">
               <div className="llamada">
@@ -64,7 +62,7 @@ function Explorador() {
             </section>
             <FuentesSection />
           </main>
-          <footer className="pie">Mar Peruano 360 · Open satellite data from NASA, ESA and NOAA. The relationships shown here are associations, not proof of causation.</footer>
+          <footer className="pie">Chaski Polar · Open satellite data from NASA, ESA and NOAA. The relationships shown here are associations, not proof of causation.</footer>
         </ExplorerProvider>
       </DataState>
     </AppShell>

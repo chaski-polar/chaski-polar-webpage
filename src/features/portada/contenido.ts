@@ -20,7 +20,7 @@ export interface Seccion {
 export const SECCIONES: readonly Seccion[] = [
   {
     de: 0, a: 0.05, principal: true,
-    titulo: "MAR PERUANO 360",
+    titulo: "Chaski Polar",
     texto: "From satellite to the seafloor of the Peruvian sea",
     botones: [{ texto: "Enter the explorer →", accion: "entrar" }],
   },

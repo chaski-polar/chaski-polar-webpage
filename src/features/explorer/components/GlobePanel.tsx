@@ -240,14 +240,14 @@ export default function GlobePanel() {
 
   /* ---------- texto bajo el interruptor de vista ---------- */
   let nota: string
-  if (view === 'illustrated') nota = 'Cada punto es una zona, coloreada con el dato del mes.'
-  else if (mapaEstado === 'error') nota = 'El mapa del satélite no cargó en este navegador.'
-  else if (mapaEstado !== 'listo') nota = 'Cargando el mapa del satélite…'
-  else if (!v.mapa) nota = `${v.corto.charAt(0).toUpperCase() + v.corto.slice(1)}: solo hay datos por zona, sin mapa.`
+  if (view === 'illustrated') nota = "Each point is a zone, colored by the selected month's data."
+  else if (mapaEstado === 'error') nota = 'The satellite map could not be loaded in this browser.'
+  else if (mapaEstado !== 'listo') nota = 'Loading the satellite map…'
+  else if (!v.mapa) nota = `${v.corto.charAt(0).toUpperCase() + v.corto.slice(1)}: data is available by zone only, without a map.`
   else nota = `${view === 'satellite' ? 'Earth imagery with the satellite map' : 'Monthly satellite map'}. ${punteroFino ? 'Hover' : 'Tap the sea'} to read it.`
 
   const textoVer = esAngosto() && panel.tipo !== 'general'
-    ? panel.tipo === 'zona' ? `Ver los datos de ${modelo.zona(panel.z).nombre}` : panel.tipo === 'recorrido' ? `Leer el paso ${panel.paso + 1}` : 'Ver la explicación'
+    ? panel.tipo === 'zona' ? `View ${modelo.zona(panel.z).nombre} data` : panel.tipo === 'recorrido' ? `Read step ${panel.paso + 1}` : 'View the explanation'
     : null
 
   // Escape vuelve a la vista general; en el recorrido, las flechas avanzan o retroceden
@@ -331,7 +331,7 @@ export default function GlobePanel() {
         <GlobeViewToggle value={view} onChange={(x) => { interaccion(); setView(x) }} />
         <p className="vista-nota" aria-live="polite" title={nota}>{nota}</p>
         {mapaActivo && <div className="estilos-mapa" role="group" aria-label="Estilo del mapa del satélite"><span>Mapa:</span>
-          {(['bandas', 'celdas', 'suave'] as const).map((e) => <button className="control-pill" key={e} type="button" aria-pressed={mapStyle === e} onClick={() => setMapStyle(e)}>{e.charAt(0).toUpperCase() + e.slice(1)}</button>)}
+          {(['bandas', 'celdas', 'suave'] as const).map((e) => <button className="control-pill" key={e} type="button" aria-pressed={mapStyle === e} onClick={() => setMapStyle(e)}>{{ bandas: 'Bands', celdas: 'Cells', suave: 'Smooth' }[e]}</button>)}
         </div>}
         <p className={`pista-globo${pistaOculta ? ' oculta' : ''}`}>Drag to rotate. Tap a zone, current or the sea.</p>
       </div>

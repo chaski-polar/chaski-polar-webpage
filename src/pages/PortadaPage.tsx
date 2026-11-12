@@ -9,7 +9,7 @@ export default function PortadaPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.title = 'Mar Peruano 360'
+    document.title = 'Chaski Polar'
     // la pantalla sigue en negro mientras carga el explorador; el globo la aclara cuando está listo
     // el explorador abre en la vista Satelital: la misma foto de la Tierra que se ve en la portada
     return montarPortada(() => {
