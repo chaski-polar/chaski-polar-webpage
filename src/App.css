@@ -25,8 +25,8 @@
 #globo canvas { display: block; }
 .globe-toolbar { position: absolute; z-index: 7; top: 16px; left: 16px; display: grid; gap: 8px; max-width: 380px; }
 .globe-toolbar p { margin: 0; color: var(--niebla); font-size: .85rem; }
-.view-toggle { display: inline-flex; width: fit-content; padding: 4px; border: 1px solid var(--linea); border-radius: 14px; background: rgba(7, 30, 51, .92); backdrop-filter: blur(10px); }
-.view-toggle button { display: grid; gap: 1px; padding: 6px 11px; border: 0; border-radius: 10px; background: transparent; color: var(--niebla); font: inherit; font-size: .92rem; text-align: left; cursor: pointer; }
+.view-toggle { display: inline-flex; width: fit-content; padding: 4px; border: 1px solid var(--linea); border-radius: 8px; background: rgba(7, 30, 51, .92); backdrop-filter: blur(10px); }
+.view-toggle button { display: grid; gap: 1px; padding: 6px 11px; border: 0; border-radius: 5px; background: transparent; color: var(--niebla); font: inherit; font-size: .92rem; text-align: left; cursor: pointer; }
 .view-toggle button:hover, .view-toggle button.is-active { background: var(--hielo); color: var(--abismo); }
 .view-toggle small { font-size: .67rem; opacity: .75; }
 .timeline-panel { position: absolute; z-index: 6; left: 5%; right: 5%; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; gap: 8px; padding: 12px 16px 10px; border: 1px solid var(--linea); border-radius: 16px; background: var(--panel-fuerte); backdrop-filter: blur(12px); }
@@ -41,7 +41,7 @@
 .timeline-track { position: relative; flex: 1; min-width: 0; padding-top: 18px; padding-bottom: 18px; }
 .timeline-chart { height: 42px; opacity: .9; }
 .timeline-events { position: absolute; inset: 0 0 auto; height: 20px; pointer-events: none; }
-.timeline-events span { position: absolute; transform: translateX(-50%); padding: 2px 7px; border: 1px solid var(--nino); border-radius: 999px; color: var(--nino); font-size: .7rem; line-height: 1.1; }
+.timeline-events span { position: absolute; transform: translateX(-50%); padding: 2px 7px; border: 1px solid var(--nino); border-radius: 4px; color: var(--nino); font-size: .7rem; line-height: 1.1; }
 .timeline-range { position: absolute; inset: 62px 0 auto; width: 100%; accent-color: var(--current); cursor: pointer; }
 .timeline-legend { color: var(--niebla); font-size: .78rem; }
 .timeline-gradient { height: 7px; flex: 1; border-radius: 999px; background: linear-gradient(90deg, #453781, #238a8d, #65c96e, #f5e642); }
@@ -53,7 +53,7 @@
 .leyenda { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; font-size: .82rem; color: var(--niebla); }
 .leyenda .rampa { height: 7px; }
 .zonas-inferior { grid-column: 1 / -1; display: flex; gap: 6px; overflow-x: auto; padding: 2px 0; scrollbar-width: thin; }
-.zona-punto { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 5px 8px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--niebla); font: inherit; font-size: .78rem; cursor: pointer; white-space: nowrap; }
+.zona-punto { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 5px 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--niebla); font: inherit; font-size: .78rem; cursor: pointer; white-space: nowrap; }
 .zona-punto:hover, .zona-punto[aria-pressed=true] { color: var(--hielo); background: rgba(63, 194, 140, .12); border-color: var(--fito); }
 .zona-punto .punto, .fila-zona .punto { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--fito); border: 1px solid rgba(234, 243, 245, .7); }
 .lista-zonas { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }

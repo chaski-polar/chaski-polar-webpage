@@ -78,7 +78,7 @@ a:hover { color: var(--hielo); }
 
 .control-pill {
   border: 1px solid var(--control-borde);
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--control-fondo);
   color: var(--hielo);
   cursor: pointer;
@@ -113,7 +113,7 @@ a:hover { color: var(--hielo); }
 .marca svg { width: 28px; height: 28px; }
 .nav { display: flex; gap: 6px; }
 .nav a {
-  color: var(--niebla); text-decoration: none; padding: 7px 14px; border-radius: 999px;
+  color: var(--niebla); text-decoration: none; padding: 7px 14px; border-radius: 6px;
   border: 1px solid transparent; transition: color .2s, border-color .2s, background-color .2s;
 }
 .nav a:hover { color: var(--hielo); border-color: var(--linea); }
@@ -123,7 +123,7 @@ a:hover { color: var(--hielo); }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   font: inherit; font-weight: 700; cursor: pointer;
-  padding: 12px 22px; border-radius: 999px; border: 1px solid var(--linea);
+  padding: 12px 22px; border-radius: 6px; border: 1px solid var(--linea);
   background: var(--profundo); color: var(--hielo); text-decoration: none;
   transition: background-color .2s, border-color .2s, transform .15s;
   touch-action: manipulation;
