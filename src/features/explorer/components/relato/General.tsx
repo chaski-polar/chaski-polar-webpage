@@ -11,7 +11,7 @@ import { ChipsEventos } from './comun'
 export default function General() {
   const { modelo, mapa, mapaEstado } = useExplorer()
   const acciones = useAcciones()
-  const { variable, month: i, view } = useExplorerStore()
+  const { section, variable, month: i, view } = useExplorerStore()
   const v = variablePorId(variable)
   const filas = modelo.ids.map((z) => ({ z, t: modelo.anomalia(z, v, i), a: modelo.anomaliaTxt(z, v, i) }))
     .sort((x, y) => (y.t == null ? -1 : x.t == null ? 1 : Math.abs(y.t) - Math.abs(x.t)))
@@ -19,6 +19,12 @@ export default function General() {
   const mes = mesLargo(modelo.mes(i))
   const sinDatoAntartida = filas.some((f) => !esPeru(f.z) && f.t == null) && v.id === 'clorofila_mg_m3'
   const conMapa = mapaEstado === 'listo' && mapa.activo({ variable: v, vista: view })
+
+  if (section === 'pacifico_sur') return <>
+    <h2>Pacífico Sur</h2>
+    <p>Este apartado identifica las regiones del Pacífico Sur que el proyecto quiere estudiar, pero el dataset actual no contiene sus campos oceanográficos regionales.</p>
+    <p className="nota">No se muestran valores de Perú ni de la Antártida como sustituto. Las cajas previstas son el Pacífico Sur intermedio, subtropical y la transición hacia Humboldt.</p>
+  </>
 
   let notaMapa: React.ReactNode = null
   if (conMapa) {
@@ -32,6 +38,7 @@ export default function General() {
   return <>
     <h2>{v.nombre}</h2>
     <p>{v.que}{notaMapa}</p>
+    <p className="variable-meta"><strong>Unidad:</strong> {v.unidad} · <strong>Fuente:</strong> {v.fuente} · <strong>Periodo:</strong> {v.periodo} · <strong>Cobertura:</strong> {v.cobertura}</p>
     <button className="recorrido-cta" type="button" onClick={() => acciones.paso(0)}>
       <b>Del hielo a la anchoveta</b>
       <span>Recorrido guiado en 6 pasos, con datos reales. Unos 3 minutos.</span>

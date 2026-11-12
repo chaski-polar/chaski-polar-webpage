@@ -4,15 +4,16 @@ import { colorDiverge, colorRampa, DEGRADADO_DIVERGE, tClorofila } from '../../.
 import { etiquetaMes, mesLargo, nf } from '../../../lib/formato'
 import { useExplorer } from '../ExplorerContext'
 import { useAcciones } from '../hooks/useAcciones'
-import { VARIABLES, variablePorId } from '../lib/variables'
+import { variablePorId, variablesDeSeccion } from '../lib/variables'
 import { useExplorerStore } from '../store'
 
 /** Línea de tiempo: dato, mes, reproducción, saltos a cada El Niño y barra con el histórico del dato elegido */
 export function TimelinePanel() {
   const { modelo } = useExplorer()
   const acciones = useAcciones()
-  const { variable, month, playing, setVariable, setMonth, setPlaying } = useExplorerStore()
+  const { section, variable, month, playing, setVariable, setMonth, setPlaying, setSection, setSidebarTab, setMonitorZone } = useExplorerStore()
   const v = variablePorId(variable)
+  const opciones = variablesDeSeccion(section)
   const { i0, ultimo } = modelo
   const eventos = useMemo(() => modelo.eventosNino(), [modelo])
 
@@ -37,17 +38,33 @@ export function TimelinePanel() {
   const desplazamiento = (k: number) =>
     cerca(eventos[k]?.i, eventos[k + 1]?.i) ? 'translateX(calc(-100% + 4px))' : cerca(eventos[k - 1]?.i, eventos[k]?.i) ? 'translateX(-4px)' : undefined
 
+  useEffect(() => {
+    if (opciones.length && !opciones.some((x) => x.id === variable)) setVariable(opciones[0]!.id)
+  }, [opciones, setVariable, variable])
+
+  const elegirSeccion = (next: 'austral' | 'humboldt') => {
+    setSection(next)
+    setSidebarTab('parametro')
+    setMonitorZone(null)
+    const primera = variablesDeSeccion(next)[0]
+    if (primera) setVariable(primera.id)
+    acciones.irARegion(next === 'austral' ? 'antartida' : 'peru')
+  }
+
   return <section className="timeline-panel" aria-label="Línea de tiempo del globo">
     <div className="timeline-topline">
-      <label className="timeline-variable"><span>Dato</span><select value={variable} onChange={(e) => setVariable(e.target.value)}>{VARIABLES.map((x) => <option key={x.id} value={x.id}>{x.nombre}</option>)}</select></label>
-      <div className="timeline-regions" role="group" aria-label="Enfocar región">
+      <label className="timeline-variable"><span>{opciones.length ? 'Dato' : 'Pacífico Sur'}</span>{opciones.length
+        ? <select value={variable} onChange={(e) => setVariable(e.target.value)}>{opciones.map((x) => <option key={x.id} value={x.id}>{x.nombre} · {x.unidad}</option>)}</select>
+        : <span className="timeline-unavailable">Sin parámetros regionales disponibles</span>}</label>
+      <div className="timeline-regions" role="group" aria-label="Apartados de exploración">
         <span>Zonas:</span>
-        <button className="control-pill" type="button" onClick={() => acciones.irARegion('peru')}>Perú</button>
-        <button className="control-pill" type="button" onClick={() => acciones.irARegion('antartida')}>Península Antártica</button>
+        <button className="control-pill" type="button" aria-pressed={section === 'austral'} onClick={() => elegirSeccion('austral')}>Océano Austral y Antártida</button>
+        <button className="control-pill" type="button" disabled aria-disabled="true" title="Sin campos regionales disponibles en el dataset actual">Pacífico Sur</button>
+        <button className="control-pill" type="button" aria-pressed={section === 'humboldt'} onClick={() => elegirSeccion('humboldt')}>Humboldt y mar peruano</button>
       </div>
       <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>
-    <div className="timeline-controls">
+    {opciones.length > 0 && <div className="timeline-controls">
       <button className="play-button" type="button" aria-label={playing ? 'Pausar animación' : 'Reproducir meses'} onClick={() => setPlaying(!playing)}>{playing ? 'Ⅱ' : '▶'}</button>
       <div className="timeline-track">
         <div className="timeline-events" role="group" aria-label="Saltar a un evento de El Niño">{eventos.map((e, k) =>
@@ -61,7 +78,7 @@ export function TimelinePanel() {
         </BarChart></ResponsiveContainer></div>
         <input className="timeline-range" type="range" min={i0} max={ultimo} step={1} value={month} aria-label="Mes" onChange={(e) => { setPlaying(false); setMonth(Number(e.target.value)) }} />
       </div>
-    </div>
+    </div>}
     <Leyenda />
   </section>
 }

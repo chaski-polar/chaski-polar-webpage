@@ -8,10 +8,13 @@ import Punto from './Punto'
 import Nino2026 from './Nino2026'
 import Recorrido from './Recorrido'
 import Zona from './Zona'
+import Biologia from './Biologia'
 
 /** Panel lateral: muestra una vista según lo que se tocó en el globo */
 export default function Relato() {
   const panel = useExplorerStore((s) => s.panel)
+  const sidebarTab = useExplorerStore((s) => s.sidebarTab)
+  const setSidebarTab = useExplorerStore((s) => s.setSidebarTab)
   const raiz = useRef<HTMLDivElement>(null)
 
   // cada vista nueva empieza arriba
@@ -29,5 +32,14 @@ export default function Relato() {
     case 'nino2026': vista = <Nino2026 />; break
     default: vista = <General />
   }
-  return <div className="relato-contenido" key={clave} ref={raiz}>{vista}</div>
+  const zona = panel.tipo === 'zona' ? panel.z : undefined
+  return <>
+    <div className="relato-tabs" role="tablist" aria-label="Contenido de la barra lateral">
+      <button className="relato-tab" type="button" role="tab" aria-selected={sidebarTab === 'parametro'} aria-controls="relato-panel-parametro" onClick={() => setSidebarTab('parametro')}>Parámetro</button>
+      <button className="relato-tab" type="button" role="tab" aria-selected={sidebarTab === 'biologia'} aria-controls="relato-panel-biologia" onClick={() => setSidebarTab('biologia')}>Respuesta biológica</button>
+    </div>
+    {sidebarTab === 'biologia'
+      ? <div className="relato-contenido" id="relato-panel-biologia" role="tabpanel" key={`biologia-${clave}`} ref={raiz}><Biologia zona={zona} /></div>
+      : <div className="relato-contenido" id="relato-panel-parametro" role="tabpanel" key={clave} ref={raiz}>{vista}</div>}
+  </>
 }

@@ -15,7 +15,7 @@ const anioDecimal = (f: string): number => { const [a = 0, m = 1, d = 15] = f.sp
 const mt = (t: number) => nf(2).format(t / 1e6)
 
 /** Biomasa de anchoveta medida en cada crucero acústico de IMARPE */
-export default function CrucerosSection() {
+export default function CrucerosSection({ id = 'cruceros', compacto = false, encabezado = true }: { id?: string; compacto?: boolean; encabezado?: boolean } = {}) {
   const { cruises, monitor } = useData()
   // franjas: meses seguidos con Niño 1+2 de +1 °C o más
   const ninos = useMemo(() => {
@@ -38,11 +38,11 @@ export default function CrucerosSection() {
   const desde = Math.min(...norteCentro.map((c) => c.anio))
   const ordenados = [...cruises].sort((a, b) => a.inicio.localeCompare(b.inicio) || a.stock.localeCompare(b.stock))
 
-  return <section className="seccion" id="cruceros" aria-labelledby="t-cruceros">
-    <div className="encabezado-seccion">
-      <h2 id="t-cruceros">La anchoveta en los cruceros de IMARPE</h2>
+  return <section className={`seccion${compacto ? ' cruceros-lateral' : ''}`} id={id} aria-labelledby={encabezado ? `t-${id}` : undefined} aria-label={encabezado ? undefined : 'Gráfico de biomasa de anchoveta por crucero de IMARPE'}>
+    {encabezado && <div className="encabezado-seccion">
+      <h2 id={`t-${id}`}>La anchoveta en los cruceros de IMARPE</h2>
       <p>Cada punto es la biomasa total de anchoveta que estimó un crucero acústico de IMARPE: toda la anchoveta que ve el barco, incluidos los juveniles. Las franjas naranjas marcan los meses en que el mar frente al norte del Perú (Niño 1+2) estuvo al menos 1 °C más cálido que lo normal. {minimo && <>En la región norte-centro, la cifra más baja desde {desde} es la del crucero {minimo.crucero}: <strong>{mt(minimo.biomasa_t)} millones de t</strong>{minimo.provisional ? ' (provisional)' : ''}.</>}</p>
-    </div>
+    </div>}
     <div className="cruceros-grafico" role="img" aria-label="Biomasa de anchoveta por crucero de IMARPE, 1998 a 2026">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>

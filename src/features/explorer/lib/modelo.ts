@@ -120,6 +120,8 @@ export class Modelo {
     for (const z of this.ids) {
       const s = D.series[z], u = s.viento_u_m_s, v = s.viento_v_m_s;
       if (u && v) s.viento = u.map((x, i) => { const y = v[i]; return x == null || y == null ? null : Math.hypot(x, y); });
+      const cu = s.corriente_u_m_s, cv = s.corriente_v_m_s;
+      if (cu && cv) s.corriente_m_s = cu.map((x, i) => { const y = cv[i]; return x == null || y == null ? null : Math.hypot(x, y); });
     }
 
     // Niño 1+2: una sola versión del índice (NOAA PSL, la del monitor, que es la del análisis y los escenarios)
@@ -176,7 +178,7 @@ export class Modelo {
 
   /** Valor del dato en una zona y un mes, o null si esa zona no lo tiene */
   valorZona(z: IdZona, v: Variable, i: number): number | null {
-    if (v.modo === "indice") return esPeru(z) ? null : this.D.indices.hielo[i] ?? null;
+    if (v.modo === "indice") return esPeru(z) ? null : (v.indice === "hielo" ? this.D.indices.hielo[i] : this.D.indices.sam[i]) ?? null;
     return this.valorSerie(z, v.id, i);
   }
   /** Serie completa de una zona (multiplicada por el factor de la variable) */
@@ -205,7 +207,7 @@ export class Modelo {
   anomalia(z: IdZona, v: Variable, i: number): number | null {
     if (v.modo === "indice") {
       if (esPeru(z)) return null;
-      const a = this.D.indices.hielo_anom[i];
+      const a = v.indice === "hielo" ? this.D.indices.hielo_anom[i] : this.D.indices.sam[i];
       return a == null ? null : a / v.rango;
     }
     const x = this.valorSerie(z, v.id, i);
@@ -218,9 +220,11 @@ export class Modelo {
 
   anomaliaTxt(z: IdZona, v: Variable, i: number): TextoAnomalia | null {
     if (v.modo === "indice") {
-      const a = esPeru(z) ? null : this.D.indices.hielo_anom[i];
+      const a = esPeru(z) ? null : v.indice === "hielo" ? this.D.indices.hielo_anom[i] : this.D.indices.sam[i];
       if (a == null) return null;
-      return { corto: `${signo(a)}${nf(1).format(Math.abs(a))}`, frase: `${nf(2).format(Math.abs(a))} millones de km² ${a >= 0 ? "por encima" : "por debajo"} de lo normal`, valor: a };
+      return v.indice === "hielo"
+        ? { corto: `${signo(a)}${nf(1).format(Math.abs(a))}`, frase: `${nf(2).format(Math.abs(a))} millones de km² ${a >= 0 ? "por encima" : "por debajo"} de lo normal`, valor: a }
+        : { corto: `${signo(a)}${nf(v.dec).format(Math.abs(a))}`, frase: `${nf(v.dec).format(Math.abs(a))} puntos del índice SAM/AAO`, valor: a };
     }
     const x = this.valorSerie(z, v.id, i);
     if (x == null) return null;

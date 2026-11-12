@@ -89,16 +89,24 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .siguiente-paso { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--frio); background: rgba(12, 44, 74, .6); border-radius: 0 var(--r-chico) var(--r-chico) 0; color: var(--niebla); max-width: 72ch; }
 .siguiente-paso strong { color: var(--hielo); }
 .vista-nota { font-size: .74rem; }
-.timeline-regions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; color: var(--niebla); font-size: var(--texto-control); }
+.timeline-topline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
+.timeline-regions { display: flex; grid-column: 1 / -1; flex-direction: row; flex-wrap: nowrap; justify-content: flex-start; gap: 4px; align-items: center; color: var(--niebla); font-size: var(--texto-control); }
 .timeline-regions button {
   font: inherit; padding: 3px 9px; white-space: nowrap;
 }
 .timeline-regions button:hover, .timeline-regions button:focus-visible { background: var(--control-fondo-hover); }
+.timeline-regions button:disabled { cursor: not-allowed; opacity: .5; }
 .timeline-regions button:focus-visible { outline: 3px solid var(--frio); outline-offset: 1px; }
+.relato-tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--linea); }
+.relato-tab { flex: 1; padding: 9px 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--niebla); font: inherit; cursor: pointer; }
+.relato-tab:hover, .relato-tab:focus-visible { color: var(--hielo); background: rgba(36, 80, 122, .25); }
+.relato-tab[aria-selected="true"] { color: var(--hielo); border-bottom-color: var(--fito); }
+.relato-tab:focus-visible { outline: 2px solid var(--frio); outline-offset: -2px; }
 @media (max-width: 900px) {
-  .timeline-topline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
-  .timeline-regions { grid-column: 1 / -1; justify-content: flex-start; }
+  .timeline-regions { flex-wrap: wrap; }
 }
+.variable-meta { color: var(--tenue); font-size: var(--texto-pequeno); }
+.timeline-unavailable { color: var(--tenue); font-size: var(--texto-secundario); }
 .etq { position: absolute; width: 0; height: 0; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; transition: opacity .25s; font: 700 13px/1.2 var(--sans); }
 .etq i { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #f4f8fa; box-shadow: 0 0 0 2px rgba(4,18,31,.75), 0 2px 6px rgba(0,0,0,.5); background: #f2e14c; }
 .etq.base i { border-radius: 3px; transform: rotate(45deg) scale(.85); background: #f08a4b; }
@@ -175,6 +183,8 @@ table.eventos-nino { width: 100%; border-collapse: separate; border-spacing: 4px
 
 /* ---------- cruceros de IMARPE ---------- */
 .cruceros-grafico { height: clamp(280px, 34vw, 380px); }
+.cruceros-lateral { max-width: none; margin: 0 0 18px; padding: 0; }
+.cruceros-lateral .cruceros-grafico { width: 100%; height: clamp(280px, 42vw, 380px); }
 .cruceros-tabla { margin-top: 14px; }
 .cruceros-tabla summary { cursor: pointer; color: var(--frio); }
 .cruceros-tabla small { color: var(--tenue); }

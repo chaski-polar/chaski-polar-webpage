@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Comparacion, MapStyle, Panel, Pov } from './lib/estado'
+import type { Comparacion, ExplorerSection, MapStyle, Panel, Pov, SidebarTab } from './lib/estado'
 import type { IdZona } from './lib/tipos'
 
 /** id de una de las variables de lib/variables.ts */
@@ -12,6 +12,8 @@ type CameraRequest = { pov: Pov; ms: number; id: number }
 
 type ExplorerState = {
   variable: ExplorerVariable
+  section: ExplorerSection
+  sidebarTab: SidebarTab
   view: GlobeView
   month: number
   playing: boolean
@@ -22,6 +24,8 @@ type ExplorerState = {
   /** zona elegida en el monitor de condiciones (null = promedio de la costa) */
   monitorZone: IdZona | null
   setVariable: (variable: ExplorerVariable) => void
+  setSection: (section: ExplorerSection) => void
+  setSidebarTab: (sidebarTab: SidebarTab) => void
   setView: (view: GlobeView) => void
   setMonth: (month: number) => void
   setPlaying: (playing: boolean) => void
@@ -33,7 +37,9 @@ type ExplorerState = {
 }
 
 export const useExplorerStore = create<ExplorerState>((set) => ({
-  variable: 'clorofila_mg_m3',
+  variable: 'hielo',
+  section: 'austral',
+  sidebarTab: 'parametro',
   view: 'illustrated',
   month: 364, // mayo de 2023 (las series empiezan en enero de 1993)
   playing: false,
@@ -43,6 +49,8 @@ export const useExplorerStore = create<ExplorerState>((set) => ({
   camera: null,
   monitorZone: null,
   setVariable: (variable) => set({ variable }),
+  setSection: (section) => set({ section }),
+  setSidebarTab: (sidebarTab) => set({ sidebarTab }),
   setView: (view) => set({ view }),
   setMonth: (month) => set({ month }),
   setPlaying: (playing) => set({ playing }),

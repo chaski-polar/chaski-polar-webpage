@@ -17,7 +17,7 @@ const NUTRIENTES: readonly Nutriente[] = ['nitrato', 'fosfato', 'silicato']
 export default function Zona({ z, nota }: { z: IdZona; nota?: NotaHistoria }) {
   const { modelo, mapaEstado } = useExplorer()
   const acciones = useAcciones()
-  const { variable, month: i } = useExplorerStore()
+  const { section, variable, month: i } = useExplorerStore()
   const v = variablePorId(variable)
   const p = modelo.zona(z)
 
@@ -40,6 +40,13 @@ export default function Zona({ z, nota }: { z: IdZona; nota?: NotaHistoria }) {
   const maximos = Object.fromEntries(NUTRIENTES.map((n) => [n, Math.max(...modelo.ids.map((k) => media(modelo.D.nutrientes[k]?.[n] ?? []) ?? 0))])) as Record<Nutriente, number>
   const con = modelo.conexionesDe(z, v)
 
+  if (section === 'pacifico_sur') return <>
+    <BotonVolver />
+    <h2>{p.nombre}</h2>
+    <div className="region">{p.region}</div>
+    <p>Esta zona pertenece al dominio de datos cargado, no a las cajas regionales del Pacífico Sur. No se muestran sus valores como si fueran del Pacífico Sur.</p>
+  </>
+
   return <>
     <BotonVolver />
     {nota && <div className="nota-historia"><b>{nota.titulo}</b><p>{nota.texto}</p></div>}
@@ -52,7 +59,7 @@ export default function Zona({ z, nota }: { z: IdZona; nota?: NotaHistoria }) {
     <div className="grafico" aria-label={`Serie mensual de ${v.nombre} en ${p.nombre}`}>
       <SerieMensual modelo={modelo} serie={serie} color={v.escala === 'rampa' ? '#3fc28c' : '#63cde8'} mesActual={i} alElegirMes={acciones.fijarMes} decimales={v.dec} />
     </div>
-    <p className="nota">{v.fuente} Toca el gráfico para saltar a ese mes.</p>
+    <p className="nota">{v.fuente} Periodo: {v.periodo}. Cobertura: {v.cobertura}. Toca el gráfico para saltar a ese mes.</p>
     {modelo.claveMonitor(z) && <div className="acciones-relato" style={{ marginTop: 10 }}><button className="btn" type="button" onClick={() => { useExplorerStore.getState().setMonitorZone(z); document.getElementById('monitor')?.scrollIntoView({ behavior: 'smooth' }) }}>Ver {p.nombre} en el monitor</button></div>}
     <h3>Cambiar el dato</h3>
     <ChipsVariables zona={z} />

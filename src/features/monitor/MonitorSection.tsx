@@ -5,6 +5,7 @@ import { claveMes } from '../../lib/formato'
 import { useExplorer } from '../explorer/ExplorerContext'
 import type { Modelo } from '../explorer/lib/modelo'
 import type { CampoMonitor, CampoSerieMonitor, IdZona } from '../explorer/lib/tipos'
+import { esPeru } from '../explorer/lib/modelo'
 import { useExplorerStore } from '../explorer/store'
 
 type VariableMonitor = {
@@ -22,7 +23,10 @@ type VariableMonitor = {
 const REGIONALES: VariableMonitor[] = [
   { campo: 'chlorophyll_a_mg_m3', nombre: 'Clorofila-a / fitoplancton', unidad: 'mg/m³', color: '#3fc28c', dec: 2 },
   { campo: 'sst_c', nombre: 'Temperatura superficial', unidad: '°C', color: '#f08a4b', dec: 1 },
+  { campo: 'sss_psu', nombre: 'Salinidad', unidad: 'PSU', color: '#9fe0f2', dec: 2 },
   { campo: 'nitrate_mmol_m3', nombre: 'Nitrato', unidad: 'mmol/m³', color: '#63cde8', dec: 2 },
+  { campo: 'phosphate_mmol_m3', nombre: 'Fosfato', unidad: 'mmol/m³', color: '#a9dc6e', dec: 2 },
+  { campo: 'oxygen_ml_l', nombre: 'Oxígeno disuelto', unidad: 'ml/L', color: '#dde9f0', dec: 2 },
   { campo: 'phytoplankton_carbon_mg_c_m3', nombre: 'Carbono fitoplanctónico', unidad: 'mg C/m³', color: '#a9dc6e', dec: 2 },
   { campo: 'biomass_total_t', nombre: 'Biomasa observada en cruceros', unidad: 't', color: '#eaf3f5', dec: 0 },
   { campo: 'nino12_anom_c', nombre: 'Anomalía Niño 1+2', unidad: '°C', color: '#ff9a62', dec: 1, grupo: 'Índices climáticos' },
@@ -51,13 +55,19 @@ const fmt = (x: unknown, dec: number): string => {
 /** Monitor de condiciones: serie mensual de la costa peruana o de cada zona y, al final, los escenarios de El Niño */
 export default function MonitorSection() {
   const { modelo } = useExplorer()
-  const { monitorZone: zona, setMonitorZone } = useExplorerStore()
+  const { section, monitorZone: zona, setMonitorZone } = useExplorerStore()
   // se guarda el nombre del dato: así, al cambiar de lugar, se conserva (por ejemplo, la clorofila)
   const [elegida, setElegida] = useState('Clorofila-a / fitoplancton')
   const [anomalia, setAnomalia] = useState(false)
   const registros = modelo.registrosMonitor
-  const zonasConDatos = useMemo(() => modelo.ids.filter((z) => modelo.claveMonitor(z)), [modelo])
-  const variables = zona ? variablesDeZona(modelo, zona) : REGIONALES
+  const zonasConDatos = useMemo(() => modelo.ids.filter((z) => modelo.claveMonitor(z) && (section === 'austral' ? !esPeru(z) : section === 'humboldt' ? esPeru(z) : false)), [modelo, section])
+  const regionales = section === 'austral'
+    ? REGIONALES.filter((x) => ['chlorophyll_a_mg_m3', 'sst_c', 'sam_index', 'sea_ice_antarctic_mkm2'].includes(x.campo))
+    : section === 'humboldt'
+      ? REGIONALES.filter((x) => ['chlorophyll_a_mg_m3', 'sst_c', 'sss_psu', 'nitrate_mmol_m3', 'phosphate_mmol_m3', 'oxygen_ml_l', 'biomass_total_t'].includes(x.campo))
+      : REGIONALES.filter((x) => x.campo === 'biomass_total_t')
+  const variables = zona ? variablesDeZona(modelo, zona) : regionales
+  if (section === 'pacifico_sur') return <section className="seccion"><div className="monitor monitor-vacio"><h2>Monitor del Pacífico Sur</h2><p>Las cajas del Pacífico Sur intermedio, subtropical y de transición hacia Humboldt todavía no están descargadas en este dataset. No se muestran series de otra región como reemplazo.</p></div></section>
   const v = variables.find((x) => x.nombre === elegida) ?? variables[0]!
   const esBiomasa = v.campo === 'biomass_total_t'
   const nombreLugar = zona ? modelo.zona(zona).nombre : 'la costa peruana'

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useExplorer } from '../../ExplorerContext'
 import { useAcciones } from '../../hooks/useAcciones'
 import type { IdZona } from '../../lib/tipos'
-import { VARIABLES } from '../../lib/variables'
+import { VARIABLES, variablesDeSeccion } from '../../lib/variables'
 import { useExplorerStore } from '../../store'
 
 /** Texto con **negritas** */
@@ -18,9 +18,10 @@ export function BotonVolver({ texto = 'Volver a todas las zonas' }: { texto?: st
 /** Botones para cambiar el dato (solo los que tienen datos en la zona) */
 export function ChipsVariables({ zona }: { zona: IdZona | null }) {
   const { modelo } = useExplorer()
-  const { variable, setVariable } = useExplorerStore()
+  const { section, variable, setVariable } = useExplorerStore()
+  if (section === 'pacifico_sur') return null
   return <div className="chips" role="group" aria-label="Cambiar el dato">
-    {VARIABLES.filter((v) => modelo.tieneDato(zona, v)).map((v) =>
+    {variablesDeSeccion(section).filter((v) => modelo.tieneDato(zona, v)).map((v) =>
       <button key={v.id} className="chip" type="button" aria-pressed={v.id === variable} onClick={() => setVariable(v.id)}>{v.nombre.replace(/ \(.*\)/, '')}</button>)}
   </div>
 }
