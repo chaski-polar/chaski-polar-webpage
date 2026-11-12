@@ -99,3 +99,5 @@
   .juego .juego-fecha { top: 12px; left: auto; right: 12px; transform: none; min-width: 0; font-size: 13px; }
   .juego .juego-menu-boton { left: auto; right: 12px; top: 210px; }
 }
+.juego .juego-menu-escenas { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; font-size: 14px; }
+.juego .juego-menu-escenas button.juego-caja { padding: 4px 12px; font-size: 14px; }
