@@ -34,3 +34,21 @@
 @media (prefers-reduced-motion: reduce) {
   .juego .juego-aviso { transition: none; }
 }
+
+/* diálogo con retrato, abajo al centro */
+.juego .juego-dialogo { position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%); z-index: 8; width: min(680px, calc(100% - 32px));
+  display: flex; gap: 14px; align-items: flex-start; padding: 12px 16px; text-align: left; font: inherit; cursor: pointer; }
+.juego .juego-dialogo:focus-visible { outline: 3px solid var(--sol); outline-offset: 3px; }
+.juego .juego-dialogo-retrato { flex: none; width: 96px; height: 96px; background: #dcefe9; border: 3px solid var(--tinta); border-radius: 12px; }
+.juego .juego-dialogo-texto { display: flex; flex-direction: column; gap: 4px; font-size: 17px; line-height: 1.45; min-height: 96px; }
+.juego .juego-dialogo-texto b { font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: #b3481f; }
+.juego .juego-dialogo-seguir { position: absolute; right: 14px; bottom: 8px; font-size: 14px; animation: juego-latido 1s ease-in-out infinite; }
+@keyframes juego-latido { 50% { transform: translateY(3px); } }
+@media (max-width: 640px) {
+  .juego .juego-dialogo { bottom: 12px; gap: 10px; padding: 10px 12px; }
+  .juego .juego-dialogo-retrato { width: 64px; height: 64px; }
+  .juego .juego-dialogo-texto { font-size: 15px; min-height: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .juego .juego-dialogo-seguir { animation: none; }
+}
