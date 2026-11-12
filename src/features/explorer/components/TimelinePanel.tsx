@@ -40,6 +40,10 @@ export function TimelinePanel() {
   return <section className="timeline-panel" aria-label="Línea de tiempo del globo">
     <div className="timeline-topline">
       <label className="timeline-variable"><span>Dato</span><select value={variable} onChange={(e) => setVariable(e.target.value)}>{VARIABLES.map((x) => <option key={x.id} value={x.id}>{x.nombre}</option>)}</select></label>
+      <div className="timeline-regions" role="group" aria-label="Enfocar región">
+        <button type="button" onClick={() => acciones.irARegion('peru')}>Perú</button>
+        <button type="button" onClick={() => acciones.irARegion('antartida')}>Península Antártica</button>
+      </div>
       <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>
     <div className="timeline-controls">

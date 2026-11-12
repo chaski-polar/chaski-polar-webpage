@@ -1,12 +1,13 @@
 import { useMemo } from 'react'
 import { useExplorer } from '../ExplorerContext'
-import type { Comparacion, IdCorriente, NotaHistoria, Pov } from '../lib/estado'
+import type { Comparacion, IdCorriente, IdRegion, NotaHistoria, Pov } from '../lib/estado'
 import { HISTORIAS, type IdHistoria } from '../lib/historias'
 import { BASE_MACHU_PICCHU, distanciaKm, esPeru, zonasCercanas } from '../lib/modelo'
 import { RECORRIDO } from '../lib/recorrido'
 import type { IdZona } from '../lib/tipos'
 import { variablePorId } from '../lib/variables'
 import { useExplorerStore } from '../store'
+import { REGIONES } from '../lib/mapa'
 
 /** Encuadre que muestra a la vez la costa del Perú y la Península Antártica */
 export const VISTA_INICIAL: Pov = { lat: -37, lng: -73, altitude: 1.7 }
@@ -31,6 +32,12 @@ export function useAcciones() {
     const general = (volar = true) => {
       st().setPanel({ tipo: 'general' })
       if (volar) st().flyTo(VISTA_INICIAL, 1500)
+    }
+
+    const irARegion = (region: IdRegion) => {
+      st().setPlaying(false)
+      st().setPanel({ tipo: 'general' })
+      st().flyTo(REGIONES[region].pov, 1400)
     }
 
     const base = () => {
@@ -94,6 +101,6 @@ export function useAcciones() {
       st().flyTo({ lat: -9, lng: -84, altitude: 1.1 }, 1600)
     }
 
-    return { fijarMes, irAZona, general, base, corriente, clicMar, historia, comparar, paso, nino2026 }
+    return { fijarMes, irAZona, irARegion, general, base, corriente, clicMar, historia, comparar, paso, nino2026 }
   }, [modelo, mapa])
 }

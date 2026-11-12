@@ -89,6 +89,17 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .siguiente-paso { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--frio); background: rgba(12, 44, 74, .6); border-radius: 0 var(--r-chico) var(--r-chico) 0; color: var(--niebla); max-width: 72ch; }
 .siguiente-paso strong { color: var(--hielo); }
 .vista-nota { font-size: .74rem; }
+.timeline-regions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.timeline-regions button {
+  font: inherit; font-size: .76rem; padding: 3px 9px; border: 1px solid var(--linea); border-radius: 999px;
+  background: rgba(7, 30, 51, .88); color: var(--hielo); cursor: pointer; white-space: nowrap;
+}
+.timeline-regions button:hover, .timeline-regions button:focus-visible { background: rgba(36, 80, 122, .6); }
+.timeline-regions button:focus-visible { outline: 3px solid var(--frio); outline-offset: 1px; }
+@media (max-width: 900px) {
+  .timeline-topline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
+  .timeline-regions { grid-column: 1 / -1; justify-content: flex-start; }
+}
 .etq { position: absolute; width: 0; height: 0; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; transition: opacity .25s; font: 700 13px/1.2 var(--sans); }
 .etq i { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #f4f8fa; box-shadow: 0 0 0 2px rgba(4,18,31,.75), 0 2px 6px rgba(0,0,0,.5); background: #f2e14c; }
 .etq.base i { border-radius: 3px; transform: rotate(45deg) scale(.85); background: #f08a4b; }

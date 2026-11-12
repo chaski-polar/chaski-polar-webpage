@@ -5,3 +5,7 @@ dist
 .vscode/*
 !.vscode/extensions.json
 .vite
+
+.env
+.idea/
+graphify-out/

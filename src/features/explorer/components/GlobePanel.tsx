@@ -12,7 +12,7 @@ import { useEnlace } from '../hooks/useEnlace'
 import { esAngosto, menosMovimiento, punteroFino } from '../lib/entorno'
 import { zonaActiva, type IdCorriente, type Pov } from '../lib/estado'
 import { RECUADRO } from '../lib/mapa'
-import { BASE_MACHU_PICCHU, esPeru } from '../lib/modelo'
+import { BASE_MACHU_PICCHU } from '../lib/modelo'
 import { RECORRIDO } from '../lib/recorrido'
 import type { IdZona } from '../lib/tipos'
 import { variablePorId } from '../lib/variables'
@@ -36,7 +36,7 @@ const LADO: Partial<Record<IdZona, Lado>> = {
   peru_norte_paita_sechura: 'izq', peru_centro_norte_chimbote: 'der', peru_centro_callao: 'izq', peru_sur_pisco: 'der',
   peru_sur_ilo: 'der', antartida_rey_jorge: 'der-arriba', antartida_peninsula: 'izq',
 }
-// con el globo lejos (altitud > 1,15) las 5 zonas del Perú se juntan en una sola pastilla
+// con el globo lejos (altitud > 1,15) las zonas de cada región se juntan en una sola pastilla
 const AGRUPAR = 1.15
 const ANILLO_BASE: Anillo = { ...BASE_MACHU_PICCHU, r: 2.6 }
 
@@ -71,8 +71,9 @@ export default function GlobePanel() {
 
   /* ---------- etiquetas de zonas, base y corrientes ---------- */
   const marcas = useMemo<Marca[]>(() => [
-    ...modelo.ids.map((z): Marca => ({ z, lat: modelo.zona(z).lat, lng: modelo.zona(z).lon, texto: modelo.zona(z).nombre, lado: LADO[z] ?? 'der', ...(esPeru(z) ? { soloCerca: AGRUPAR } : {}) })),
+    ...modelo.ids.map((z): Marca => ({ z, lat: modelo.zona(z).lat, lng: modelo.zona(z).lon, texto: modelo.zona(z).nombre, lado: LADO[z] ?? 'der', soloCerca: AGRUPAR })),
     { z: 'grupo-peru', lat: -11, lng: -78.2, texto: '5 zonas del Perú', lado: 'der', forma: 'grupo', soloLejos: AGRUPAR },
+    { z: 'grupo-antartida', lat: -62, lng: -62, texto: 'Península Antártica', lado: 'der-arriba', forma: 'grupo', soloLejos: AGRUPAR },
     { z: 'base', ...BASE_MACHU_PICCHU, texto: 'Base Machu Picchu', lado: 'der-abajo', forma: 'base' },
     { z: 'rio-humboldt', lat: -27, lng: -78.4, texto: 'Corriente de Humboldt ↑', forma: 'rio' },
     { z: 'rio-circumpolar', lat: -55.2, lng: -96, texto: 'Corriente Circumpolar →', forma: 'rio' },
@@ -90,7 +91,8 @@ export default function GlobePanel() {
   useEffect(() => {
     manejadores.current.clic = (m) => {
       interaccion()
-      if (m.z === 'grupo-peru') useExplorerStore.getState().flyTo({ lat: -12, lng: -80, altitude: 1.0 }, 1400)
+      if (m.z === 'grupo-peru') acciones.irARegion('peru')
+      else if (m.z === 'grupo-antartida') acciones.irARegion('antartida')
       else if (m.z === 'base') acciones.base()
       else if (modelo.esZona(m.z)) acciones.irAZona(m.z)
     }
@@ -129,6 +131,7 @@ export default function GlobePanel() {
   useEffect(() => {
     for (const [m, e] of elementos.current) {
       if (m.z === 'grupo-peru') e.setAttribute('aria-label', '5 zonas del Perú: acercar el globo')
+      if (m.z === 'grupo-antartida') e.setAttribute('aria-label', 'Península Antártica: acercar el globo')
       if (!modelo.esZona(m.z)) { e.classList.toggle('activa', m.z === 'base' && panel.tipo === 'base'); continue }
       const punto = e.querySelector('i')
       if (punto) punto.style.background = modelo.colorZona(m.z, v, month, 1)
