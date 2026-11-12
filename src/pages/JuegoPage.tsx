@@ -22,6 +22,7 @@ import MenuCardumen from '../features/juego/interfaz/MenuCardumen'
 import { precargarSprites } from '../features/juego/personajes/sprites'
 import { alCambiarSilencio, alternarSilencio, despertarAudio, detenerAmbiente, estaEnSilencio, iniciarAmbiente, sonar } from '../features/juego/motor/sonido'
 import '../features/juego/juego.css'
+import '../features/juego/interfaz/bitacora.css'
 
 /** Años de la campaña: un año normal para aprender, El Niño 1997-98, la recuperación, dos Niños costeros
     y el final con El Niño 2026 en curso (hasta el último mes con datos) */
@@ -49,6 +50,7 @@ const AYUDA: Record<EscenaPrologo | 'cardumen', string> = {
 
 /** Juego: mundo 3D con personajes dibujados en 2D */
 export default function JuegoPage() {
+  const dialogoAbierto = useDialogo((s) => s.linea !== null)
   const contenedor = useRef<HTMLDivElement>(null)
   const lienzo = useRef<HTMLCanvasElement>(null)
   const motorRef = useRef<Motor | null>(null)
@@ -206,7 +208,7 @@ export default function JuegoPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clave, mar, entrada])
 
-  // C junta o dispersa el cardumen
+  // F junta o dispersa; C queda libre para bajar.
   useEffect(() => {
     if (pantalla.tipo !== 'cardumen') return
     const tecla = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'f' && !e.repeat) setCompacto((x) => !x) }
@@ -220,13 +222,20 @@ export default function JuegoPage() {
     : null
   const ayuda = pantalla.tipo === 'cardumen' ? AYUDA.cardumen : pantalla.tipo === 'prologo' ? AYUDA[pantalla.escena] : ''
 
-  if (new URLSearchParams(location.search).has('sprites')) return <div className="juego"><GaleriaSprites /></div>
-  return <div className="juego" ref={contenedor}>
+  if (new URLSearchParams(location.search).has('sprites')) return <div className="juego bitacora"><GaleriaSprites /></div>
+  return <div className={`juego bitacora${dialogoAbierto ? ' bitacora-con-dialogo' : ''}`} ref={contenedor}
+    data-modal={Boolean(informe || verFinal)} data-etapa={pantalla.tipo === 'prologo' ? pantalla.escena : pantalla.tipo}>
     <canvas className="juego-lienzo" ref={lienzo} aria-label="Escena del juego" />
-    <Link className="juego-volver juego-caja" to="/">← Portada</Link>
-    <button type="button" className="juego-sonido juego-caja" onClick={alternarSilencio} aria-pressed={!silencio}
-      >{silencio ? 'Sonido: no' : 'Sonido: sí'}</button>
-    {pantalla.tipo !== 'menu' && <button type="button" className="juego-menu-boton juego-caja" onClick={() => { setInforme(null); setVerFinal(false); setPantalla({ tipo: 'menu' }) }}>Menú</button>}
+    <nav className="bitacora-navegacion" aria-label="Navegación del juego">
+      <Link className="bitacora-nav-enlace" to="/">← Portada</Link>
+      {pantalla.tipo !== 'menu' && <button type="button" className="bitacora-nav-enlace" onClick={() => { setInforme(null); setVerFinal(false); setPantalla({ tipo: 'menu' }) }}>Menú</button>}
+      {ayuda && <details className="bitacora-controles"><summary title="Recordar controles">Controles</summary>
+        <p>{ayuda}<br />Ratón: arrastra para girar la cámara y usa la rueda para acercar. En pantalla táctil, usa la palanca y los botones.</p>
+      </details>}
+      <span className="bitacora-marca">Cardumen</span>
+      <button type="button" className="bitacora-nav-enlace bitacora-nav-sonido" onClick={alternarSilencio} aria-pressed={!silencio}
+        >{silencio ? 'Sonido: no' : 'Sonido: sí'}</button>
+    </nav>
 
     {pantalla.tipo === 'menu' && mar && <MenuCardumen historia={() => prologo('lumi', true)} cardumen={empezarCampana}
       escena={(id) => prologo(id, false)} />}
@@ -238,7 +247,6 @@ export default function JuegoPage() {
 
     <div className={`juego-aviso${aviso ? ' visible' : ''}`} aria-live="assertive">{aviso}</div>
     {pantalla.tipo === 'cardumen' && cartel && <div className="juego-cartel" role="status"><b>{cartel.mes}</b>{cartel.detalle && <span>{cartel.detalle}</span>}</div>}
-    {ayuda && <p className="juego-ayuda"><span className="solo-teclado">{ayuda} · </span>Ratón: arrastra para girar la cámara, rueda para acercar</p>}
     <Dialogo />
 
     {pantalla.tipo === 'cardumen' && informe && mar && <Escritorio key={clave} datos={informe.datos}

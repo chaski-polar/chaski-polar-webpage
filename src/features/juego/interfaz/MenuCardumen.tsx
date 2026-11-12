@@ -40,7 +40,7 @@ export default function MenuCardumen({ historia, cardumen, escena }: {
 }) {
   return <div className="juego-menu menu-carta">
     <div className="menu-carta-interior">
-      <header className="menu-carta-marca"><span>MAR PERUANO 360</span><span>Una historia del océano</span></header>
+      <header className="menu-carta-marca"><span>MAR PERUANO 360</span><span>Bitácora de expedición</span></header>
       <div className="menu-carta-principal">
         <section className="menu-carta-relato" aria-labelledby="titulo-cardumen">
           <p className="menu-carta-numero">01 / DEL HIELO A LA COSTA</p>
