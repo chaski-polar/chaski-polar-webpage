@@ -120,3 +120,31 @@
 .juego button.juego-caja:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: 4px 4px 0 var(--tinta); }
 .juego .juego-sonido { position: absolute; bottom: 36px; left: 12px; z-index: 8; width: 44px; height: 44px; padding: 0 !important; font-size: 20px; line-height: 1; }
 @media (pointer: coarse) { .juego .juego-sonido { bottom: auto; top: 60px; } }
+
+/* pantalla de título */
+.juego .juego-menu-caja { width: min(520px, 100%); }
+.juego .juego-protagonistas { list-style: none; margin: -60px 0 0; padding: 0; display: flex; justify-content: center; gap: 4px; }
+.juego .juego-protagonistas li { display: flex; flex-direction: column; align-items: center; width: 96px; animation: juego-flotar 2.4s ease-in-out infinite; }
+.juego .juego-protagonistas img { width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(3px 3px 0 rgba(29, 43, 54, .35)); }
+.juego .juego-protagonistas b { font-size: 14px; }
+.juego .juego-protagonistas small { font-size: 11px; opacity: .7; }
+@keyframes juego-flotar { 50% { transform: translateY(-8px) rotate(-2deg); } }
+@media (max-width: 420px) { .juego .juego-protagonistas img { width: 64px; height: 64px; } .juego .juego-protagonistas li { width: 72px; } }
+@media (prefers-reduced-motion: reduce) { .juego .juego-protagonistas li { animation: none; } }
+
+/* celular: paneles más compactos y sin encimarse (fecha arriba a la derecha, el mar sobre la palanca) */
+.juego .juego-volver { z-index: 8; }
+@media (max-width: 640px) {
+  .juego .juego-volver { padding: 4px 10px; font-size: 13px; }
+  .juego .juego-menu-boton { top: 12px; left: 100px; right: auto; padding: 4px 10px !important; font-size: 13px; }
+  .juego .juego-fecha { top: 12px; right: 12px; left: auto; transform: none; min-width: 0; padding: 4px 10px; font-size: 13px; }
+  .juego .juego-estado-cardumen { top: 64px; right: 12px; width: 160px; padding: 6px 10px; gap: 2px; font-size: 12px; }
+  .juego .juego-mar { top: auto; bottom: 176px; left: 12px; right: 12px; width: auto; padding: 6px 10px; font-size: 11px; }
+  .juego .juego-contador { top: 64px; font-size: 15px; }
+}
+.juego button.juego-dialogo { text-align: left; font-weight: normal; }
+.juego button.juego-dialogo:hover { transform: translateX(-50%); box-shadow: 4px 4px 0 var(--tinta); }
+@media (max-width: 640px) {
+  .juego .juego-menu-boton { left: 128px; }
+  .juego .juego-ayuda { display: none; }
+}

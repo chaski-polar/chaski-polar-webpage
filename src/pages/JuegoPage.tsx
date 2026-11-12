@@ -16,6 +16,7 @@ import { anioDelMar, ESTRATEGIAS, mesesConDatos, PECES_INICIALES, type Estrategi
 import { crearEntrada, type Entrada } from '../features/juego/motor/entrada'
 import { crearMotor, type Motor } from '../features/juego/motor/escena'
 import { crearMar, type Mar } from '../features/juego/motor/mar'
+import { protagonistas } from '../features/juego/personajes/galeria'
 import { alCambiarSilencio, alternarSilencio, despertarAudio, detenerAmbiente, estaEnSilencio, iniciarAmbiente, sonar } from '../features/juego/motor/sonido'
 import '../features/juego/juego.css'
 
@@ -215,6 +216,11 @@ export default function JuegoPage() {
 
     {pantalla.tipo === 'menu' && mar && <div className="juego-menu">
       <div className="juego-menu-caja juego-caja">
+        <ul className="juego-protagonistas" aria-label="Protagonistas">
+          {protagonistas().map((p, i) => <li key={p.nombre} style={{ animationDelay: `${i * 0.35}s` }}>
+            <img src={p.src} alt="" width={84} height={84} /><b>{p.nombre}</b><small>{p.que}</small>
+          </li>)}
+        </ul>
         <h1>Cardumen</h1>
         <p>De la Antártida al mar peruano, en un océano que cambia con datos satelitales reales.</p>
         <button type="button" className="juego-caja principal" onClick={() => prologo('lumi', true)}>Jugar la historia completa</button>
