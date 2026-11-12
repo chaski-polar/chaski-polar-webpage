@@ -7,6 +7,7 @@ import type { Entrada } from "../motor/entrada";
 import { azar, sinContorno, toon, type Escena, type Motor } from "../motor/escena";
 import { crearPersonaje, type Personaje } from "../motor/personaje";
 import { dibujarLumi, dibujarNutriente } from "../personajes/antartida";
+import { sonar } from "../motor/sonido";
 
 export const DIVISIONES_META = 3;
 const X = 14, Y_MIN = -13, Y_MAX = -0.8, Z = 5;
@@ -122,6 +123,7 @@ export function escenaLumi(entrada: Entrada, eventos: EventosLumi, pausa: () => 
           if (ch.p.posicion.y > -2.5) renacer(ch); // cerca de la superficie ya no quedan nutrientes
           if (!detenido && ch.p.posicion.distanceTo(lumi.posicion) < 1.5) {
             estado.nutrientes = Math.min(1, estado.nutrientes + NUTRIENTES_POR_CHISPA);
+            sonar("comer");
             renacer(ch);
           }
         }
@@ -137,6 +139,7 @@ export function escenaLumi(entrada: Entrada, eventos: EventosLumi, pausa: () => 
             const h = crearPersonaje(escena, dibujo, { ancho: 1.6, alto: 1.6 });
             h.posicion.copy(lumi.posicion);
             hijas.push(h);
+            sonar("division");
             eventos.division(estado.divisiones);
             if (estado.divisiones >= DIVISIONES_META) { fin = true; eventos.terminado(); }
           }

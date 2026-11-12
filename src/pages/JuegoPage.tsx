@@ -16,6 +16,7 @@ import { anioDelMar, ESTRATEGIAS, mesesConDatos, PECES_INICIALES, type Estrategi
 import { crearEntrada, type Entrada } from '../features/juego/motor/entrada'
 import { crearMotor, type Motor } from '../features/juego/motor/escena'
 import { crearMar, type Mar } from '../features/juego/motor/mar'
+import { alCambiarSilencio, alternarSilencio, despertarAudio, detenerAmbiente, estaEnSilencio, iniciarAmbiente, sonar } from '../features/juego/motor/sonido'
 import '../features/juego/juego.css'
 
 /** Años de la campaña: un año normal para aprender, El Niño 1997-98, la recuperación, dos Niños costeros
@@ -64,6 +65,16 @@ export default function JuegoPage() {
   const presentado = useRef(false)
 
   useEffect(() => { document.title = 'Mar Peruano 360 · Juego' }, [])
+
+  // sonido: el navegador lo habilita recién con el primer gesto del jugador
+  const [silencio, setSilencio] = useState(estaEnSilencio)
+  useEffect(() => {
+    const despertar = () => { despertarAudio(); iniciarAmbiente() }
+    addEventListener('pointerdown', despertar)
+    addEventListener('keydown', despertar)
+    const quitar = alCambiarSilencio(setSilencio)
+    return () => { removeEventListener('pointerdown', despertar); removeEventListener('keydown', despertar); quitar(); detenerAmbiente() }
+  }, [])
   useEffect(() => { compactoRef.current = compacto }, [compacto])
 
   // los datos del mar son los mismos que usa el explorador
@@ -168,6 +179,7 @@ export default function JuegoPage() {
           if (lineas.length) void useDialogo.getState().decir(lineas)
         },
         fin: (datos, historia) => {
+          sonar('exito')
           setInforme({ datos, historia })
           const r: ResultadoAnio = { anio, inicial: datos.inicial, sobrevivientes: datos.sobrevivientes, estrategia: datos.estrategia }
           setResultados((rs) => [...rs.filter((x) => x.anio !== anio), r])
@@ -197,6 +209,8 @@ export default function JuegoPage() {
   return <div className="juego" ref={contenedor}>
     <canvas className="juego-lienzo" ref={lienzo} aria-label="Escena del juego" />
     <Link className="juego-volver juego-caja" to="/">← Portada</Link>
+    <button type="button" className="juego-sonido juego-caja" onClick={alternarSilencio} aria-pressed={!silencio}
+      aria-label={silencio ? 'Activar el sonido' : 'Silenciar'}>{silencio ? '🔇' : '🔊'}</button>
     {pantalla.tipo !== 'menu' && <button type="button" className="juego-menu-boton juego-caja" onClick={() => { setInforme(null); setVerFinal(false); setPantalla({ tipo: 'menu' }) }}>Menú</button>}
 
     {pantalla.tipo === 'menu' && mar && <div className="juego-menu">

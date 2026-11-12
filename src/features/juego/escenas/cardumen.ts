@@ -12,6 +12,7 @@ import { NOMBRE_ZONA, ZONAS_PERU, type Mar, type ZonaMar } from "../motor/mar";
 import { crearPersonaje, type Personaje } from "../motor/personaje";
 import { dibujarFito } from "../personajes/antartida";
 import { dibujarAnchi, dibujarAnchoveta, dibujarGuanay, dibujarLetrero, dibujarLobo } from "../personajes/costa";
+import { sonar } from "../motor/sonido";
 
 const LARGO_ZONA = 30;
 const X_MIN = -16, X_MAX = 9;
@@ -256,6 +257,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
             }
             if (pa.p.posicion.distanceTo(anchi.posicion) < (c.compacto ? 1.8 : 2.6)) {
               L.comer(c);
+              sonar("comer");
               pa.activo = false; pa.p.sprite.visible = false;
               pa.espera = L.tiempoReaparicion(condicionesMes.get(pa.zona)!.alimento);
             }
@@ -269,7 +271,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
               ave.objetivo.copy(anchi.posicion);
               sombraAve.position.set(anchi.posicion.x, -0.05, anchi.posicion.z);
               sombraAve.visible = true;
-              eventos.aviso("¡Guanay! Baja");
+              eventos.aviso("¡Guanay! Baja"); sonar("aviso");
             } else ave.t = 1.5;
           } else if (ave.estado === "aviso") {
             sombraAve.position.x += (anchi.posicion.x - sombraAve.position.x) * dt;
@@ -284,7 +286,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
             guanay.posicion.lerp(ave.objetivo, Math.min(1, dt * 5));
             if (ave.t <= 0) {
               const dx = Math.hypot(anchi.posicion.x - ave.objetivo.x, anchi.posicion.z - ave.objetivo.z);
-              if (dx < 3 && anchi.posicion.y > -4.2) { L.golpe(c, "ave"); eventos.aviso("¡Un guanay atrapó peces!"); eventos.hito("ave", m); }
+              if (dx < 3 && anchi.posicion.y > -4.2) { L.golpe(c, "ave"); sonar("golpe"); eventos.aviso("¡Un guanay atrapó peces!"); eventos.hito("ave", m); }
               ave.estado = "espera"; ave.t = azar(6, 10);
               guanay.sprite.visible = false; sombraAve.visible = false;
             }
@@ -304,7 +306,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
           lobo.posicion.x = THREE.MathUtils.clamp(lobo.posicion.x, X_MIN, X_MAX);
           lobo.posicion.y = THREE.MathUtils.clamp(lobo.posicion.y, -11, -1.5);
           if (loboEstado.pausa <= 0 && distLobo < 2) {
-            L.golpe(c, "lobo"); eventos.aviso("¡Lobo marino!");
+            L.golpe(c, "lobo"); sonar("golpe"); eventos.aviso("¡Lobo marino!");
             loboEstado.pausa = 5; loboEstado.rumbo.subVectors(lobo.posicion, anchi.posicion).normalize();
           }
 
@@ -316,7 +318,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
               flota.centro.set(anchi.posicion.x, 0, anchi.posicion.z);
               barco.position.set(flota.centro.x + 8, 0, flota.centro.z);
               barco.visible = red.visible = true;
-              eventos.aviso("¡Bolichera! Sal del círculo o baja");
+              eventos.aviso("¡Bolichera! Sal del círculo o baja"); sonar("aviso");
               eventos.hito("red", m);
             } else flota.t = 4;
           } else if (flota.estado === "calando") {
@@ -325,7 +327,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
             red.position.set(flota.centro.x, -flota.prof / 2, flota.centro.z);
             if (flota.t <= 0) {
               const dentro = Math.hypot(anchi.posicion.x - flota.centro.x, anchi.posicion.z - flota.centro.z) < 7 && anchi.posicion.y > -8;
-              if (dentro) { L.golpe(c, "red"); eventos.aviso("La red atrapó parte del cardumen"); }
+              if (dentro) { L.golpe(c, "red"); sonar("golpe"); eventos.aviso("La red atrapó parte del cardumen"); }
               flota.estado = "espera"; flota.t = azar(14, 20);
               barco.visible = red.visible = false;
             }

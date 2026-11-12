@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { nombreDe, retratoDe } from '../personajes/guias'
 import { useDialogo } from './estado'
+import { sonar } from '../motor/sonido'
 
 const LETRAS_POR_SEGUNDO = 45
 const sinMovimiento = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -14,6 +15,7 @@ export default function Dialogo() {
 
   useEffect(() => {
     if (!linea) return
+    sonar('dialogo')
     if (sinMovimiento()) { setLetras(linea.texto.length); return }
     setLetras(0)
     const inicio = performance.now()

@@ -6,6 +6,7 @@ import type { Entrada } from "../motor/entrada";
 import { azar, sinContorno, toon, type Escena, type Motor } from "../motor/escena";
 import { crearPersonaje, type Personaje } from "../motor/personaje";
 import { dibujarFito, dibujarKiri, dibujarPinguino } from "../personajes/antartida";
+import { sonar } from "../motor/sonido";
 
 const ALTURA_NADO = 4;
 const LIMITE = 28;
@@ -123,7 +124,7 @@ export function escenaKiri(entrada: Entrada, avisos: AvisosKiri, pausa: () => bo
           f.posicion.y += Math.sin(t * 1.5 + fase) * 0.004;
           f.sprite.material.rotation = Math.sin(t + fase) * 0.2;
           f.animar(t, quieto, seguidor.derecha, 1);
-          if (!detenido && f.posicion.distanceTo(kiri.posicion) < 1.6) { comidos++; avisos.comio(comidos); colocar(f); }
+          if (!detenido && f.posicion.distanceTo(kiri.posicion) < 1.6) { sonar("comer"); comidos++; avisos.comio(comidos); colocar(f); }
         }
         // pingüinos: dan vueltas y de vez en cuando se lanzan sobre Kiri
         for (const u of pinguinos) {
@@ -136,7 +137,7 @@ export function escenaKiri(entrada: Entrada, avisos: AvisosKiri, pausa: () => bo
             hacia.subVectors(kiri.posicion, u.p.posicion).normalize();
             u.p.posicion.addScaledVector(hacia, dt * 9);
             if (aturdido <= 0 && u.p.posicion.distanceTo(kiri.posicion) < 1.5) {
-              aturdido = 1.5; comidos = Math.max(0, comidos - 2);
+              aturdido = 1.5; comidos = Math.max(0, comidos - 2); sonar("golpe");
               avisos.comio(comidos); avisos.golpe(); u.estado = "ronda";
             }
             if (u.dur > 3) u.estado = "ronda";

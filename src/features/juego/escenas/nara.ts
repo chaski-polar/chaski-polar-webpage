@@ -11,6 +11,7 @@ import { sinContorno, type Escena, type Motor } from "../motor/escena";
 import { crearPersonaje } from "../motor/personaje";
 import { dibujarFlecha, dibujarNara } from "../personajes/antartida";
 import { dibujarLetrero } from "../personajes/costa";
+import { sonar } from "../motor/sonido";
 
 const V: Ventana = { lonO: -105, latN: 0, lonE: -55, latS: -70 };
 const K = 2; // unidades por grado
@@ -144,10 +145,10 @@ export function escenaNara(entrada: Entrada, eventos: EventosNara, pausa: () => 
         if (!detenido) {
           descanso = Math.max(0, descanso - dt);
           grasa = Math.max(0, grasa - (GASTO + GASTO_ESFUERZO * esfuerzo) * dt);
-          if (grasa <= 0 && descanso <= 0) { descanso = 4; grasa = 0.35; eventos.agotada(); }
+          if (grasa <= 0 && descanso <= 0) { descanso = 4; grasa = 0.35; sonar("golpe"); eventos.agotada(); }
           const punto = PUNTOS[puntoSig];
           if (punto && lat > punto.lat) { puntoSig++; eventos.punto(punto.id); }
-          if (Math.hypot(lat - META.lat, lon - META.lon) < RADIO_META) { fin = true; eventos.llego(); }
+          if (Math.hypot(lat - META.lat, lon - META.lon) < RADIO_META) { fin = true; sonar("exito"); eventos.llego(); }
         }
 
         tEstado -= dt;
