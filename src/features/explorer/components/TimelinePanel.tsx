@@ -41,8 +41,9 @@ export function TimelinePanel() {
     <div className="timeline-topline">
       <label className="timeline-variable"><span>Dato</span><select value={variable} onChange={(e) => setVariable(e.target.value)}>{VARIABLES.map((x) => <option key={x.id} value={x.id}>{x.nombre}</option>)}</select></label>
       <div className="timeline-regions" role="group" aria-label="Enfocar región">
-        <button type="button" onClick={() => acciones.irARegion('peru')}>Perú</button>
-        <button type="button" onClick={() => acciones.irARegion('antartida')}>Península Antártica</button>
+        <span>Zonas:</span>
+        <button className="control-pill" type="button" onClick={() => acciones.irARegion('peru')}>Perú</button>
+        <button className="control-pill" type="button" onClick={() => acciones.irARegion('antartida')}>Península Antártica</button>
       </div>
       <strong className="timeline-date">{etiquetaMes(modelo.mes(month))}</strong>
     </div>

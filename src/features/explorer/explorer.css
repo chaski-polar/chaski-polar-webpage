@@ -76,11 +76,11 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .selectores label { display: grid; gap: 4px; font-size: .85rem; color: var(--niebla); }
 .selectores select { width: 100%; min-width: 0; }
 .selectores .ancho { grid-column: 1 / -1; }
-.estilos-mapa { display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: .78rem; color: var(--niebla); }
+.estilos-mapa { display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: var(--texto-pequeno); color: var(--niebla); }
 .estilos-mapa[hidden] { display: none; }
 .estilos-mapa span { margin-right: 2px; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
-.estilos-mapa button { font: inherit; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--linea); background: rgba(7, 30, 51, .88); color: var(--hielo); cursor: pointer; }
-.estilos-mapa button:hover { background: rgba(36, 80, 122, .6); }
+.estilos-mapa button { font: inherit; font-weight: 700; padding: 3px 10px; }
+.estilos-mapa button:hover { background: var(--control-fondo-hover); }
 .estilos-mapa button[aria-pressed="true"] { background: var(--hielo); color: var(--abismo); }
 .estilos-mapa button:focus-visible { outline: 3px solid var(--frio); outline-offset: 1px; }
 .vista-nota { margin: 5px 2px 0; font-size: .8rem; line-height: 1.35; color: var(--niebla); text-shadow: 0 1px 3px rgba(0,0,0,.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -89,12 +89,11 @@ table.fuentes { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .siguiente-paso { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--frio); background: rgba(12, 44, 74, .6); border-radius: 0 var(--r-chico) var(--r-chico) 0; color: var(--niebla); max-width: 72ch; }
 .siguiente-paso strong { color: var(--hielo); }
 .vista-nota { font-size: .74rem; }
-.timeline-regions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.timeline-regions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; color: var(--niebla); font-size: var(--texto-control); }
 .timeline-regions button {
-  font: inherit; font-size: .76rem; padding: 3px 9px; border: 1px solid var(--linea); border-radius: 999px;
-  background: rgba(7, 30, 51, .88); color: var(--hielo); cursor: pointer; white-space: nowrap;
+  font: inherit; padding: 3px 9px; white-space: nowrap;
 }
-.timeline-regions button:hover, .timeline-regions button:focus-visible { background: rgba(36, 80, 122, .6); }
+.timeline-regions button:hover, .timeline-regions button:focus-visible { background: var(--control-fondo-hover); }
 .timeline-regions button:focus-visible { outline: 3px solid var(--frio); outline-offset: 1px; }
 @media (max-width: 900px) {
   .timeline-topline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }

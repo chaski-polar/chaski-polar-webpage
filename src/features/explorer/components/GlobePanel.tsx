@@ -331,7 +331,7 @@ export default function GlobePanel() {
         <GlobeViewToggle value={view} onChange={(x) => { interaccion(); setView(x) }} />
         <p className="vista-nota" aria-live="polite" title={nota}>{nota}</p>
         {mapaActivo && <div className="estilos-mapa" role="group" aria-label="Estilo del mapa del satélite"><span>Mapa:</span>
-          {(['bandas', 'celdas', 'suave'] as const).map((e) => <button key={e} type="button" aria-pressed={mapStyle === e} onClick={() => setMapStyle(e)}>{e.charAt(0).toUpperCase() + e.slice(1)}</button>)}
+          {(['bandas', 'celdas', 'suave'] as const).map((e) => <button className="control-pill" key={e} type="button" aria-pressed={mapStyle === e} onClick={() => setMapStyle(e)}>{e.charAt(0).toUpperCase() + e.slice(1)}</button>)}
         </div>}
         <p className={`pista-globo${pistaOculta ? ' oculta' : ''}`}>Arrastra para girar. Toca una zona, una corriente o el mar.</p>
       </div>

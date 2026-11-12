@@ -16,8 +16,19 @@
   /* escala de color del océano (clorofila baja → alta) */
   --rampa: linear-gradient(90deg, #3b1c6e, #2c5aa0, #1d9a8a, #7fcf4a, #f2e14c);
 
-  --serif: "Newsreader", Georgia, serif;
-  --sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+  /* tipografía compartida con los tokens de la aplicación */
+  --serif: var(--font-display, "Newsreader", Georgia, serif);
+  --sans: var(--font-body, "Atkinson Hyperlegible", system-ui, sans-serif);
+  --texto-base: 1.0625rem;
+  --texto-control: var(--texto-base);
+  --texto-secundario: .85rem;
+  --texto-pequeno: .78rem;
+  --texto-micro: .72rem;
+
+  /* controles flotantes y de navegación */
+  --control-fondo: rgba(7, 30, 51, .88);
+  --control-fondo-hover: rgba(36, 80, 122, .6);
+  --control-borde: var(--linea);
 
   --r-chico: 6px;
   --r-medio: 14px;
@@ -35,7 +46,7 @@ body {
   background: var(--abismo);
   color: var(--hielo);
   font-family: var(--sans);
-  font-size: 1.0625rem;
+  font-size: var(--texto-base);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -56,6 +67,14 @@ p { margin: 0 0 1em; text-wrap: pretty; }
 a { color: var(--frio); text-underline-offset: 3px; }
 a:hover { color: var(--hielo); }
 .num { font-variant-numeric: tabular-nums; }
+
+.control-pill {
+  border: 1px solid var(--control-borde);
+  border-radius: 999px;
+  background: var(--control-fondo);
+  color: var(--hielo);
+  cursor: pointer;
+}
 
 :focus-visible {
   outline: 3px solid var(--frio);
