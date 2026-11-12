@@ -19,8 +19,9 @@ export default function Dialogo() {
     const inicio = performance.now()
     let id = 0
     const paso = (ahora: number) => {
-      const n = Math.floor(((ahora - inicio) / 1000) * LETRAS_POR_SEGUNDO)
-      setLetras(n)
+      const n = Math.min(linea.texto.length, Math.floor(((ahora - inicio) / 1000) * LETRAS_POR_SEGUNDO))
+      // si el jugador ya completó el texto, no se vuelve atrás
+      setLetras((antes) => Math.max(antes, n))
       if (n < linea.texto.length) id = requestAnimationFrame(paso)
     }
     id = requestAnimationFrame(paso)
@@ -30,7 +31,7 @@ export default function Dialogo() {
   useEffect(() => {
     if (!linea) return
     const tecla = (e: KeyboardEvent) => {
-      if (e.key !== ' ' && e.key !== 'Enter' && e.key.toLowerCase() !== 'e') return
+      if (e.key !== ' ' && e.key !== 'Enter') return
       e.preventDefault()
       if (completo) avanzar(); else setLetras(largo)
     }

@@ -12,7 +12,8 @@ interface EstadoDialogo {
   linea: Linea | null;
   cola: Linea[];
   terminar: (() => void) | null;
-  /** muestra las líneas una tras otra; la promesa se cumple cuando se cierra la última */
+  /** muestra las líneas una tras otra; si ya hay un diálogo, se agregan al final.
+      La promesa se cumple cuando se cierra la última línea */
   decir(lineas: Linea[]): Promise<void>;
   avanzar(): void;
   cerrar(): void;
@@ -23,10 +24,15 @@ export const useDialogo = create<EstadoDialogo>((set, get) => ({
   cola: [],
   terminar: null,
   decir(lineas) {
-    get().terminar?.(); // si había otro diálogo abierto, se da por terminado
     const [primera, ...resto] = lineas;
     if (!primera) return Promise.resolve();
-    return new Promise<void>((resolver) => set({ linea: primera, cola: resto, terminar: resolver }));
+    const { linea, cola, terminar } = get();
+    return new Promise<void>((resolver) => {
+      // al terminar se avisa a quien pidió el diálogo anterior y a este
+      const ambos = () => { terminar?.(); resolver(); };
+      if (linea) set({ cola: [...cola, ...lineas], terminar: ambos });
+      else set({ linea: primera, cola: resto, terminar: resolver });
+    });
   },
   avanzar() {
     const { cola, terminar } = get();
