@@ -60,6 +60,8 @@ export default function GlobePanel() {
   const globo = useRef<GlobeMethods | undefined>(undefined)
   const contenedor = useRef<HTMLDivElement>(null)
   const lienzo = useRef<HTMLDivElement>(null)
+  const vistaAnterior = useRef({ panel, section: useExplorerStore.getState().section })
+  const section = useExplorerStore((s) => s.section)
   const { width, height } = useTamano(contenedor)
   const material = useMemo(() => new THREE.MeshPhongMaterial({ color: PALETAS.noche.marSimple, shininess: 4, specular: new THREE.Color(0x080808) }), [])
   const atlasListo = useAtlas(view, material)
@@ -69,6 +71,18 @@ export default function GlobePanel() {
   const [veloAbierto, setVeloAbierto] = useState(giroPortada == null)
   const [pistaOculta, setPistaOculta] = useState(false)
   const [lectura, setLectura] = useState<{ x: number; y: number; titulo: string; detalle: string[] } | null>(null)
+
+  // Al elegir otra vista desde el globo fijo, volver al inicio de su explicación.
+  useEffect(() => {
+    const anterior = vistaAnterior.current
+    vistaAnterior.current = { panel, section }
+    if (anterior.panel === panel && anterior.section === section) return
+    if (window.matchMedia('(max-width: 900px)').matches) return
+    const escenario = lienzo.current?.parentElement
+    if (escenario && escenario.getBoundingClientRect().top < -2) {
+      window.scrollTo({ top: escenario.offsetTop, behavior: menosMovimiento ? 'auto' : 'smooth' })
+    }
+  }, [panel, section])
 
   /* ---------- etiquetas de zonas, base y corrientes ---------- */
   const marcas = useMemo<Marca[]>(() => [
@@ -341,7 +355,10 @@ export default function GlobePanel() {
       {lectura && <div className="lectura" aria-hidden="true" style={{ transform: `translate(${Math.max(8, lectura.x)}px, ${lectura.y}px)` }}><b>{lectura.titulo}</b>{lectura.detalle.map((d) => <small key={d}>{d}</small>)}</div>}
       <TimelinePanel />
     </div>
-    <aside className="relato" id="relato" aria-live="polite" aria-label="Lo que muestra el globo"><Relato /></aside>
+    <aside className="relato" id="relato" aria-label="What the globe shows">
+      <div className="relato-orientacion"><span>Explore the selected view below</span><a href="#hallazgos">Skip to findings <span aria-hidden="true">↓</span></a></div>
+      <div aria-live="polite"><Relato /></div>
+    </aside>
     <div className={`velo-entrada${veloAbierto ? ' abierto' : ''}`} aria-hidden="true" />
   </section>
 }

@@ -33,6 +33,21 @@ function Explorador() {
           </div>}>
             <GlobePanel />
           </Suspense>
+          <section className="puente-explorador" aria-label="From the globe to the evidence">
+            <div className="puente-hilo" aria-hidden="true"><span /></div>
+            <div className="puente-copy">
+              <p className="puente-kicker">The view is only the beginning</p>
+              <h2>From a living ocean to evidence we can compare</h2>
+              <p>Keep the question from the globe in mind. Below, the same signal is followed through time, place and biological response.</p>
+            </div>
+            <div className="puente-steps" aria-hidden="true">
+              <span><i>01</i>Observe</span>
+              <b />
+              <span><i>02</i>Compare</span>
+              <b />
+              <span><i>03</i>Interpret</span>
+            </div>
+          </section>
           <main id="contenido">
             <section className="seccion pregunta">
               <blockquote>How are changes in Antarctic phytoplankton associated with marine life in Peru?</blockquote>

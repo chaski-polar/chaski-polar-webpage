@@ -18,9 +18,10 @@
 .game-placeholder { min-height: 100vh; display: grid; place-content: center; gap: 1rem; padding: 2rem; background: var(--abismo); color: var(--hielo); text-align: center; }
 .game-placeholder .btn { width: fit-content; justify-self: center; }
 
-.escenario { display: grid; grid-template-columns: minmax(0, 1fr) clamp(320px, 31vw, 430px); height: 100svh; min-height: 560px; padding-top: 63px; }
+.escenario { display: grid; grid-template-columns: minmax(0, 1fr) clamp(320px, 31vw, 430px); min-height: 100svh; padding-top: 63px; align-items: start; }
 .escenario > div:not(.lienzo-globo) { display: contents; }
-.lienzo-globo { position: relative; min-width: 0; overflow: hidden; background: var(--globo-fondo); }
+.lienzo-globo { position: sticky; top: 63px; height: calc(100svh - 63px); min-height: 497px; min-width: 0; overflow: hidden; background: var(--globo-fondo); }
+.lienzo-globo::after { content: ''; position: absolute; z-index: 4; inset: auto 0 0; height: clamp(100px, 18vh, 180px); pointer-events: none; background: linear-gradient(180deg, transparent, rgba(7, 30, 51, .6) 65%, var(--abismo)); }
 #globo { position: absolute; inset: 0 0 180px; }
 #globo canvas { display: block; }
 .globe-toolbar { position: absolute; z-index: 7; top: 16px; left: 16px; display: grid; gap: 8px; max-width: 380px; }
@@ -78,7 +79,10 @@
 .prediction-card { border: 1px solid var(--linea); border-radius: var(--r-chico); background: var(--panel-suave); padding: 8px 10px; color: var(--niebla); font-size: .78rem; }
 .prediction-card summary { cursor: pointer; color: var(--hielo); font-weight: 700; }
 .prediction-card[open] summary { margin-bottom: 6px; }
-.relato { position: relative; overflow-y: auto; border-left: 1px solid var(--linea); background: var(--panel-lateral); }
+.relato { position: relative; min-height: calc(100svh - 63px); border-left: 1px solid var(--linea); background: linear-gradient(180deg, rgba(12, 44, 74, .55), var(--abismo) 100%); }
+.relato-orientacion { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; padding: 14px 26px; border-bottom: 1px solid var(--linea); color: var(--niebla); font-size: .78rem; }
+.relato-orientacion a { color: var(--frio); text-decoration: none; }
+.relato-orientacion a:hover { text-decoration: underline; }
 .relato-contenido { padding: 26px 26px 32px; animation: entrar .35s cubic-bezier(.2, .8, .2, 1); }
 .relato h2 { font-size: clamp(1.6rem, 2.2vw, 2.1rem); margin-bottom: .25em; }
 .relato p { color: var(--niebla); }
@@ -117,7 +121,7 @@
 
 @media (max-width: 900px) {
   .escenario { display: block; height: auto; min-height: 0; }
-  .lienzo-globo { height: 76svh; min-height: 560px; }
+  .lienzo-globo { position: relative; top: auto; height: 76svh; min-height: 560px; }
   .relato { border-left: 0; border-top: 1px solid var(--linea); overflow: visible; }
   .pregunta, .hallazgo, .hallazgo:nth-of-type(even) { grid-template-columns: 1fr; }
   .hallazgo:nth-of-type(even) .texto { order: 0; }

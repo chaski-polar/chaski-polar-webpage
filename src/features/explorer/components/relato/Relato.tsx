@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { useExplorerStore } from '../../store'
 import Base from './Base'
 import Comparar from './Comparar'
@@ -14,11 +13,7 @@ import Biologia from './Biologia'
 export default function Relato() {
   const panel = useExplorerStore((s) => s.panel)
   const section = useExplorerStore((s) => s.section)
-  const raiz = useRef<HTMLDivElement>(null)
-
-  // cada vista nueva empieza arriba
   const clave = JSON.stringify(panel)
-  useEffect(() => { raiz.current?.parentElement?.scrollTo({ top: 0 }) }, [clave])
 
   let vista
   switch (panel.tipo) {
@@ -33,6 +28,6 @@ export default function Relato() {
   }
   const zona = panel.tipo === 'zona' ? panel.z : undefined
   return section === 'anchoveta'
-    ? <div className="relato-contenido" key={`biologia-${clave}`} ref={raiz}><Biologia zona={zona} /></div>
-    : <div className="relato-contenido" key={clave} ref={raiz}>{vista}</div>
+    ? <div className="relato-contenido" key={`biologia-${clave}`}><Biologia zona={zona} /></div>
+    : <div className="relato-contenido" key={clave}>{vista}</div>
 }
