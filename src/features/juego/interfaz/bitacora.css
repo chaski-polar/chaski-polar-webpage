@@ -16,6 +16,18 @@
 .juego.bitacora .juego-caja.activo { background: #26483e; border-color: var(--verde); }
 .juego.bitacora :focus-visible { outline: 2px solid var(--nino); outline-offset: 4px; }
 .juego.bitacora kbd { border: 1px solid #52707a; border-radius: 2px; padding: 1px 5px; background: #071b29; color: #b2cacb; font: 11px/1.5 ui-monospace, monospace; }
+.bitacora .visor-teclas { position: absolute; z-index: 5; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 8px 10px; border: 1px solid var(--borde); background: rgba(7, 27, 41, .9); pointer-events: none; text-align: center; }
+.bitacora .visor-teclas > span { display: block; margin-bottom: 5px; color: var(--hielo-300); font-size: 10px; letter-spacing: .12em; }
+.bitacora .visor-teclas > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.juego.bitacora .visor-teclas kbd { display: grid; place-items: center; min-width: 25px; min-height: 25px; transition: background-color .08s, color .08s; }
+.juego.bitacora .visor-teclas kbd.pulsada { background: var(--verde); color: var(--oceano-950); border-color: var(--verde); }
+.bitacora .pausa-velo { position: absolute; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(3, 15, 25, .85); }
+.bitacora .pausa-panel { width: min(420px, 100%); padding: 32px; border-top: 3px solid var(--verde); }
+.bitacora .pausa-panel > span { color: var(--verde); font-size: 11px; letter-spacing: .12em; }
+.bitacora .pausa-panel h2 { margin: 12px 0; font-size: 2.2rem; }
+.bitacora .pausa-panel p { color: var(--hielo-300); }
+.bitacora .pausa-panel button { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 14px; cursor: pointer; }
+@media (pointer: coarse), (max-width: 1000px) { .bitacora .visor-teclas { display: none; } }
 
 /* Una sola navegación, fuera del área central de nado. */
 .bitacora .bitacora-navegacion { position: absolute; inset: max(12px, env(safe-area-inset-top)) 20px auto; z-index: 8; display: flex; gap: 8px; align-items: center; pointer-events: none; }

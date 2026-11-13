@@ -12,6 +12,7 @@ export interface Entrada {
   /** true una sola vez después de pedir un impulso (Shift o el botón en pantalla) */
   impulso(): boolean;
   pedirImpulso(): void;
+  soltar(): void;
   destruir(): void;
 }
 
@@ -23,7 +24,7 @@ export function crearEntrada(contenedor: HTMLElement): Entrada {
   let impulsoPedido = false;
   const escribe = (e: KeyboardEvent) => e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
   const bajar = (e: KeyboardEvent) => {
-    if (escribe(e)) return;
+    if (escribe(e) || document.querySelector('.pausa-velo')) return;
     const k = e.key.toLowerCase();
     teclas.add(k);
     if (k === "shift" && !e.repeat) impulsoPedido = true;
@@ -32,7 +33,7 @@ export function crearEntrada(contenedor: HTMLElement): Entrada {
     if (k === " " && document.activeElement instanceof HTMLButtonElement && !document.activeElement.closest(".juego-dialogo, .juego-informe, .juego-escritorio, .juego-menu")) document.activeElement.blur();
   };
   const subir = (e: KeyboardEvent) => teclas.delete(e.key.toLowerCase());
-  const soltarTodo = () => teclas.clear();
+  const soltarTodo = () => { teclas.clear(); impulsoPedido = false; botones.subir = false; botones.bajar = false; };
   addEventListener("keydown", bajar);
   addEventListener("keyup", subir);
   addEventListener("blur", soltarTodo);
@@ -70,6 +71,7 @@ export function crearEntrada(contenedor: HTMLElement): Entrada {
   const botones = { subir: false, bajar: false };
   return {
     botones,
+    soltar: soltarTodo,
     impulso() { const pedido = impulsoPedido; impulsoPedido = false; return pedido; },
     pedirImpulso() { impulsoPedido = true; },
     vertical: () => (teclas.has(" ") || teclas.has("q") || botones.subir ? 1 : 0) - (teclas.has("c") || teclas.has("e") || botones.bajar ? 1 : 0),

@@ -217,7 +217,7 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
 
     const anchi = crearPersonaje(escena, sprite("anchi", dibujarAnchi), { ancho: 2.6, alto: 2.6 });
     anchi.posicion.set(-3, -3, centroZona(ZONA_INICIAL));
-    const seguidor = crearSeguidor(camara, renderer.domElement, anchi.posicion, { distancia: 15, giro: 0.9 });
+    const seguidor = crearSeguidor(camara, renderer.domElement, anchi.posicion, { distancia: 15, libre: true });
 
     // el cardumen: un dibujo por cada PECES_POR_DIBUJO peces
     const dibujoPez = sprite("anchoveta", dibujarAnchoveta);

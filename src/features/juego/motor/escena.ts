@@ -31,6 +31,7 @@ export interface Motor {
   readonly camara: THREE.PerspectiveCamera;
   /** cambia la escena activa; la anterior se destruye y se vacía la escena 3D */
   usar(crear: (motor: Motor) => Escena): void;
+  pausar(pausado: boolean): void;
   destruir(): void;
 }
 
@@ -78,10 +79,11 @@ export function crearMotor(lienzo: HTMLCanvasElement): Motor {
   // el contorno dibuja la escena dos veces: el conteo se reinicia a mano una vez por cuadro
   renderer.info.autoReset = false;
   const reloj = new THREE.Clock();
+  let pausado = false, tiempoJuego = 0;
   renderer.setAnimationLoop(() => {
     const dt = Math.min(0.1, reloj.getDelta());
     if (!actual) return;
-    actual.actualizar(dt, reloj.elapsedTime);
+    if (!pausado) { tiempoJuego += dt; actual.actualizar(dt, tiempoJuego); }
     renderer.info.reset();
     contorno.render(escena, camara);
     if (depurar) depurar(renderer.info.render.calls, renderer.info.render.triangles);
@@ -89,6 +91,7 @@ export function crearMotor(lienzo: HTMLCanvasElement): Motor {
 
   const motor: Motor = {
     renderer, escena, camara,
+    pausar(valor) { pausado = valor; },
     usar(crear) {
       actual?.destruir();
       vaciar();

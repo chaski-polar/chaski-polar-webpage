@@ -15,6 +15,8 @@ export interface Seguidor {
 }
 
 export interface OpcionesSeguidor {
+  /** órbita completa sin recentrado automático */
+  libre?: boolean;
   distancia?: number;
   /** cuánto se puede girar a cada lado (radianes) */
   giro?: number;
@@ -34,7 +36,7 @@ export function crearSeguidor(camara: THREE.PerspectiveCamera, elemento: HTMLEle
   const giro = opciones.giro ?? 1.2;
   const inclinacion = opciones.inclinacion ?? 1.2;
   const porVertical = opciones.inclinacionVertical ?? 0.05;
-  const [polarMin, polarMax] = opciones.inclinacionLimites ?? [0.75, 1.5];
+  const [polarMin, polarMax] = opciones.libre ? [0, Math.PI] : opciones.inclinacionLimites ?? [0.75, 1.5];
   camara.position.copy(inicio).add(new THREE.Vector3(0, distancia * Math.cos(inclinacion), distancia * Math.sin(inclinacion)));
   const controles = new OrbitControls(camara, elemento);
   controles.enablePan = false;
@@ -43,8 +45,8 @@ export function crearSeguidor(camara: THREE.PerspectiveCamera, elemento: HTMLEle
   controles.maxDistance = distancia * 1.45;
   controles.minPolarAngle = polarMin;
   controles.maxPolarAngle = polarMax;
-  controles.minAzimuthAngle = -giro;
-  controles.maxAzimuthAngle = giro;
+  controles.minAzimuthAngle = opciones.libre ? -Infinity : -giro;
+  controles.maxAzimuthAngle = opciones.libre ? Infinity : giro;
   controles.target.copy(inicio);
 
   // mientras el jugador arrastra, la cámara es suya; al soltar, vuelve detrás del personaje
@@ -76,7 +78,7 @@ export function crearSeguidor(camara: THREE.PerspectiveCamera, elemento: HTMLEle
       controles.target.add(delta);
 
       // volver detrás del personaje e inclinarse según suba o baje
-      if (!arrastrando && ahora - ultimoToque > ESPERA_RECENTRAR) {
+      if (!opciones.libre && !arrastrando && ahora - ultimoToque > ESPERA_RECENTRAR) {
         desplazamiento.subVectors(camara.position, controles.target);
         esfera.setFromVector3(desplazamiento);
         const k = Math.min(1, dt * 1.5);

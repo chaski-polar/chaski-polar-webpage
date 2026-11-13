@@ -43,7 +43,7 @@ type Pantalla =
 
 const AYUDA: Record<EscenaPrologo | 'cardumen', string> = {
   lumi: 'W o Espacio: subir · S o C: bajar · A/D: a los lados',
-  kiri: 'WASD o flechas: nadar',
+  kiri: 'WASD o flechas: nadar · Espacio/Q: subir · C/E: bajar',
   nara: 'WASD o flechas: nadar',
   cardumen: 'WASD: nadar · Espacio: subir · C: bajar · Shift: impulso · F: juntar',
 }
@@ -69,6 +69,8 @@ export default function JuegoPage() {
   const compactoRef = useRef(false)
   const [resultados, setResultados] = useState<ResultadoAnio[]>([])
   const [verFinal, setVerFinal] = useState(false)
+  const [pausado, setPausado] = useState(false)
+  const [teclas, setTeclas] = useState<Set<string>>(new Set())
   const hitos = useRef(new Set<string>())
   const presentado = useRef(false)
 
@@ -84,6 +86,20 @@ export default function JuegoPage() {
     return () => { removeEventListener('pointerdown', despertar); removeEventListener('keydown', despertar); quitar(); detenerAmbiente() }
   }, [])
   useEffect(() => { compactoRef.current = compacto }, [compacto])
+  useEffect(() => { motorRef.current?.pausar(pausado); entrada?.soltar() }, [pausado, entrada])
+  useEffect(() => { setPausado(false); setTeclas(new Set()) }, [pantalla])
+  useEffect(() => {
+    const bajar = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !e.repeat && pantalla.tipo !== 'menu' && !informe && !verFinal) { e.preventDefault(); setPausado((p) => !p); return }
+      if (pausado || dialogoAbierto || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      setTeclas((t) => new Set(t).add(e.key.toLowerCase()))
+    }
+    const subir = (e: KeyboardEvent) => setTeclas((t) => { const siguiente = new Set(t); siguiente.delete(e.key.toLowerCase()); return siguiente })
+    const limpiar = () => setTeclas(new Set())
+    addEventListener('keydown', bajar); addEventListener('keyup', subir); addEventListener('blur', limpiar)
+    return () => { removeEventListener('keydown', bajar); removeEventListener('keyup', subir); removeEventListener('blur', limpiar) }
+  }, [pantalla.tipo, pausado, dialogoAbierto, informe, verFinal])
+  useEffect(() => { if (pausado || dialogoAbierto) setTeclas(new Set()) }, [pausado, dialogoAbierto])
 
   // los datos del mar son los mismos que usa el explorador
   useEffect(() => {
@@ -211,10 +227,10 @@ export default function JuegoPage() {
   // F junta o dispersa; C queda libre para bajar.
   useEffect(() => {
     if (pantalla.tipo !== 'cardumen') return
-    const tecla = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'f' && !e.repeat) setCompacto((x) => !x) }
+    const tecla = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'f' && !e.repeat && !pausado && !hayDialogo() && !informe) setCompacto((x) => !x) }
     addEventListener('keydown', tecla)
     return () => removeEventListener('keydown', tecla)
-  }, [pantalla.tipo])
+  }, [pantalla.tipo, pausado, informe])
 
   const prologo = (escena: EscenaPrologo, historia: boolean) => setPantalla({ tipo: 'prologo', escena, historia, intento: Date.now() })
   const siguiente = pantalla.tipo === 'cardumen' && informe && pantalla.generacion + 1 < CAMPANA.length
@@ -244,10 +260,17 @@ export default function JuegoPage() {
     {pantalla.tipo === 'prologo' && pantalla.escena === 'kiri' && <HudKiri comidos={comidos} />}
     {pantalla.tipo === 'prologo' && pantalla.escena === 'nara' && <HudNara e={estadoNara} />}
     {pantalla.tipo === 'cardumen' && <HudCardumen entrada={entrada} compacto={compacto} alternar={() => setCompacto((x) => !x)} />}
+    {pantalla.tipo === 'prologo' && pantalla.escena === 'kiri' && <div className="bitacora-acciones kiri-vertical" aria-label="Controles de profundidad">
+      {(['subir', 'bajar'] as const).map((accion) => <button key={accion} type="button" className="juego-caja bitacora-tactil"
+        onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); if (entrada) entrada.botones[accion] = true }}
+        onPointerUp={() => { if (entrada) entrada.botones[accion] = false }} onPointerCancel={() => { if (entrada) entrada.botones[accion] = false }} onLostPointerCapture={() => { if (entrada) entrada.botones[accion] = false }}>{accion === 'subir' ? '↑ Subir' : '↓ Bajar'}</button>)}
+    </div>}
+    {pantalla.tipo !== 'menu' && !dialogoAbierto && !informe && !verFinal && !pausado && <div className="visor-teclas" aria-hidden="true"><span>CONTROLES</span><div>{(pantalla.tipo === 'prologo' && pantalla.escena === 'lumi' ? [['W','w'], ['A','a'], ['S','s'], ['D','d'], ['ESPACIO',' '], ['C','c']] : [['W','w'], ['A','a'], ['S','s'], ['D','d'], ['↑','arrowup'], ['←','arrowleft'], ['↓','arrowdown'], ['→','arrowright'], ...(pantalla.tipo === 'cardumen' || pantalla.escena === 'kiri' ? [['ESPACIO',' '], ['Q','q'], ['C','c'], ['E','e']] : []), ...(pantalla.tipo === 'cardumen' ? [['SHIFT','shift'], ['F','f']] : [])]).map(([label, key]) => <kbd key={key} className={teclas.has(key) ? 'pulsada' : ''}>{label}</kbd>)}</div></div>}
+    {pausado && <div className="pausa-velo" role="dialog" aria-modal="true" aria-labelledby="pausa-titulo"><div className="pausa-panel juego-caja"><span>BITÁCORA · EN ESPERA</span><h2 id="pausa-titulo">Juego en pausa</h2><p>La expedición está detenida. Tómate un momento.</p><button autoFocus type="button" className="juego-caja principal" onClick={() => setPausado(false)}>Continuar <kbd>ESC</kbd></button></div></div>}
 
     <div className={`juego-aviso${aviso ? ' visible' : ''}`} aria-live="assertive">{aviso}</div>
     {pantalla.tipo === 'cardumen' && cartel && <div className="juego-cartel" role="status"><b>{cartel.mes}</b>{cartel.detalle && <span>{cartel.detalle}</span>}</div>}
-    <Dialogo />
+    {!pausado && <Dialogo />}
 
     {pantalla.tipo === 'cardumen' && informe && mar && <Escritorio key={clave} datos={informe.datos}
       turno={crearTurno(mar, informe.datos.anio, informe.datos.mesesJugados, pantalla.generacion)} siguiente={siguiente}

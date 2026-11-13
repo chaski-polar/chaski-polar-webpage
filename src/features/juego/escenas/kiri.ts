@@ -94,7 +94,7 @@ export function escenaKiri(entrada: Entrada, avisos: AvisosKiri, pausa: () => bo
     const { rayos, nieve } = crearFondo(escena);
     const kiri = crearPersonaje(escena, sprite("kiri", dibujarKiri), { ancho: 2.6, alto: 2.6, suelo: 0 });
     kiri.posicion.set(0, ALTURA_NADO, 0);
-    const seguidor = crearSeguidor(camara, renderer.domElement, kiri.posicion);
+    const seguidor = crearSeguidor(camara, renderer.domElement, kiri.posicion, { libre: true });
 
     const dibujoPinguino = sprite("pinguino", dibujarPinguino), dibujoFito = sprite("fito", dibujarFito);
     const pinguinos: Pinguino[] = Array.from({ length: 3 }, (_, i) => ({ p: crearPersonaje(escena, dibujoPinguino, { ancho: 2.4, alto: 2.4, suelo: 0 }), ang: i * 2.1, estado: "ronda", dur: 0 }));
@@ -113,7 +113,7 @@ export function escenaKiri(entrada: Entrada, avisos: AvisosKiri, pausa: () => bo
         mov.multiplyScalar(aturdido > 0 ? 2 : VELOCIDAD);
         vel.lerp(mov, 1 - Math.pow(0.002, dt));
         kiri.posicion.addScaledVector(vel, dt);
-        kiri.posicion.y = ALTURA_NADO + Math.sin(t * 2) * 0.3;
+        if (!detenido) kiri.posicion.y = THREE.MathUtils.clamp(kiri.posicion.y + entrada.vertical() * VELOCIDAD * dt, 1.5, 11);
         const horizontal = Math.hypot(kiri.posicion.x, kiri.posicion.z);
         if (horizontal > LIMITE) { kiri.posicion.x *= LIMITE / horizontal; kiri.posicion.z *= LIMITE / horizontal; }
         seguidor.seguir(kiri.posicion);
