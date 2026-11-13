@@ -259,7 +259,7 @@ export default function JuegoPage() {
     {pantalla.tipo === 'prologo' && pantalla.escena === 'lumi' && <HudLumi e={estadoLumi} />}
     {pantalla.tipo === 'prologo' && pantalla.escena === 'kiri' && <HudKiri comidos={comidos} />}
     {pantalla.tipo === 'prologo' && pantalla.escena === 'nara' && <HudNara e={estadoNara} />}
-    {pantalla.tipo === 'cardumen' && <HudCardumen entrada={entrada} compacto={compacto} alternar={() => setCompacto((x) => !x)} />}
+    {pantalla.tipo === 'cardumen' && <HudCardumen entrada={entrada} mar={mar} compacto={compacto} alternar={() => setCompacto((x) => !x)} />}
     {pantalla.tipo === 'prologo' && pantalla.escena === 'kiri' && <div className="bitacora-acciones kiri-vertical" aria-label="Controles de profundidad">
       {(['subir', 'bajar'] as const).map((accion) => <button key={accion} type="button" className="juego-caja bitacora-tactil"
         onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); if (entrada) entrada.botones[accion] = true }}

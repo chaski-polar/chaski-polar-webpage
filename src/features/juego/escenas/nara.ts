@@ -14,7 +14,8 @@ import { dibujarLetrero } from "../personajes/costa";
 import { sonar } from "../motor/sonido";
 import { sprite } from "../personajes/sprites";
 
-const V: Ventana = { lonO: -105, latN: 0, lonE: -55, latS: -70 };
+const V: Ventana = { lonO: -105, latN: 15, lonE: -30, latS: -70 };
+const RECORRIDO: Ventana = { lonO: -105, latN: 0, lonE: -55, latS: -70 };
 const K = 2; // unidades por grado
 const aX = (lon: number) => (lon + 80) * K;
 const aZ = (lat: number) => -(lat + 35) * K;
@@ -45,10 +46,11 @@ export function escenaNara(entrada: Entrada, eventos: EventosNara, pausa: () => 
   return (motor) => {
     const { escena, camara, renderer } = motor;
     escena.background = new THREE.Color(0x0f3352);
+    escena.fog = new THREE.FogExp2(0x0f3352, 0.006);
     escena.add(new THREE.HemisphereLight(0xffffff, 0x223344, 1.3));
 
     // mapa: se pinta con el atlas del explorador; la capa de tierra sirve también para no cruzar la costa
-    const W = 1000, H = 1400;
+    const W = 1500, H = 1700;
     const materialMapa = sinContorno(new THREE.MeshBasicMaterial({ color: 0x0f3352 }));
     const mapa = new THREE.Mesh(new THREE.PlaneGeometry((V.lonE - V.lonO) * K, (V.latN - V.latS) * K).rotateX(-Math.PI / 2), materialMapa);
     mapa.position.set(aX((V.lonO + V.lonE) / 2), 0, aZ((V.latN + V.latS) / 2));
@@ -64,6 +66,7 @@ export function escenaNara(entrada: Entrada, eventos: EventosNara, pausa: () => 
       tierra = capaTierra.getContext("2d")?.getImageData(0, 0, W, H).data ?? null;
     });
     const esTierra = (lat: number, lon: number): boolean => {
+      if (lon < RECORRIDO.lonO || lon >= RECORRIDO.lonE || lat > RECORRIDO.latN || lat <= RECORRIDO.latS) return true;
       if (!tierra) return false;
       const px = Math.floor(((lon - V.lonO) / (V.lonE - V.lonO)) * W), py = Math.floor(((V.latN - lat) / (V.latN - V.latS)) * H);
       if (px < 0 || py < 0 || px >= W || py >= H) return true; // fuera del mapa

@@ -1,6 +1,6 @@
 import { useState, type PointerEvent } from 'react'
 import type { Entrada } from '../motor/entrada'
-import { NOMBRE_ZONA } from '../motor/mar'
+import { NOMBRE_ZONA, type Mar } from '../motor/mar'
 import { useHud } from '../escenas/cardumen'
 import Medidor from './Medidor'
 
@@ -13,15 +13,42 @@ const TEXTO_TEMPORADA = { abierta: 'Abierta: salen las bolicheras', veda: 'Veda:
 const TEXTO_ORIGEN = { observado: 'Clorofila medida por satélite', estimado: 'Alimento estimado por temperatura', normal: 'Sin dato: se asume un mes normal' } as const
 const limitar = (n: number) => Math.max(0, Math.min(100, n))
 
+type PuntoHistorico = { valor: number | null; estimado: boolean }
+function Historico({ puntos, mesFin, tipo, etiqueta }: { puntos: PuntoHistorico[]; mesFin: number; tipo: 'alimento' | 'anomalia'; etiqueta: string }) {
+  const base = tipo === 'alimento' ? 100 : 0
+  const amplitud = Math.max(tipo === 'alimento' ? 100 : 3, ...puntos.map((p) => p.valor == null ? 0 : Math.abs(p.valor - base)))
+  const ancho = 240 / mesFin
+  const datos = puntos.map((p, i) => `${MESES[i]}: ${p.valor == null ? 'sin dato' : `${n1.format(p.valor)}${tipo === 'alimento' ? ' %' : ' °C'}${p.estimado ? ' estimado' : ''}`}`).join('; ')
+  return <div className="lectura-historico">
+    <svg viewBox="0 0 240 58" preserveAspectRatio="none" role="img" aria-label={`${etiqueta}, histórico de la zona actual. ${datos}`}>
+      <line x1="0" y1="29" x2="240" y2="29" className="historico-base" />
+      {puntos.map((p, i) => {
+        if (p.valor == null) return <line key={i} x1={i * ancho + ancho / 2} x2={i * ancho + ancho / 2} y1="25" y2="33" className="historico-ausente" />
+        const diferencia = p.valor - base, alto = Math.abs(diferencia) / amplitud * 24
+        return <rect key={i} x={i * ancho + 2} y={diferencia >= 0 ? 29 - alto : 29} width={Math.max(1, ancho - 4)} height={Math.max(1, alto)} className={`${tipo === 'anomalia' ? diferencia >= 0 ? 'historico-calido' : 'historico-frio' : diferencia >= 0 ? 'historico-positivo' : 'historico-negativo'}${p.estimado ? ' historico-estimado' : ''}`}><title>{MESES[i]}: {n1.format(p.valor)}{tipo === 'alimento' ? ' %' : ' °C'}{p.estimado ? ' (estimado)' : ''}</title></rect>
+      })}
+    </svg>
+    <div className="historico-eje"><span>Ene</span><span>{tipo === 'alimento' ? '100 % normal' : '0 °C'}</span><span>{MESES[mesFin - 1]?.slice(0, 3)}</span></div>
+  </div>
+}
+
 /** Lo necesario para sobrevivir permanece visible; el parte científico se consulta a voluntad. */
-export default function HudCardumen({ entrada, compacto, alternar }: { entrada: Entrada | null; compacto: boolean; alternar: () => void }) {
+export default function HudCardumen({ entrada, mar, compacto, alternar }: { entrada: Entrada | null; mar: Mar | null; compacto: boolean; alternar: () => void }) {
   const hud = useHud((s) => s.hud)
-  const [parteAbierto, setParteAbierto] = useState(false)
+  const [parteAbierto, setParteAbierto] = useState(true)
   if (!hud) return null
   const pctComida = Math.round(hud.alimento * 100)
   const supervivencia = hud.inicial > 0 ? hud.peces / hud.inicial : 0
   const profundidad = Math.max(0, Math.round(-hud.y * METROS))
   const limiteOxigeno = Math.max(0, Math.round(-hud.yOxigeno * METROS))
+  const historia = Array.from({ length: hud.mes + 1 }, (_, mes) => {
+    const indice = mar?.indice(hud.anio, mes + 1) ?? -1
+    return indice >= 0 && mar ? mar.estado(hud.zona, indice) : null
+  })
+  const serie = (campo: 'alimento' | 'anomaliaTemp' | 'nino12'): PuntoHistorico[] => historia.map((estado) => ({
+    valor: !estado || (campo === 'alimento' && estado.origen === 'normal') ? null : campo === 'alimento' ? estado.alimento * 100 : estado[campo],
+    estimado: campo === 'alimento' && estado?.origen === 'estimado',
+  }))
   const alerta = hud.bajoOxigeno ? 'Sin oxígeno. Sube a aguas menos profundas.'
     : hud.energia < 0.25 ? 'Energía baja. Busca las manchas verdes de alimento.' : null
   const tocar = (boton: 'subir' | 'bajar', activo: boolean) => { if (entrada) entrada.botones[boton] = activo }
@@ -76,9 +103,9 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
         <div id="bitacora-parte-contenido" className="bitacora-parte-contenido" hidden={!parteAbierto}>
           <p className="bitacora-origen">{TEXTO_ORIGEN[hud.origen]}. El 100 % representa lo normal de este mes.</p>
           <dl className="bitacora-lecturas">
-            <div><dt>Alimento</dt><dd className={pctComida < 60 ? 'lectura-alerta' : ''}>{pctComida} %</dd></div>
-            <div><dt>Temperatura</dt><dd>{hud.anomaliaTemp == null ? 'Sin dato' : `${n1.format(hud.anomaliaTemp)} °C`}</dd></div>
-            <div><dt>Niño 1+2</dt><dd>{hud.nino12 == null ? 'Sin dato' : `${n1.format(hud.nino12)} °C`}</dd></div>
+            <div><dt>Alimento</dt><dd className={pctComida < 60 ? 'lectura-alerta' : ''}>{pctComida} %</dd><Historico puntos={serie('alimento')} mesFin={hud.mesFin} tipo="alimento" etiqueta="Alimento" /></div>
+            <div><dt>Temperatura</dt><dd>{hud.anomaliaTemp == null ? 'Sin dato' : `${n1.format(hud.anomaliaTemp)} °C`}</dd><Historico puntos={serie('anomaliaTemp')} mesFin={hud.mesFin} tipo="anomalia" etiqueta="Temperatura" /></div>
+            <div><dt>Niño 1+2</dt><dd>{hud.nino12 == null ? 'Sin dato' : `${n1.format(hud.nino12)} °C`}</dd><Historico puntos={serie('nino12')} mesFin={hud.mesFin} tipo="anomalia" etiqueta="Niño 1+2" /></div>
           </dl>
           <p className="bitacora-temporada"><b>Pesca</b> {TEXTO_TEMPORADA[hud.temporada]}</p>
           <div className="bitacora-radar" aria-label="Alimento por zona este mes">
@@ -89,7 +116,7 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
               <b>{Math.round(r.alimento * 100)} %</b>
             </div>)}
           </div>
-          <p className="bitacora-origen">Temperatura y Niño 1+2: diferencia frente a lo normal.</p>
+          <p className="bitacora-origen">Histórico hasta el mes actual, para la zona seleccionada. Temperatura y Niño 1+2: diferencia frente a lo normal. Barras tenues: alimento estimado; marca: sin dato.</p>
         </div>
       </section>
     </div>

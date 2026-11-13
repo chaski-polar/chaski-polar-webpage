@@ -87,10 +87,20 @@
 .bitacora .bitacora-parte-contenido { padding: 0 14px 14px; border-top: 1px solid #345361; }
 .bitacora .bitacora-origen { color: var(--hielo-300); font-size: 12px; line-height: 1.5; margin: 12px 0; }
 .bitacora .bitacora-lecturas { margin: 0; }
-.bitacora .bitacora-lecturas > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #345361; font-size: 13px; }
+.bitacora .bitacora-lecturas > div { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid #345361; font-size: 13px; }
 .bitacora .bitacora-lecturas dt { color: var(--hielo-300); }
 .bitacora .bitacora-lecturas dd { margin: 0; color: var(--hielo-100); }
 .bitacora .bitacora-lecturas dd.lectura-alerta { color: var(--alerta); }
+.bitacora .lectura-historico { grid-column: 1 / -1; min-width: 0; }
+.bitacora .lectura-historico svg { display: block; width: 100%; height: 48px; background: rgba(7, 27, 41, .55); }
+.bitacora .historico-base { stroke: #78939b; stroke-width: .8; }
+.bitacora .historico-positivo { fill: var(--verde); }
+.bitacora .historico-negativo { fill: var(--nino); }
+.bitacora .historico-calido { fill: var(--nino); }
+.bitacora .historico-frio { fill: var(--corriente); }
+.bitacora .historico-estimado { opacity: .48; }
+.bitacora .historico-ausente { stroke: var(--hielo-300); stroke-width: 1; stroke-dasharray: 2 2; }
+.bitacora .historico-eje { display: flex; justify-content: space-between; gap: 4px; margin-top: 3px; color: var(--hielo-300); font-size: 10px; }
 .bitacora .bitacora-temporada { margin: 12px 0 16px; color: var(--hielo-300); font-size: 12px; line-height: 1.5; }
 .bitacora .bitacora-temporada b { color: var(--hielo-100); margin-right: 8px; }
 .bitacora .bitacora-radar-fila { display: grid; grid-template-columns: 82px 1fr 46px; gap: 9px; align-items: center; margin-top: 9px; color: var(--hielo-300); font-size: 12px; }
