@@ -265,7 +265,12 @@ export default function JuegoPage() {
         onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); if (entrada) entrada.botones[accion] = true }}
         onPointerUp={() => { if (entrada) entrada.botones[accion] = false }} onPointerCancel={() => { if (entrada) entrada.botones[accion] = false }} onLostPointerCapture={() => { if (entrada) entrada.botones[accion] = false }}>{accion === 'subir' ? '↑ Subir' : '↓ Bajar'}</button>)}
     </div>}
-    {pantalla.tipo !== 'menu' && !dialogoAbierto && !informe && !verFinal && !pausado && <div className="visor-teclas" aria-hidden="true"><span>CONTROLES</span><div>{(pantalla.tipo === 'prologo' && pantalla.escena === 'lumi' ? [['W','w'], ['A','a'], ['S','s'], ['D','d'], ['ESPACIO',' '], ['C','c']] : [['W','w'], ['A','a'], ['S','s'], ['D','d'], ['↑','arrowup'], ['←','arrowleft'], ['↓','arrowdown'], ['→','arrowright'], ...(pantalla.tipo === 'cardumen' || pantalla.escena === 'kiri' ? [['ESPACIO',' '], ['Q','q'], ['C','c'], ['E','e']] : []), ...(pantalla.tipo === 'cardumen' ? [['SHIFT','shift'], ['F','f']] : [])]).map(([label, key]) => <kbd key={key} className={teclas.has(key) ? 'pulsada' : ''}>{label}</kbd>)}</div></div>}
+    {pantalla.tipo !== 'menu' && !dialogoAbierto && !informe && !verFinal && !pausado && <div className="visor-teclas" aria-hidden="true">
+      <span>CONTROLES</span><div className="visor-grupos">
+        {[ [['W', 'w'], ['A', 'a'], ['S', 's'], ['D', 'd']], [['↑', 'arrowup'], ['←', 'arrowleft'], ['↓', 'arrowdown'], ['→', 'arrowright']] ].map((grupo, i) => <div className="visor-cruz" key={i}>{grupo.map(([label, key], posicion) => <kbd key={key} className={`${posicion === 0 ? 'tecla-arriba ' : ''}${teclas.has(key) ? 'pulsada' : ''}`}>{label}</kbd>)}</div>)}
+        <div className="visor-acciones">{(pantalla.tipo === 'cardumen' || pantalla.escena === 'kiri' ? [['ESPACIO', ' '], ['Q', 'q'], ['C', 'c'], ['E', 'e'], ...(pantalla.tipo === 'cardumen' ? [['SHIFT', 'shift'], ['F', 'f']] : [])] : pantalla.escena === 'lumi' ? [['ESPACIO', ' '], ['C', 'c']] : []).map(([label, key]) => <kbd key={key} className={teclas.has(key) ? 'pulsada' : ''}>{label}</kbd>)}</div>
+      </div>
+    </div>}
     {pausado && <div className="pausa-velo" role="dialog" aria-modal="true" aria-labelledby="pausa-titulo"><div className="pausa-panel juego-caja"><span>BITÁCORA · EN ESPERA</span><h2 id="pausa-titulo">Juego en pausa</h2><p>La expedición está detenida. Tómate un momento.</p><button autoFocus type="button" className="juego-caja principal" onClick={() => setPausado(false)}>Continuar <kbd>ESC</kbd></button></div></div>}
 
     <div className={`juego-aviso${aviso ? ' visible' : ''}`} aria-live="assertive">{aviso}</div>

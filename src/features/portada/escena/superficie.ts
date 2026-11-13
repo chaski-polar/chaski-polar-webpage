@@ -114,6 +114,14 @@ export function crearSuperficie(escena: THREE.Scene, C: Calidad): Capa {
   const grupo = new THREE.Group();
   const cielo = new Sky();
   cielo.scale.setScalar(1500);
+  // El cielo se mezcla con el espacio durante el descenso, en vez de aparecer de golpe.
+  cielo.material.transparent = true;
+  cielo.material.depthWrite = false;
+  cielo.material.uniforms.opacidadAtmosfera = { value: 0 };
+  cielo.material.fragmentShader = cielo.material.fragmentShader
+    .replace('void main() {', 'uniform float opacidadAtmosfera;\nvoid main() {')
+    .replace('gl_FragColor = vec4( texColor, 1.0 );', 'gl_FragColor = vec4( texColor, opacidadAtmosfera );');
+  escena.add(cielo);
   const u = cielo.material.uniforms;
   u.turbidity!.value = 8; u.rayleigh!.value = 2.2; u.mieCoefficient!.value = 0.004; u.mieDirectionalG!.value = 0.8;
   (u.sunPosition!.value as THREE.Vector3).copy(DIR_SOL);
@@ -128,16 +136,32 @@ export function crearSuperficie(escena: THREE.Scene, C: Calidad): Capa {
 
   const barco = crearBolichera();
   const aves = Array.from({ length: C.aves }, crearAve);
-  grupo.add(cielo, agua, crearCerros(), barco, ...aves.map((a) => a.ave));
+  grupo.add(agua, crearCerros(), barco, ...aves.map((a) => a.ave));
   escena.add(grupo);
+
+  // La costa entra a través de la neblina mientras la cámara desciende.
+  const materiales = new Map<THREE.Material, number>();
+  grupo.traverse((objeto) => {
+    if (!(objeto instanceof THREE.Mesh) || objeto === agua) return;
+    for (const material of [objeto.material].flat() as THREE.Material[]) {
+      if (!materiales.has(material)) materiales.set(material, material.opacity);
+      material.transparent = true;
+    }
+  });
+  agua.material.transparent = true;
 
   return {
     actualizar(t, y) {
-      grupo.visible = y > -1.5 && y < 46;
+      const atmosfera = 1 - THREE.MathUtils.smoothstep(y, 34, 66);
+      cielo.visible = y >= 0 && atmosfera > 0;
+      cielo.material.uniforms.opacidadAtmosfera!.value = atmosfera;
+      const aparicion = 1 - THREE.MathUtils.smoothstep(y, 32, 64);
+      grupo.visible = y > -1.5 && aparicion > 0;
       if (!grupo.visible) return;
+      materiales.forEach((opacidad, material) => { material.opacity = opacidad * aparicion; });
+      agua.material.uniforms.alpha!.value = aparicion;
       const debajo = y < 0;
       agua.visible = !debajo;
-      cielo.visible = y < 62 && !debajo;
       tiempoAgua.value = t * 0.6;
       barco.position.y = Math.sin(t * 1.1) * 0.08;
       barco.rotation.z = Math.sin(t * 0.9) * 0.035;

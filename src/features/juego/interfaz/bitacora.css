@@ -19,6 +19,11 @@
 .bitacora .visor-teclas { position: absolute; z-index: 5; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 8px 10px; border: 1px solid var(--borde); background: rgba(7, 27, 41, .9); pointer-events: none; text-align: center; }
 .bitacora .visor-teclas > span { display: block; margin-bottom: 5px; color: var(--hielo-300); font-size: 10px; letter-spacing: .12em; }
 .bitacora .visor-teclas > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.bitacora .visor-teclas .visor-grupos { align-items: end; gap: 12px; }
+.bitacora .visor-cruz { display: grid; grid-template-columns: repeat(3, 25px); gap: 3px; }
+.bitacora .visor-cruz .tecla-arriba { grid-column: 2; }
+.bitacora .visor-cruz .tecla-arriba + kbd { grid-column: 1; }
+.bitacora .visor-acciones { display: flex; flex-wrap: wrap; max-width: 150px; gap: 3px; }
 .juego.bitacora .visor-teclas kbd { display: grid; place-items: center; min-width: 25px; min-height: 25px; transition: background-color .08s, color .08s; }
 .juego.bitacora .visor-teclas kbd.pulsada { background: var(--verde); color: var(--oceano-950); border-color: var(--verde); }
 .bitacora .pausa-velo { position: absolute; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(3, 15, 25, .85); }
@@ -46,6 +51,8 @@
 .bitacora .bitacora-fecha b { color: var(--hielo-100); font: 500 20px var(--serif); }
 .bitacora .bitacora-fecha > div > span { color: var(--hielo-300); font-size: 13px; }
 .bitacora .bitacora-fecha .bitacora-medidor { height: 3px; margin-top: 9px; }
+.bitacora .bitacora-fecha .bitacora-temporada-extremos { display: flex; justify-content: space-between; margin-top: 4px; color: var(--hielo-300); font-size: 11px; }
+.bitacora .bitacora-fecha .bitacora-temporada-extremos span { font-size: 11px; }
 .bitacora .bitacora-supervivencia { position: absolute; bottom: 76px; left: 20px; width: 360px; padding: 14px; }
 .bitacora .bitacora-indicadores { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .bitacora .bitacora-indicador { min-width: 0; }
@@ -61,10 +68,11 @@
 .bitacora .bitacora-profundidad { margin-top: 14px; padding-top: 10px; border-top: 1px solid #345361; }
 .bitacora .bitacora-profundidad-titulo { display: flex; justify-content: space-between; align-items: baseline; color: var(--hielo-300); font-size: 12px; }
 .bitacora .bitacora-profundidad-titulo b { color: var(--hielo-100); font-size: 17px; font-weight: 500; }
-.bitacora .bitacora-profundidad-riel { position: relative; height: 7px; margin: 9px 1px 8px; background: #345361; }
-.bitacora .bitacora-profundidad-zona { position: absolute; inset: 0 0 0 auto; background: #885764; border-left: 2px solid var(--alerta); }
-.bitacora .bitacora-profundidad-marca { position: absolute; top: -4px; width: 3px; height: 15px; margin-left: -1px; background: var(--hielo-100); }
-.bitacora .bitacora-profundidad-pie { display: flex; justify-content: space-between; gap: 8px; color: var(--hielo-300); font-size: 11px; }
+.bitacora .bitacora-profundidad-escala { display: flex; align-items: stretch; gap: 12px; margin-top: 8px; }
+.bitacora .bitacora-profundidad-riel { position: relative; flex: 0 0 7px; height: 64px; margin: 0 4px; background: #345361; }
+.bitacora .bitacora-profundidad-zona { position: absolute; inset: auto 0 0; background: #885764; border-top: 2px solid var(--alerta); }
+.bitacora .bitacora-profundidad-marca { position: absolute; left: -4px; width: 15px; height: 3px; transform: translateY(-50%); background: var(--hielo-100); }
+.bitacora .bitacora-profundidad-pie { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; color: var(--hielo-300); font-size: 11px; }
 .bitacora .bitacora-profundidad-pie span:last-child { color: var(--alerta); }
 .bitacora .bitacora-alerta { padding: 7px 0 0 10px; margin: 12px 0 0; border-left: 2px solid var(--alerta); color: var(--alerta); font-size: 13px; line-height: 1.5; }
 
@@ -183,8 +191,7 @@
   .bitacora .bitacora-supervivencia .bitacora-medidor { height: 4px; }
   .bitacora .bitacora-profundidad { margin-top: 6px; padding-top: 6px; }
   .bitacora .bitacora-profundidad-titulo b { font-size: 14px; }
-  .bitacora .bitacora-profundidad-riel { height: 5px; margin: 6px 1px; }
-  .bitacora .bitacora-profundidad-marca { height: 13px; }
+  .bitacora .bitacora-profundidad-riel { height: 40px; }
 }
 @media (max-height: 540px) and (min-width: 641px) {
   .bitacora .bitacora-supervivencia { top: auto; bottom: 74px; left: 20px; right: auto; width: 300px; }

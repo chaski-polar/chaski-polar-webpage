@@ -28,11 +28,14 @@ export function crearAmbiente(escena: THREE.Scene, renderer: THREE.WebGLRenderer
   const niebla = new THREE.FogExp2(0x0f4d6e, 0.02);
   escena.fog = niebla;
   const fondo = new THREE.Color();
+  const direccionSol = new THREE.Vector3();
 
   return {
     actualizar(y, camara) {
       const debajo = y < 0;
-      sol.position.copy(y > 30 ? DIR_SOL_ESPACIO : DIR_SOL).multiplyScalar(100);
+      const atmosfera = 1 - THREE.MathUtils.smoothstep(y, 34, 66);
+      direccionSol.copy(DIR_SOL_ESPACIO).lerp(DIR_SOL, atmosfera).normalize();
+      sol.position.copy(direccionSol).multiplyScalar(100);
       if (debajo) {
         fondo.copy(colorBajo(y));
         escena.background = fondo;
@@ -43,7 +46,7 @@ export function crearAmbiente(escena: THREE.Scene, renderer: THREE.WebGLRenderer
         hemi.color.setHex(0x8fd3e8);
       } else {
         // en el cielo el fondo lo pinta el Sky de la superficie
-        escena.background = y > 50 ? fondo.setHex(0x02040a) : null;
+        escena.background = fondo.setHex(0x02040a);
         niebla.color.setHex(0x9fb8c8);
         niebla.density = y > 40 ? 0 : 0.0016;
         sol.intensity = 2.6;
@@ -52,7 +55,7 @@ export function crearAmbiente(escena: THREE.Scene, renderer: THREE.WebGLRenderer
       }
       lampara.position.set(camara.position.x, y + 2, 2);
       lampara.intensity = THREE.MathUtils.clamp((-y - 22) / 10, 0, 1) * 90;
-      renderer.toneMappingExposure = y > 50 ? 1.0 : !debajo ? 0.55 : 0.95;
+      renderer.toneMappingExposure = !debajo ? THREE.MathUtils.lerp(1, 0.55, atmosfera) : 0.95;
     },
   };
 }

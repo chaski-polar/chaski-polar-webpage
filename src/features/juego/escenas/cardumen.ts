@@ -44,7 +44,8 @@ export interface Hud {
   temporada: L.Temporada;
   compacto: boolean;
   bajoOxigeno: boolean;
-  avanceMes: number;
+  avanceTemporada: number;
+  mesFin: number;
   /** comida de cada zona este mes, de norte a sur (el radar de ORBI) */
   radar: { zona: ZonaMar; alimento: number }[];
   /** 0 = listo; 1 = recién usado */
@@ -285,7 +286,8 @@ export function escenaCardumen(mar: Mar, entrada: Entrada, eventos: EventosCardu
     const publicarHud = (m: L.Mes, bajoOx: boolean) => useHud.getState().poner({
       anio: c.anio, mes: c.mes, zona: m.zona, peces: Math.round(c.peces), inicial, energia: c.energia, alimento: m.alimento, origen: m.origen,
       anomaliaTemp: (() => { const i = mar.indice(c.anio, c.mes + 1); return i >= 0 ? mar.estado(m.zona, i).anomaliaTemp : null; })(),
-      nino12: m.nino12, temporada: m.temporada, compacto: c.compacto, bajoOxigeno: bajoOx, avanceMes: c.tMes / L.SEGUNDOS_POR_MES,
+      nino12: m.nino12, temporada: m.temporada, compacto: c.compacto, bajoOxigeno: bajoOx,
+      avanceTemporada: c.terminado ? 1 : (c.mes + c.tMes / L.SEGUNDOS_POR_MES) / c.mesFin, mesFin: c.mesFin,
       radar: ZONAS_PERU.map((zona) => ({ zona, alimento: condicionesMes.get(zona)?.alimento ?? 1 })), impulsoEspera: Math.max(0, impulso.espera / IMPULSO.espera), y: anchi.posicion.y, yOxigeno: yOxActual,
     });
 

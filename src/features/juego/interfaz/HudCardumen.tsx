@@ -36,7 +36,8 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
       <section className="bitacora-fecha juego-caja" aria-label="Fecha y zona de la expedición">
         <span className="bitacora-sobretitulo">Bitácora de temporada</span>
         <div><b>{MESES[hud.mes]} {hud.anio}</b><span>{NOMBRE_ZONA[hud.zona]}</span></div>
-        <Medidor valor={hud.avanceMes} tono="hielo" etiqueta="Avance del mes" />
+        <Medidor valor={hud.avanceTemporada} tono="hielo" etiqueta="Avance de la temporada" />
+        <div className="bitacora-temporada-extremos"><span>Ene {hud.anio}</span><span>{MESES[hud.mesFin - 1]} {hud.anio}</span></div>
       </section>
 
       <section className="bitacora-supervivencia juego-caja" aria-label="Estado del cardumen">
@@ -54,11 +55,13 @@ export default function HudCardumen({ entrada, compacto, alternar }: { entrada: 
         </div>
         <div className="bitacora-profundidad" aria-label={`Profundidad aproximada: ${profundidad} metros; sin oxígeno desde ${limiteOxigeno} metros`}>
           <div className="bitacora-profundidad-titulo"><span>Profundidad</span><b>~{profundidad} m</b></div>
-          <div className="bitacora-profundidad-riel" aria-hidden="true">
-            <span className="bitacora-profundidad-zona" style={{ left: `${limitar(-hud.yOxigeno / FONDO * 100)}%` }} />
-            <span className="bitacora-profundidad-marca" style={{ left: `${limitar(-hud.y / FONDO * 100)}%` }} />
+          <div className="bitacora-profundidad-escala" aria-hidden="true">
+            <div className="bitacora-profundidad-riel">
+              <span className="bitacora-profundidad-zona" style={{ top: `${limitar(-hud.yOxigeno / FONDO * 100)}%` }} />
+              <span className="bitacora-profundidad-marca" style={{ top: `${limitar(-hud.y / FONDO * 100)}%` }} />
+            </div>
+            <div className="bitacora-profundidad-pie"><span>Superficie</span><span>Sin oxígeno desde ~{limiteOxigeno} m</span></div>
           </div>
-          <div className="bitacora-profundidad-pie"><span>Superficie</span><span>Sin oxígeno desde ~{limiteOxigeno} m</span></div>
         </div>
         {alerta && <p className="bitacora-alerta" role="status">{alerta}</p>}
       </section>
