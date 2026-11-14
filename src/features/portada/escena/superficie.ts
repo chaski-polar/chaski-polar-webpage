@@ -4,6 +4,7 @@ import { Water } from "three/examples/jsm/objects/Water.js";
 import { DIR_SOL } from "./ambiente";
 import type { Calidad } from "./calidad";
 import { azar, contexto, fbm, lienzo, type Capa } from "./materiales";
+import { cargarModelo, geometriaNormalizada, materialDe, mallas, MODELO_PERU } from "./modelos";
 
 /** Mapa de normales de las olas: suma de ondas que se repite sin cortes */
 function normalesOlas(): THREE.CanvasTexture {
@@ -134,21 +135,55 @@ export function crearSuperficie(escena: THREE.Scene, C: Calidad): Capa {
   agua.rotation.x = -Math.PI / 2;
   const tiempoAgua = agua.material.uniforms.time!;
 
-  const barco = crearBolichera();
-  const aves = Array.from({ length: C.aves }, crearAve);
+  let barco = crearBolichera();
+  let aves = Array.from({ length: C.aves }, crearAve);
   grupo.add(agua, crearCerros(), barco, ...aves.map((a) => a.ave));
   escena.add(grupo);
 
   // La costa entra a través de la neblina mientras la cámara desciende.
   const materiales = new Map<THREE.Material, number>();
-  grupo.traverse((objeto) => {
+  const registrar = (raiz: THREE.Object3D) => raiz.traverse((objeto) => {
     if (!(objeto instanceof THREE.Mesh) || objeto === agua) return;
     for (const material of [objeto.material].flat() as THREE.Material[]) {
       if (!materiales.has(material)) materiales.set(material, material.opacity);
       material.transparent = true;
     }
   });
+  registrar(grupo);
   agua.material.transparent = true;
+
+  // Modelos del equipo: la bolichera y los guanayes reemplazan a los dibujados en código.
+  void cargarModelo(MODELO_PERU).then((raiz) => {
+    if (!raiz) return;
+    const casco = mallas(raiz, "Bolichera")[0];
+    if (casco) {
+      const nuevo = new THREE.Group();
+      const m = new THREE.Mesh(geometriaNormalizada(casco, 6.2), materialDe(casco));
+      m.position.y = -0.35;
+      nuevo.add(m);
+      nuevo.position.copy(barco.position);
+      nuevo.rotation.y = barco.rotation.y;
+      grupo.remove(barco);
+      barco = nuevo;
+      grupo.add(barco);
+      registrar(barco);
+    }
+    const guanay = mallas(raiz, "guanay")[0];
+    if (guanay) {
+      const g = geometriaNormalizada(guanay, 1.1), mat = materialDe(guanay);
+      for (const a of aves) grupo.remove(a.ave);
+      aves = Array.from({ length: C.aves }, () => {
+        const ave = new THREE.Group();
+        const m = new THREE.Mesh(g, mat);
+        m.position.y = -0.1;
+        ave.add(m);
+        ave.position.set(azar(-20, 20), azar(5, 12), azar(-40, -18));
+        return { ave, v: azar(0.02, 0.04), f: azar(5, 8), alas: [] };
+      });
+      for (const a of aves) grupo.add(a.ave);
+      registrar(grupo);
+    }
+  });
 
   return {
     actualizar(t, y) {

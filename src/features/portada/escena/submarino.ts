@@ -3,6 +3,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { Y_FONDO } from "../scroll";
 import type { Calidad } from "./calidad";
 import { azar, fbm, nube, type Capa } from "./materiales";
+import { cargarModelo, geometriaNormalizada, materialDe, mallas, MODELO_FONDO } from "./modelos";
 
 /** La superficie vista desde abajo: un techo claro que ondula */
 function crearTecho(): THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial> {
@@ -97,9 +98,41 @@ function crearFondo(C: Calidad): THREE.Group {
     roca.position.set(azar(-30, 30), Y_FONDO - 4.6, azar(-44, -8));
     roca.scale.set(azar(1, 3.2), azar(0.6, 1.8), azar(1, 3));
     roca.rotation.y = azar(0, 6);
+    roca.userData.proceso = true;
     grupo.add(roca);
   }
   return grupo;
+}
+
+/** Rocas, guijarros, conchas, erizos y estrellas del modelo del equipo, en instancias y apoyados en el relieve del fondo */
+function poblarFondo(fondo: THREE.Group, C: Calidad): void {
+  void cargarModelo(MODELO_FONDO).then((raiz) => {
+    if (!raiz) return;
+    const piezas: [string, number, number, number][] = [ // prefijo, cantidad, tamaño mínimo, tamaño máximo
+      ["Roca", C.rocas, 2, 6], ["Guijarro", C.rocas * 3, 0.4, 1], ["Concha", C.rocas, 0.5, 1.1], ["Erizo", Math.round(C.rocas / 3), 0.5, 0.9], ["Estrella", Math.round(C.rocas / 4), 0.7, 1.3],
+    ];
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3();
+    let hay = false;
+    for (const [prefijo, n, mini, maxi] of piezas) {
+      const fuentes = mallas(raiz, prefijo);
+      if (!fuentes.length) continue;
+      hay = true;
+      const por = Math.ceil(n / fuentes.length);
+      for (const f of fuentes) {
+        const inst = new THREE.InstancedMesh(geometriaNormalizada(f, 1), materialDe(f) as THREE.Material, por);
+        for (let i = 0; i < por; i++) {
+          const x = azar(-30, 30), z = azar(-44, -8);
+          p.set(x, Y_FONDO - 5.5 + fbm(x * 0.05, z * 0.05, 5) * 3 - 0.05, z);
+          q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, azar(0, 6.28));
+          s.setScalar(azar(mini, maxi));
+          inst.setMatrixAt(i, m4.compose(p, q, s));
+        }
+        inst.frustumCulled = false;
+        fondo.add(inst);
+      }
+    }
+    if (hay) for (const o of [...fondo.children]) if (o.userData.proceso) fondo.remove(o);
+  });
 }
 
 /** Zona sin oxígeno: una capa turbia donde se acaba el oxígeno (oxiclina) */
@@ -139,7 +172,9 @@ export function crearSubmarino(escena: THREE.Scene, C: Calidad): Capa {
   const peces = new THREE.InstancedMesh(geometriaAnchoveta(), matPez, C.peces);
   const datos: Pez[] = Array.from({ length: C.peces }, () => ({ a: azar(0, Math.PI * 2), r: azar(1.5, 7.5), y: azar(-1.6, 1.6), v: azar(0.22, 0.32), d: azar(-0.5, 0.5), s: azar(1.1, 1.5) }));
 
-  grupo.add(techo, rayos, plancton, nieve, turbidez, oxiclina, peces, crearFondo(C));
+  const fondo = crearFondo(C);
+  poblarFondo(fondo, C);
+  grupo.add(techo, rayos, plancton, nieve, turbidez, oxiclina, peces, fondo);
   escena.add(grupo);
 
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), vp = new THREE.Vector3(), esc = new THREE.Vector3();
