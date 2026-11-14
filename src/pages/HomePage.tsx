@@ -15,6 +15,7 @@ const GlobePanel = lazy(() => import('../features/explorer/components/GlobePanel
 const InsightsSection = lazy(() => import('../features/insights/InsightsSection'))
 const EventosNinoSection = lazy(() => import('../features/eventos/EventosNinoSection'))
 const CrucerosSection = lazy(() => import('../features/cruceros/CrucerosSection'))
+const TendenciasSection = lazy(() => import('../features/tendencias/TendenciasSection'))
 
 /** Explorador: los datos se cargan solo al entrar a esta página */
 export default function HomePage() {
@@ -66,6 +67,7 @@ function Explorador() {
             <CargarAlVer id="hallazgos" alto={2600}><InsightsSection /></CargarAlVer>
             <CargarAlVer id="eventos-nino" alto={760}><EventosNinoSection /></CargarAlVer>
             <CargarAlVer id="cruceros" alto={820}><CrucerosSection /></CargarAlVer>
+            <CargarAlVer id="trends" alto={1100}><TendenciasSection /></CargarAlVer>
             <section className="seccion">
               <div className="llamada">
                 <div>

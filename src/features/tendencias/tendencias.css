@@ -1,0 +1,20 @@
+.tendencias h2 { margin: 4px 0 10px; }
+.tend-ejemplos { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 18px 0; }
+.tend-ejemplos .btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 10px 14px; }
+.tend-ejemplos .btn span { font-size: .85rem; color: var(--niebla); font-weight: 400; }
+.tend-controles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 10px 0 8px; }
+.tend-controles label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--niebla); }
+.tend-controles select { background: var(--panel-fuerte); color: var(--hielo); border: 1px solid rgba(163, 188, 203, .3); border-radius: 6px; padding: 8px 10px; font: inherit; }
+.tend-controles select:disabled { opacity: .6; }
+.tend-def { margin: 6px 0 16px; color: var(--niebla); font-size: .92rem; max-width: 70ch; }
+.tend-veredicto { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 14px 16px; border-radius: 6px; background: var(--panel-medio); border-left: 4px solid var(--niebla); }
+.tend-veredicto.si { border-left-color: var(--fito); }
+.tend-veredicto.no { border-left-color: var(--niebla); }
+.tend-veredicto b { font-family: var(--serif); font-size: 1.35rem; font-weight: 400; }
+.tend-veredicto span { color: var(--niebla); font-size: .95rem; }
+.tend-nota { margin: 8px 0; font-size: .9rem; color: var(--niebla); max-width: 70ch; }
+.tend-grafico { margin: 14px 0; padding: 12px 8px 4px; border-radius: 6px; background: var(--panel-suave); }
+.tend-sens h3 { margin: 22px 0 6px; font-size: 1.05rem; }
+.tend-sens-graficos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 10px; }
+.tend-sens-graficos figure { margin: 0; padding: 10px 6px 2px; border-radius: 6px; background: var(--panel-suave); }
+.tend-sens-graficos figcaption { font-size: .82rem; color: var(--niebla); padding: 0 8px 4px; }
