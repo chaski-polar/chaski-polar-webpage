@@ -32,12 +32,12 @@ export const HISTORIAS: readonly Historia[] = [
     },
   },
   {
-    id: 'record2013', titulo: '2013, a highly productive sea', desc: 'The year with the most phytoplankton off Peru in 27 years.',
+    id: 'record2013', titulo: '2004, Chimbote’s greenest year', desc: 'The highest annual chlorophyll in the Chimbote series.',
     variable: 'clorofila_mg_m3', zona: CN,
-    mes: (m) => m.mesExtremo(CN, chl(), 2013, 1),
+    mes: (m) => m.mesExtremo(CN, chl(), 2004, 1),
     nota(m, i) {
       const a = m.anomaliaTxt(CN, chl(), i)
-      return `It was the year with the most phytoplankton off north-central Peru in 27 years. In ${etiquetaMes(m.mes(i))} there was ${a ? a.frase : 'a lot of phytoplankton'}. The water was cold and scallop harvest reached its maximum.`
+      return `2004 has the highest annual chlorophyll in the Chimbote series. In ${etiquetaMes(m.mes(i))} there was ${a ? a.frase : 'a lot of phytoplankton'}. Compare the monthly values and test the full record in Trends.`
     },
   },
   {

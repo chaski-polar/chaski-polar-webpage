@@ -49,7 +49,7 @@ const CAMPOS_ESCENARIO = new Set<CampoSerieMonitor>(['chlorophyll_a_mg_m3', 'sst
 
 const fmt = (x: unknown, dec: number): string => {
   if (Array.isArray(x)) return x.map((y) => fmt(y, dec)).join(' – ')
-  return typeof x === 'number' ? new Intl.NumberFormat('es', { maximumFractionDigits: dec }).format(x) : 'sin dato'
+  return typeof x === 'number' ? new Intl.NumberFormat('en', { maximumFractionDigits: dec }).format(x) : 'Not available'
 }
 
 /** Monitor de condiciones: serie mensual de la costa peruana o de cada zona y, al final, los escenarios de El Niño */
@@ -70,7 +70,7 @@ export default function MonitorSection() {
   if (section === 'pacifico_sur') return <section className="seccion"><div className="monitor monitor-vacio"><h2>South Pacific monitor</h2><p>The boxes for the intermediate, subtropical and Humboldt-transition South Pacific are not included in this dataset yet. No series from another region are shown as a replacement.</p></div></section>
   const v = variables.find((x) => x.nombre === elegida) ?? variables[0]!
   const esBiomasa = v.campo === 'biomass_total_t'
-  const nombreLugar = zona ? modelo.zona(zona).nombre : 'la costa peruana'
+  const nombreLugar = zona ? modelo.zona(zona).nombre : 'the Peruvian coast'
 
   const { datos, conDato, hayEscenario } = useMemo(() => {
     const primero = registros[0]
@@ -104,7 +104,7 @@ export default function MonitorSection() {
   }, [modelo, registros, v, anomalia, esBiomasa, zona])
 
   if (!registros.length) return null
-  const unidad = anomalia ? v.unidadAnomalia ?? `${v.unidad} · anomalía mensual` : v.unidad
+  const unidad = anomalia ? v.unidadAnomalia ?? `${v.unidad} · monthly anomaly` : v.unidad
   const ultimo = modelo.ultimoMonitor(esBiomasa ? 'biomass_total_t_interpolated' : v.campo)
   const nino = modelo.ultimoMonitor('nino12_anom_c')
   const nEscenario = datos.length - registros.length
@@ -117,9 +117,9 @@ export default function MonitorSection() {
           <h2 id="t-monitor">Conditions monitor</h2>
           <p>Monthly environmental signals off the Peruvian coast, as an average or zone by zone: temperature, chlorophyll, nutrients, observed survey biomass and climate indices. El Niño scenarios through February 2027 are added at the end.</p>
         </div>
-        <span className="monitor-meta">{registros[0]?.date.slice(0, 7)} → {registros.at(-1)?.date.slice(0, 7)} · {registros.length} meses{nEscenario > 0 ? ` + ${nEscenario} de escenario` : ''}</span>
+        <span className="monitor-meta">{registros[0]?.date.slice(0, 7)} → {registros.at(-1)?.date.slice(0, 7)} · {registros.length} months{nEscenario > 0 ? ` + ${nEscenario} scenario months` : ''}</span>
       </div>
-      <div className="monitor-controles" role="group" aria-label="Filtros del monitor">
+      <div className="monitor-controles" role="group" aria-label="Monitor filters">
         <label>Place <select value={zona ?? ''} onChange={(e) => setMonitorZone(modelo.esZona(e.target.value) ? e.target.value : null)}>
           <option value="">Peruvian coast (average)</option>
           <optgroup label="Zones">{zonasConDatos.map((z) => <option key={z} value={z}>{modelo.zona(z).nombre}</option>)}</optgroup>
@@ -133,11 +133,11 @@ export default function MonitorSection() {
         <label>Scale <select value={anomalia ? 'anomaly' : 'absolute'} onChange={(e) => setAnomalia(e.target.value === 'anomaly')}><option value="absolute">Values</option><option value="anomaly">Difference from each month's normal</option></select></label>
       </div>
       <p className="monitor-estado" aria-live="polite">
-        {conDato} de {datos.length - nEscenario} meses con dato de {v.nombre.toLowerCase()} en {nombreLugar}. {esBiomasa ? 'La línea une observaciones de crucero solo para visualización; los puntos claros son los meses observados.' : zona ? 'Mediana mensual de los píxeles del satélite dentro de la zona.' : 'La serie ambiental es continua dentro del periodo descargado.'}
-        {hayEscenario && ' La línea discontinua naranja son escenarios de El Niño (septiembre de 2026 a febrero de 2027), no observaciones.'}
-        {zona && ' Los escenarios de El Niño solo existen para el promedio de la costa.'}
+        {conDato} of {datos.length - nEscenario} months with data for {v.nombre.toLowerCase()} in {nombreLugar}. {esBiomasa ? 'The line connects survey observations for visualization only; light points are observed months.' : zona ? 'Monthly median of satellite pixels within the zone.' : 'Environmental series cover the downloaded period.'}
+        {hayEscenario && ' The dashed orange line shows El Niño scenarios (September 2026–February 2027), not observations.'}
+        {zona && ' El Niño scenarios are available only for the coast-wide average.'}
       </p>
-      <div className="monitor-grafico" role="img" aria-label={`Serie mensual de ${v.nombre.toLowerCase()} en ${nombreLugar}`}>
+      <div className="monitor-grafico" role="img" aria-label={`Monthly series of ${v.nombre.toLowerCase()} in ${nombreLugar}`}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={datos} margin={{ top: 6, right: 8, bottom: 0, left: 4 }}>
             <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
@@ -146,9 +146,9 @@ export default function MonitorSection() {
             <Tooltip contentStyle={{ background: 'rgba(7,30,51,.96)', border: '1px solid #24507a', borderRadius: 8 }} formatter={(x, n) => [fmt(x, v.dec), String(n)]} />
             <Legend verticalAlign="bottom" wrapperStyle={{ fontSize: 12, color: '#a3bccb' }} />
             <Area dataKey="valor" name={`${v.nombre} (${unidad})`} stroke={v.color} fill={`${v.color}22`} strokeWidth={2} isAnimationActive={false} />
-            {esBiomasa && <Scatter dataKey="observada" name="Observada en crucero" fill="#eaf3f5" isAnimationActive={false} />}
-            {hayEscenario && <Area dataKey="banda" name="Escenarios débil a intenso" stroke="none" fill="rgba(240,138,75,0.22)" isAnimationActive={false} />}
-            {hayEscenario && <Line dataKey="central" name="Escenario central de El Niño" stroke="#f08a4b" strokeDasharray="5 4" strokeWidth={2} dot={false} isAnimationActive={false} />}
+            {esBiomasa && <Scatter dataKey="observada" name="Observed on survey" fill="#eaf3f5" isAnimationActive={false} />}
+            {hayEscenario && <Area dataKey="banda" name="Weak to intense scenarios" stroke="none" fill="rgba(240,138,75,0.22)" isAnimationActive={false} />}
+            {hayEscenario && <Line dataKey="central" name="Central El Niño scenario" stroke="#f08a4b" strokeDasharray="5 4" strokeWidth={2} dot={false} isAnimationActive={false} />}
           </ComposedChart>
         </ResponsiveContainer>
       </div>

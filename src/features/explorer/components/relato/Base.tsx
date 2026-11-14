@@ -31,18 +31,18 @@ export default function Base() {
     <p>It is Peru's scientific base in Antarctica. It operates during the austral summer, when Peruvian expeditions arrive to study the sea, ice and Antarctic life.</p>
     <div className="cifras">
       <div className="cifra"><b className="num">{prom < 0 ? '−' : ''}{nf(1).format(Math.abs(prom))} °C</b><span>average air temperature, {filas[0]?.anio ?? '—'}–{filas.at(-1)?.anio ?? '—'}</span></div>
-      <div className="cifra"><b className="num">{signo(pend)}{nf(2).format(Math.abs(pend * 10))} °C</b><span>tendencia por década</span></div>
+      <div className="cifra"><b className="num">{signo(pend)}{nf(2).format(Math.abs(pend * 10))} °C</b><span>trend per decade</span></div>
     </div>
-    <div className="grafico" aria-label="Temperatura anual del aire en la Base Machu Picchu">
+    <div className="grafico" aria-label="Annual air temperature at Machu Picchu Base">
       <ResponsiveContainer width="100%" height="100%"><BarChart data={filas} margin={{ top: 6, right: 6, bottom: 0, left: -12 }}>
         <XAxis dataKey="anio" tick={{ fill: '#a3bccb', fontSize: 12 }} stroke="rgba(36,80,122,.55)" minTickGap={24} />
         <YAxis tick={{ fill: '#a3bccb', fontSize: 12 }} stroke="rgba(36,80,122,.55)" tickCount={5} width={44} />
-        <Tooltip formatter={(x) => [`${nf(1).format(Number(x))} °C`, 'Temperatura del aire']} contentStyle={{ background: 'rgba(7,30,51,.96)', border: '1px solid #24507a', borderRadius: 8 }} />
+        <Tooltip formatter={(x) => [`${nf(1).format(Number(x))} °C`, 'Air temperature']} contentStyle={{ background: 'rgba(7,30,51,.96)', border: '1px solid #24507a', borderRadius: 8 }} />
         <Bar dataKey="t" radius={2} isAnimationActive={false}>{filas.map((f) => <Cell key={f.anio} fill={colorDiverge((f.t - prom) / 1.2, 0.9)} />)}</Bar>
       </BarChart></ResponsiveContainer>
     </div>
     <p className="nota">Air at 2 m above ground, NASA POWER (MERRA-2). The trend is weak: winters vary greatly from year to year.</p>
-    <h3>¿Qué quieres ver?</h3>
+    <h3>What would you like to explore?</h3>
     <div className="chips">
       <button className="chip" type="button" onClick={() => acciones.irAZona('antartida_rey_jorge')}>King George waters</button>
       <button className="chip" type="button" onClick={() => acciones.irAZona('antartida_peninsula')}>Antarctic Peninsula</button>

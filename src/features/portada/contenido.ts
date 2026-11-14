@@ -21,7 +21,7 @@ export const SECCIONES: readonly Seccion[] = [
   {
     de: 0, a: 0.05, principal: true,
     titulo: "Chaski Polar",
-    texto: "From satellite to the seafloor of the Peruvian sea",
+    texto: "Explore a changing ocean, from satellite to seafloor",
     botones: [{ texto: "Enter the explorer →", accion: "entrar" }, { texto: "Play Cardumen", href: "/juego" }],
   },
   {
@@ -37,7 +37,7 @@ export const SECCIONES: readonly Seccion[] = [
   {
     de: 0.43, a: 0.54,
     titulo: "0–50 m · Phytoplankton",
-    texto: "For every degree the sea warms, phytoplankton falls by 18% to 33%, depending on the zone. When it cools, it barely recovers.",
+    texto: "In the central and southern zones, chlorophyll falls by about 18% to 30% per degree of warming. Cooling responses differ by zone: this is an observed pattern, not a forecast.",
   },
   {
     de: 0.58, a: 0.69,
@@ -52,7 +52,7 @@ export const SECCIONES: readonly Seccion[] = [
   {
     de: 0.9, a: 1.05,
     titulo: "200 m · The seafloor",
-    texto: "Now explore the satellite data month by month, from 1998.",
+    texto: "What changes, where, and how much? Explore the satellite record and test whether a trend is significant.",
     botones: [{ texto: "Enter the explorer →", accion: "entrar" }, { texto: "Play Cardumen", href: "/juego" }],
   },
 ];

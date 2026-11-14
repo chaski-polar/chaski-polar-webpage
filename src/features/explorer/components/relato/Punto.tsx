@@ -27,18 +27,18 @@ export default function Punto({ lat, lng }: { lat: number; lng: number }) {
         <div className="cifra"><b className="num">{dp.sst == null ? 'no data' : `${nf(1).format(dp.sst)} °C`}</b><span>sea temperature{dp.anom != null && `, ${signo(dp.anom)}${nf(1).format(Math.abs(dp.anom))} °C from normal`}</span></div>
       </div>
       {dp.serie && <>
-        <div className="grafico" aria-label="Clorofila mensual en este punto"><SerieMensual modelo={modelo} serie={dp.serie} color="#3fc28c" mesActual={i} alElegirMes={acciones.fijarMes} logaritmica /></div>
+        <div className="grafico" aria-label="Monthly chlorophyll at this point"><SerieMensual modelo={modelo} serie={dp.serie} color="#3fc28c" mesActual={i} alElegirMes={acciones.fijarMes} logaritmica /></div>
         <p className="nota">Chlorophyll from the map's half-degree cell (ESA OC-CCI v6), on a logarithmic scale. Tap the chart to jump to that month.</p>
       </>}
     </>}
     {dp?.tierra && <p>This point falls on land or where the satellite never sees the sea, such as permanent ice.</p>}
     <p>
-      {dp ? `No es una de las ${modelo.ids.length} zonas de estudio.` : 'Aquí no hay mapa del satélite ni una zona de estudio.'}
-      {cerca[0] && <> La zona más cercana es <strong>{modelo.zona(cerca[0].z).nombre}</strong>, a unos {km(cerca[0].d)} km.</>}
-      {dBase < 3000 && ` La Base Machu Picchu queda a ${km(dBase)} km.`}
+      {dp ? `This is not one of the ${modelo.ids.length} study zones.` : 'No satellite map or study zone is available here.'}
+      {cerca[0] && <> The nearest zone is <strong>{modelo.zona(cerca[0].z).nombre}</strong>, about {km(cerca[0].d)} km.</>}
+      {dBase < 3000 && ` Machu Picchu Base is ${km(dBase)} km away.`}
     </p>
-    <h3>Ir a una zona cercana</h3>
+    <h3>Go to a nearby zone</h3>
     <div className="chips">{cerca.slice(0, 3).map(({ z, d }) => <button key={z} className="chip" type="button" onClick={() => acciones.irAZona(z)}>{modelo.zona(z).nombre} ({km(d)} km)</button>)}</div>
-    <p className="nota" style={{ marginTop: 18 }}>El mapa del satélite cubre del ecuador al sur de la Península Antártica, entre los 92° y los 52° O.</p>
+    <p className="nota" style={{ marginTop: 18 }}>The satellite map extends from the equator to south of the Antarctic Peninsula, between 92° and 52° W.</p>
   </>
 }

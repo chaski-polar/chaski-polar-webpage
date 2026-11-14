@@ -24,7 +24,7 @@ export function SerieMensual({ modelo, serie, color, mesActual, alElegirMes, log
     return serie.map((valor, k) => ({ k, valor, media: media[k] }))
   }, [serie])
   const marcas = useMemo(() => datos.filter((d) => { const m = modelo.mes(i0 + d.k); return m.mes === 0 && m.anio % 5 === 0 }).map((d) => d.k), [datos, modelo, i0])
-  const fmt = (x: unknown) => (typeof x === 'number' ? nf(x < 1 ? decimales : Math.min(decimales, 1)).format(x) : 'sin dato')
+  const fmt = (x: unknown) => (typeof x === 'number' ? nf(x < 1 ? decimales : Math.min(decimales, 1)).format(x) : 'Not available')
 
   return <ResponsiveContainer width="100%" height="100%">
     <ComposedChart data={datos} margin={{ top: 6, right: 6, bottom: 0, left: -12 }}

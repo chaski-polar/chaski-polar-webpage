@@ -9,11 +9,11 @@ const ZONAS_PERU: ClaveZonaMonitor[] = ['paita', 'chimbote', 'callao', 'pisco', 
 
 /** Meses que se promediaron en cada evento */
 const PERIODOS: Record<string, string> = {
-  '1997-98': 'ene–jun 1998',
-  '2015-16': 'jun 2015–abr 2016',
-  '2017': 'ene–may 2017',
-  '2023-24': 'mar 2023–ene 2024',
-  '2026': 'may–sep 2026, parcial',
+  '1997-98': 'Jan–Jun 1998',
+  '2015-16': 'Jun 2015–Apr 2016',
+  '2017': 'Jan–May 2017',
+  '2023-24': 'Mar 2023–Jan 2024',
+  '2026': 'May–Sep 2026, partial',
 }
 const periodo = (nombre: string): string | undefined => Object.entries(PERIODOS).find(([k]) => nombre.includes(k))?.[1]
 
@@ -58,13 +58,13 @@ export default function EventosNinoSection() {
         <thead><tr><th scope="col">El Niño</th>{ZONAS_PERU.map((c) => <th scope="col" key={c}>{zonas[c]?.nombre ?? c}</th>)}</tr></thead>
         <tbody>
           {eventos.map((e) => <tr key={e.nombre}>
-            <th scope="row">{e.nombre}{periodo(e.nombre) && <small>{periodo(e.nombre)}</small>}{e.nombre.includes('2026') && <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>View on the globe</button>}</th>
+            <th scope="row">{e.nombre.replace("(en curso)", "(ongoing)")}{periodo(e.nombre) && <small>{periodo(e.nombre)}</small>}{e.nombre.includes('2026') && <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>View on the globe</button>}</th>
             {e.cambio_clorofila_pct
               ? ZONAS_PERU.map((c) => {
                 const p = e.cambio_clorofila_pct?.[c]
                 return <td key={c}>{p == null ? '—' : <button type="button" style={{ background: colorCambio(p) }} onClick={() => ir(e.nombre, c)} title={`View ${zonas[c]?.nombre ?? c} on the globe`}>{signo(p)}{nf(0).format(Math.abs(p))} %</button>}</td>
               })
-              : <td colSpan={ZONAS_PERU.length} className="evento-nota">{e.nota ?? 'No data yet.'} <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>View El Niño 2026 on the globe</button></td>}
+              : <td colSpan={ZONAS_PERU.length} className="evento-nota">{e.nombre.includes('2026') ? 'The event is ongoing; the full event comparison is not available.' : e.nota ?? 'No data yet.'} <button type="button" className="enlace" onClick={() => { acciones.nino2026(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>View El Niño 2026 on the globe</button></td>}
           </tr>)}
           <tr className="fila-promedio">
             <th scope="row">Event average<small>excluding 2026, which is ongoing</small></th>

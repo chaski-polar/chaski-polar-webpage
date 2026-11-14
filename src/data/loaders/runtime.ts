@@ -9,13 +9,13 @@ function loadScript(src: string) {
     if (existing) {
       if (existing.dataset.loaded === 'true') return resolve()
       existing.addEventListener('load', () => resolve(), { once: true })
-      existing.addEventListener('error', () => reject(new Error(`No se pudo cargar ${src}`)), { once: true })
+      existing.addEventListener('error', () => reject(new Error(`Could not load ${src}`)), { once: true })
       return
     }
     const script = document.createElement('script')
     script.src = src
     script.onload = () => { script.dataset.loaded = 'true'; resolve() }
-    script.onerror = () => reject(new Error(`No se pudo cargar ${src}`))
+    script.onerror = () => reject(new Error(`Could not load ${src}`))
     document.body.appendChild(script)
   })
 }

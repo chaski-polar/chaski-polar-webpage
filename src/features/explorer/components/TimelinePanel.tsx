@@ -58,7 +58,7 @@ export function TimelinePanel() {
     {opciones.length > 0 && <div className="timeline-controls">
     <button className="play-button" type="button" aria-label={playing ? 'Pause animation' : 'Play months'} onClick={() => setPlaying(!playing)}>{playing ? 'Ⅱ' : '▶'}</button>
       <div className="timeline-track">
-        <div className="timeline-events" role="group" aria-label="Saltar a un evento de El Niño">{eventos.map((e, k) =>
+        <div className="timeline-events" role="group" aria-label="Jump to an El Niño event">{eventos.map((e, k) =>
           <button key={e.anio} type="button" style={{ left: posicion(e.i), transform: desplazamiento(k) }} aria-current={month === e.i} title={`${e.nombre} (pico en ${mesLargo(modelo.mes(e.i))})`}
             onClick={() => { setPlaying(false); if (e.anio === 2026) { acciones.nino2026(); return } if (!v.mapa) setVariable('temperatura_superficial_C'); setMonth(e.i) }}>{e.anio}</button>)}
         </div>

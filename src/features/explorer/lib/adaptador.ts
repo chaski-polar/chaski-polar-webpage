@@ -32,7 +32,7 @@ export function escenariosDesdeFilas(filas: PredictionRow[]): DatosEscenarios | 
 }
 
 export function adaptarDatos(data: ProjectData, monitor: MonitorData | null, predicciones: PredictionRow[]): DatosExplorador {
-  if (!data.meses_inicio || !data.indices || !data.pesca || !data.juego) throw new Error("Los datos del explorador están incompletos");
+  if (!data.meses_inicio || !data.indices || !data.pesca || !data.juego) throw new Error("Explorer data is incomplete");
   return {
     series: data as unknown as DatosSeries,
     monitor: monitor?.records.length ? (monitor as unknown as DatosMonitor) : null,

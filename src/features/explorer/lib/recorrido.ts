@@ -37,7 +37,7 @@ const mesNino2023 = (m: Modelo): number => m.eventosNino().find((e) => e.anio ==
 
 export const RECORRIDO: readonly Paso[] = [
   {
-    titulo: 'El mar más verde del Pacífico sur',
+    titulo: 'A productive sea in the South Pacific',
     preparar: (m) => ({ variable: 'clorofila_mg_m3', mes: m.mesExtremo(CN, chl(), m.anioMasVerde(CN), 1), pov: { lat: -13, lng: -86, altitude: 1.1 } }),
     texto(m, mapa, i) {
       const v = m.valorSerie(CN, 'clorofila_mg_m3', i)
@@ -45,44 +45,44 @@ export const RECORRIDO: readonly Paso[] = [
       const veces = v && lejos ? v / lejos : null
       return {
         parrafos: [
-          'Mira la franja amarilla y verde pegada a la costa del Perú: es **fitoplancton**, visto por satélites que miden el color del mar. Mar adentro el agua es morada: tiene muy poco fitoplancton.',
-          `Es ${mesLargo(m.mes(i))}, el mes más verde de ${m.anioMasVerde(CN)} frente a Chimbote según la serie cargada. Pasa el cursor sobre el mapa para leer cada punto.`,
+          'The yellow-green band along Peru’s coast is **phytoplankton**, observed by satellites measuring ocean color. Purple offshore water has much less phytoplankton.',
+          `This is ${mesLargo(m.mes(i))}, the greenest month of ${m.anioMasVerde(CN)} off Chimbote in the loaded record. Hover over the map to read a point.`,
         ],
-        dato: v ? { valor: `${nf(1).format(v)} mg/m³`, texto: `de clorofila frente a Chimbote${veces && lejos ? `: unas ${nf(0).format(veces)} veces más que a 1 200 km mar adentro (${nf(2).format(lejos)} mg/m³)` : ''}.` } : undefined,
+        dato: v ? { valor: `${nf(1).format(v)} mg/m³`, texto: `chlorophyll off Chimbote${veces && lejos ? `: about ${nf(0).format(veces)} times the value 1,200 km offshore (${nf(2).format(lejos)} mg/m³)` : ''}.` } : undefined,
       }
     },
   },
   {
-    titulo: 'El motor: viento y agua fría que sube',
+    titulo: 'Wind and rising cold water',
     corriente: 'humboldt',
     preparar: () => ({ pov: { lat: -20, lng: -82, altitude: 1.45 } }),
     texto(m, mapa, i) {
       const mes = m.mes(i).mes
       const costa = mapa.climaEn(-12.5, -77.5, mes), afuera = mapa.climaEn(-12.5, -88.5, mes)
       return {
-        parrafos: ['La **corriente de Humboldt**, la línea animada, trae agua fría desde el sur. El viento empuja el agua de la superficie mar adentro y desde abajo sube agua fría cargada de nitrato y fosfato: el **afloramiento**. Con esos nutrientes y el sol de todo el año, el fitoplancton crece.'],
+        parrafos: ['The **Humboldt Current**, shown by the animated line, carries cold water from the south. Wind pushes surface water offshore and cold water rich in nitrate and phosphate rises from below: **upwelling**. These nutrients and year-round sunlight support phytoplankton.'],
         dato: costa != null && afuera != null
-          ? { valor: `${nf(1).format(afuera - costa)} °C más fría`, texto: `es el agua junto a Callao que a 1 200 km mar adentro, en un ${MESES_LARGOS[mes]} promedio de 1998–2020 (${nf(1).format(costa)} °C frente a ${nf(1).format(afuera)} °C).` }
+          ? { valor: `${nf(1).format(afuera - costa)} °C colder`, texto: `is the water off Callao compared with water 1,200 km offshore, for an average ${MESES_LARGOS[mes]} over 1998–2020 (${nf(1).format(costa)} °C versus ${nf(1).format(afuera)} °C).` }
           : undefined,
       }
     },
   },
   {
-    titulo: 'Llega El Niño',
+    titulo: 'El Niño arrives',
     preparar: (m) => ({ variable: 'temperatura_superficial_C', mes: mesNino2023(m), pov: { lat: -10, lng: -86, altitude: 1.25 } }),
     texto(m, _mapa, i) {
       const n = m.nino[i], a = m.anomaliaTxt(CN, sst(), i)
       return {
         parrafos: [
-          `En ${mesLargo(m.mes(i))} el agua frente al norte del Perú se calentó. En el globo, el naranja muestra dónde el mar estuvo más cálido que lo normal para ese mes. El agua cálida forma una tapa en la superficie y el agua fría con nutrientes ya no llega arriba.`,
-          'Debajo del globo, en la línea de tiempo, las marcas naranjas señalan cada vez que pasó lo mismo.',
+          `In ${mesLargo(m.mes(i))}, water off northern Peru warmed. Orange on the globe shows water warmer than normal for that month. The warm surface layer reduces the supply of cold, nutrient-rich water.`,
+          'Orange marks on the timeline indicate other El Niño events.',
         ],
-        dato: n != null ? { valor: `${signo(n)}${nf(1).format(Math.abs(n))} °C`, texto: `sobre lo normal en la región Niño 1+2 (índice de NOAA)${a ? `; frente a Chimbote, ${a.frase}` : ''}.` } : undefined,
+        dato: n != null ? { valor: `${signo(n)}${nf(1).format(Math.abs(n))} °C`, texto: `above normal in the Niño 1+2 region (NOAA index)${a ? `; off Chimbote, ${a.frase}` : ''}.` } : undefined,
       }
     },
   },
   {
-    titulo: 'El fitoplancton se apaga y la pesca cae',
+    titulo: 'Phytoplankton and fisheries during warming',
     preparar: (m) => ({ variable: 'clorofila_mg_m3', mes: mesNino2023(m), pov: { lat: -10, lng: -84, altitude: 1.05 } }),
     texto(m, _mapa, i) {
       const a = m.anomaliaTxt(CN, chl(), i)
@@ -92,36 +92,36 @@ export const RECORRIDO: readonly Paso[] = [
       const biomasa = m.mediaMonitorAnio('biomass_total_t_interpolated', anio)
       const ultima = m.ultimoMonitor('biomass_total_t_interpolated')
       const monitor = biomasa != null
-        ? `En el monitor, la biomasa interpolada media de ${anio} fue de ${nf(1).format(biomasa / 1e6)} millones de toneladas; es una reconstrucción para visualizar entre cruceros, no una observación mensual.`
-        : `El monitor de biomasa no tiene cobertura interpolada para ${anio}; su último valor disponible es ${ultima?.biomass_total_t_interpolated != null ? `${nf(1).format(ultima.biomass_total_t_interpolated / 1e6)} millones de toneladas en ${ultima.date.slice(0, 7)}` : 'sin dato'}.`
+        ? `The monitor’s mean interpolated biomass for ${anio} is ${nf(1).format(biomasa / 1e6)} million tonnes: a reconstruction between surveys, not a monthly observation.`
+        : `No interpolated biomass is available for ${anio}; the latest available value is ${ultima?.biomass_total_t_interpolated != null ? `${nf(1).format(ultima.biomass_total_t_interpolated / 1e6)} million tonnes in ${ultima.date.slice(0, 7)}` : 'Not available'}.`
       return {
         parrafos: [
-          `El mismo mes, ahora con el fitoplancton${a ? `: frente a Chimbote hubo ${a.frase}` : ''}. Menos fitoplancton puede significar menos alimento disponible para el zooplancton y la anchoveta, pero esta página muestra una asociación, no una causa demostrada.`,
-          ...(caida != null && p0 && p1 ? [`En ${anio}, el Perú pescó ${nf(1).format(p1 / 1e6)} millones de toneladas de anchoveta, frente a ${nf(1).format(p0 / 1e6)} millones en ${anterior} (FAO).`] : []),
+          `The same month, now showing phytoplankton${a ? `: off Chimbote there was ${a.frase}` : ''}. Less phytoplankton may mean less food for zooplankton and anchoveta, but this page shows an association, not a demonstrated cause.`,
+          ...(caida != null && p0 && p1 ? [`In ${anio}, Peru caught ${nf(1).format(p1 / 1e6)} million tonnes of anchoveta, versus ${nf(1).format(p0 / 1e6)} million in ${anterior} (FAO).`] : []),
           monitor,
         ],
         dato: caida != null
-          ? { valor: `${nf(0).format(Math.abs(caida))} % ${caida >= 0 ? 'menos' : 'más'}`, texto: `cambio de anchoveta pescada entre ${anterior} y ${anio}. La pesca también depende de las cuotas: no mide directamente cuántos peces hay.` }
-          : { valor: 'sin comparación', texto: 'FAO no tiene dos años consecutivos disponibles para este paso.' },
+          ? { valor: `${nf(0).format(Math.abs(caida))} % ${caida >= 0 ? 'less' : 'more'}`, texto: `change in anchoveta catch between ${anterior} and ${anio}. Fisheries also depend on quotas: catches do not directly measure how many fish are present.` }
+          : { valor: 'No comparison', texto: 'FAO has no consecutive years available for this step.' },
       }
     },
   },
   {
-    titulo: 'Mientras tanto, en la Antártida',
+    titulo: 'Meanwhile, in Antarctica',
     preparar: (m) => ({ variable: 'clorofila_mg_m3', mes: m.mesExtremo(RJ, chl(), 2023, 1), pov: { lat: -55, lng: -62, altitude: 1.15 } }),
     texto(m, _mapa, i) {
       const a = m.anomaliaTxt(RJ, chl(), i), min = m.hieloMinimo()
       return {
         parrafos: [
-          `A unos 6 000 km al sur, junto a la Base Machu Picchu, el mar de la isla Rey Jorge tuvo mucho fitoplancton en ${mesLargo(m.mes(i))}${a ? ` (${a.frase})` : ''}.`,
-          `En la serie cargada, ${min?.anio ?? '—'} fue el año con menor anomalía media de hielo marino antártico. Bajo ese hielo vive el krill, la base de la cadena antártica.`,
+          `About 6,000 km south, near Machu Picchu Base, the sea around King George Island had abundant phytoplankton in ${mesLargo(m.mes(i))}${a ? ` (${a.frase})` : ''}.`,
+          `In this record, ${min?.anio ?? '—'} had the lowest mean Antarctic sea-ice anomaly. Krill, the base of the Antarctic food web, lives beneath that ice.`,
         ],
-        dato: min?.hielo != null ? { valor: `${nf(1).format(Math.abs(min.hielo))} millones de km²`, texto: `por debajo de lo normal en ${min.anio}, según la serie NSIDC cargada.` } : undefined,
+        dato: min?.hielo != null ? { valor: `${nf(1).format(Math.abs(min.hielo))} million km²`, texto: `below normal in ${min.anio}, according to the loaded NSIDC series.` } : undefined,
       }
     },
   },
   {
-    titulo: '¿Hay un hilo que los une?',
+    titulo: 'Is there a robust connection?',
     arcos: RJ,
     preparar: () => ({ variable: 'clorofila_mg_m3', pov: { lat: -38, lng: -72, altitude: 2.35 } }),
     texto(m) {
@@ -129,10 +129,10 @@ export const RECORRIDO: readonly Paso[] = [
       const r = pearson(J.map((j) => j.chl_rj), J.map((j) => j.chl_cn))
       return {
         parrafos: [
-          'El agua antártica sí viaja al norte: la corriente circumpolar alimenta a la de Humboldt. Pero tarda meses o años y en el camino se mezcla. Las líneas del globo muestran cuánto se parecen, mes a mes, el fitoplancton de Rey Jorge y el de cada zona del Perú.',
-          'La pregunta queda abierta: ¿el vínculo aparece con retraso, a través de los nutrientes o del viento? Para eso sirven estos datos.',
+          'Southern waters feed the Humboldt system, but transport and mixing take time. The globe’s lines show exploratory similarities between King George Island and each Peruvian zone.',
+          'More than 1,100 tests found no robust Southern Ocean–Peru relationship after controlling for El Niño and multiple testing. The apparent 3–4-year lag reflected the El Niño cycle.',
         ],
-        dato: r != null ? { valor: `r = ${fmtR(r)}`, texto: `entre el fitoplancton anual de Rey Jorge y el de Chimbote (${J[0]?.anio ?? '—'}–${J.at(-1)?.anio ?? '—'}): relación en el mismo año.` } : undefined,
+        dato: r != null ? { valor: `r = ${fmtR(r)}`, texto: `between annual phytoplankton at King George Island and Chimbote (${J[0]?.anio ?? '—'}–${J.at(-1)?.anio ?? '—'}): same-year association.` } : undefined,
       }
     },
   },

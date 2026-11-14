@@ -12,9 +12,9 @@ import { useExplorerStore } from '../../store'
 import { BotonVolver } from './comun'
 
 const ESCENARIOS: { id: NombreEscenario; nombre: string }[] = [
-  { id: 'weak', nombre: 'débil' },
+  { id: 'weak', nombre: 'weak' },
   { id: 'central', nombre: 'central' },
-  { id: 'intense', nombre: 'intenso' },
+  { id: 'intense', nombre: 'intense' },
 ]
 const pct = (x: number) => `${signo(x)}${nf(0).format(Math.abs(x))} %`
 
@@ -60,7 +60,6 @@ export default function Nino2026() {
   const ultimo = primavera.at(-1)
   const anteriores = primavera.filter((c) => c !== ultimo)
   const promAnteriores = media(anteriores.map((c) => c.biomasa_t))
-  const nota = modelo.metadataMonitor.eventos_nino?.find((e) => e.nombre.includes('2026'))?.nota
   const prediccion = modelo.metadataMonitor.hallazgos?.find((h) => h.id === 'prediccion_2026')
   const pico = d.pico
 
@@ -70,9 +69,9 @@ export default function Nino2026() {
     <div className="region">Peruvian coast · observed data through {mesLargo(modelo.mes(modelo.ultimoObservado))}</div>
     <div className="cifras">
       {pico != null && <div className="cifra"><b className="num">{signo(modelo.nino[pico] as number)}{nf(2).format(Math.abs(modelo.nino[pico] as number))} °C</b><span>Niño 1+2 in {mesLargo(modelo.mes(pico))}: sea off northern Peru, above normal</span></div>}
-      {d.icen?.icen != null && <div className="cifra"><b className="num">{signo(d.icen.icen)}{nf(2).format(Math.abs(d.icen.icen))} °C</b><span>índice costero ICEN de {d.icen.date.slice(0, 7)} (IGP/ENFEN)</span></div>}
+      {d.icen?.icen != null && <div className="cifra"><b className="num">{signo(d.icen.icen)}{nf(2).format(Math.abs(d.icen.icen))} °C</b><span>coastal ICEN index for {d.icen.date.slice(0, 7)} (IGP/ENFEN)</span></div>}
     </div>
-    <div className="grafico" role="img" aria-label="Niño 1+2 mensual desde 2025 y escenarios hasta febrero de 2027">
+    <div className="grafico" role="img" aria-label="Monthly Niño 1+2 since 2025 and scenarios through February 2027">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={d.filas} margin={{ top: 6, right: 18, bottom: 0, left: -14 }}>
           <XAxis dataKey="mes" tick={{ fill: "#a3bccb", fontSize: 11 }} stroke="rgba(36,80,122,.55)" interval={5} />
@@ -80,22 +79,22 @@ export default function Nino2026() {
           <ReferenceLine y={0} stroke="rgba(234,243,245,.5)" />
           <Tooltip contentStyle={{ background: 'rgba(7,30,51,.96)', border: '1px solid #24507a', borderRadius: 8 }} formatter={(x, n) => [Array.isArray(x) ? x.map((y: number) => nf(2).format(y)).join(' – ') : `${nf(2).format(Number(x))} °C`, String(n)]} />
           <Legend verticalAlign="bottom" height={24} wrapperStyle={{ fontSize: 12, color: '#a3bccb' }} />
-          <Bar dataKey="nino" name="Niño 1+2 observado" fill="#f08a4b" isAnimationActive={false}>{d.filas.map((f) => <Cell key={f.i} fill={(f.nino ?? 0) >= 0 ? '#f08a4b' : '#2b6cb0'} />)}</Bar>
-          <Area dataKey="banda" name="Escenarios débil a intenso" stroke="none" fill="rgba(240,138,75,0.22)" isAnimationActive={false} />
-          <Line dataKey="central" name="Escenario central" stroke="#f08a4b" strokeDasharray="5 4" strokeWidth={2} dot={false} isAnimationActive={false} />
+          <Bar dataKey="nino" name="Observed Niño 1+2" fill="#f08a4b" isAnimationActive={false}>{d.filas.map((f) => <Cell key={f.i} fill={(f.nino ?? 0) >= 0 ? '#f08a4b' : '#2b6cb0'} />)}</Bar>
+          <Area dataKey="banda" name="Weak to intense scenarios" stroke="none" fill="rgba(240,138,75,0.22)" isAnimationActive={false} />
+          <Line dataKey="central" name="Central scenario" stroke="#f08a4b" strokeDasharray="5 4" strokeWidth={2} dot={false} isAnimationActive={false} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
-    <p className="nota">Niño 1+2 de NOAA PSL. Desde {d.inicioEsc != null ? etiquetaMes(modelo.mes(d.inicioEsc)) : 'septiembre de 2026'} la línea discontinua y la banda son escenarios construidos con la climatología y una trayectoria asumida de El Niño: no son observaciones ni pronósticos.</p>
+    <p className="nota">Niño 1+2 from NOAA PSL. From {d.inicioEsc != null ? etiquetaMes(modelo.mes(d.inicioEsc)) : 'September 2026'} the dashed line and band are scenarios built from climatology and an assumed El Niño trajectory: they are not observations or forecasts.</p>
 
     <h3>What would happen to phytoplankton?</h3>
     <p>Compared with a normal month, coastal chlorophyll during the scenario months{d.finEsc != null && d.inicioEsc != null ? ` (${etiquetaMes(modelo.mes(d.inicioEsc))} to ${etiquetaMes(modelo.mes(d.finEsc))})` : ''} would average:</p>
-    <div className="cifras">{d.clorofila.map((e) => <div className="cifra" key={e.id}><b className="num">{e.cambio == null ? '—' : pct(e.cambio)}</b><span>escenario {e.nombre}</span></div>)}</div>
-    <p className="nota">Monitor chlorophyll (CMEMS reanalysis for the entire coast). {nota ?? ''} {prediccion ? `The zone-level prediction is ${prediccion.estado}.` : ''}</p>
+    <div className="cifras">{d.clorofila.map((e) => <div className="cifra" key={e.id}><b className="num">{e.cambio == null ? '—' : pct(e.cambio)}</b><span>{e.nombre} scenario</span></div>)}</div>
+    <p className="nota">Monitor chlorophyll (CMEMS reanalysis for the entire coast).  {prediccion ? `This is a scenario, not a forecast.` : ''}</p>
 
     {ultimo && <>
       <h3>Anchoveta this year</h3>
-      <p>El crucero {ultimo.crucero} estimó <strong>{nf(2).format(ultimo.biomasa_t / 1e6)} millones de t</strong> en la región norte-centro{ultimo.provisional ? ' (cifra provisional)' : ''}.{promAnteriores ? ` Es ${nf(0).format(Math.abs((ultimo.biomasa_t / promAnteriores - 1) * 100))} % ${ultimo.biomasa_t < promAnteriores ? 'menos' : 'más'} que el promedio de los cruceros de primavera anteriores de esa región (${anteriores.map((c) => c.anio).join(', ')}).` : ''}</p>
+      <p>Survey {ultimo.crucero} estimated <strong>{nf(2).format(ultimo.biomasa_t / 1e6)} million t</strong> in the north-central region{ultimo.provisional ? ' (provisional estimate)' : ''}.{promAnteriores ? ` This is ${nf(0).format(Math.abs((ultimo.biomasa_t / promAnteriores - 1) * 100))} % ${ultimo.biomasa_t < promAnteriores ? 'less' : 'more'} than the average of earlier spring surveys in that region (${anteriores.map((c) => c.anio).join(', ')}).` : ''}</p>
     </>}
 
     <h3>Phytoplankton during the warm period</h3>

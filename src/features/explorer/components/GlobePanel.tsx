@@ -29,7 +29,7 @@ type Arco = { de: IdZona; a: IdZona; r: number; startLat: number; startLng: numb
 type Anillo = { lat: number; lng: number; r?: number }
 
 const CORRIENTES: Corriente[] = [
-  { id: 'circumpolar', nombre: 'Corriente Circumpolar Antártica', pts: Array.from({ length: 37 }, (_, k): [number, number] => [-58 + 2 * Math.sin(k / 3), -180 + k * 10]), color: ['rgba(159,224,242,0.08)', 'rgba(159,224,242,0.75)'] },
+  { id: 'circumpolar', nombre: 'Antarctic Circumpolar Current', pts: Array.from({ length: 37 }, (_, k): [number, number] => [-58 + 2 * Math.sin(k / 3), -180 + k * 10]), color: ['rgba(159,224,242,0.08)', 'rgba(159,224,242,0.75)'] },
   { id: 'humboldt', nombre: 'Corriente de Humboldt', pts: [[-45, -79], [-40, -76.5], [-33, -74], [-26, -72.5], [-19, -73], [-14, -77.5], [-9, -80.5], [-4, -82.5]], color: ['rgba(159,224,242,0.25)', 'rgba(159,224,242,0.95)'] },
 ]
 // los nombres de las zonas van a lados alternos para que no se monten
@@ -145,8 +145,8 @@ export default function GlobePanel() {
   // color de cada punto = dato del mes en esa zona (la misma escala que la leyenda)
   useEffect(() => {
     for (const [m, e] of elementos.current) {
-      if (m.z === 'grupo-peru') e.setAttribute('aria-label', '5 zonas del Perú: acercar el globo')
-      if (m.z === 'grupo-antartida') e.setAttribute('aria-label', 'Península Antártica: acercar el globo')
+      if (m.z === 'grupo-peru') e.setAttribute('aria-label', '5 Peruvian zones: zoom in')
+      if (m.z === 'grupo-antartida') e.setAttribute('aria-label', 'Antarctic Peninsula: zoom in')
       if (!modelo.esZona(m.z)) { e.classList.toggle('activa', m.z === 'base' && panel.tipo === 'base'); continue }
       const punto = e.querySelector('i')
       if (punto) punto.style.background = modelo.colorZona(m.z, v, month, 1)
@@ -247,7 +247,7 @@ export default function GlobePanel() {
       const c = g.toGlobeCoords(clientX - r.left, clientY - r.top)
       const l = c ? mapa.leer(c.lat, c.lng) : null
       if (!c || !l) { ocultarMapa(); return }
-      const txt = l.valor == null ? 'sin dato este mes' : l.esClorofila ? `${nf(l.valor < 1 ? 2 : 1).format(l.valor)} mg/m³ de clorofila` : `${signo(l.valor)}${nf(1).format(Math.abs(l.valor))} °C frente a lo normal`
+      const txt = l.valor == null ? 'No data this month' : l.esClorofila ? `${nf(l.valor < 1 ? 2 : 1).format(l.valor)} mg/m³ chlorophyll` : `${signo(l.valor)}${nf(1).format(Math.abs(l.valor))} °C from normal`
       const m = modelo.mes(month)
       setLectura({ x: Math.min(clientX - r.left + 14, r.width - 220), y: clientY - r.top + 16, titulo: txt, detalle: [`${fmtCoord(c.lat, c.lng)}, ${MESES_LARGOS[m.mes]} de ${m.anio}`] })
     })
@@ -280,9 +280,9 @@ export default function GlobePanel() {
     return () => removeEventListener('keydown', alTeclear)
   }, [acciones])
 
-  return <section className="escenario" aria-label="Explorador del globo">
+  return <section className="escenario" aria-label="Globe explorer">
     <div className="lienzo-globo" ref={lienzo}>
-      <div id="globo" ref={contenedor} role="img" aria-label={`Globo terrestre con ${v.nombre.toLowerCase()}. Las ${modelo.ids.length} zonas de estudio están en la lista del panel.`}
+      <div id="globo" ref={contenedor} role="img" aria-label={`Earth globe showing ${v.nombre.toLowerCase()}. The ${modelo.ids.length} study zones are listed in the panel.`}
         onPointerDown={interaccion} onWheel={interaccion} onPointerMove={alMover} onPointerLeave={() => setLectura(null)}>
         {width > 0 && <Globe
           ref={globo}
@@ -321,7 +321,7 @@ export default function GlobePanel() {
           arcDashLength={0.45}
           arcDashGap={0.12}
           arcDashAnimateTime={menosMovimiento ? 0 : 2600}
-          arcLabel={(d: object) => { const a = d as Arco; return `<div class="tip"><b>${modelo.zona(a.de).nombre} y ${modelo.zona(a.a).nombre}</b><br>Se parecen r = ${fmtR(a.r)} en ${v.corto}</div>` }}
+          arcLabel={(d: object) => { const a = d as Arco; return `<div class="tip"><b>${modelo.zona(a.de).nombre} and ${modelo.zona(a.a).nombre}</b><br>Similarity r = ${fmtR(a.r)} in ${v.corto}</div>` }}
           onArcClick={(d, ev) => { if (!desdeEtiqueta(ev)) { interaccion(); acciones.irAZona((d as Arco).a) } }}
           htmlElementsData={marcas}
           htmlLat="lat"
@@ -346,7 +346,7 @@ export default function GlobePanel() {
         <GlobeViewToggle value={view} onChange={(x) => { interaccion(); setView(x) }} />
         <RegionesPanel alElegir={interaccion} />
         <p className="vista-nota" aria-live="polite" title={nota}>{nota}</p>
-        {mapaActivo && <div className="estilos-mapa" role="group" aria-label="Estilo del mapa del satélite"><span>Mapa:</span>
+        {mapaActivo && <div className="estilos-mapa" role="group" aria-label="Satellite map style"><span>Map:</span>
           {(['bandas', 'celdas', 'suave'] as const).map((e) => <button className="control-pill" key={e} type="button" aria-pressed={mapStyle === e} onClick={() => setMapStyle(e)}>{{ bandas: 'Bands', celdas: 'Cells', suave: 'Smooth' }[e]}</button>)}
         </div>}
         <p className={`pista-globo${pistaOculta ? ' oculta' : ''}`}>Drag to rotate. Tap a zone, current or the sea.</p>

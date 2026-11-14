@@ -48,8 +48,8 @@ export interface Region {
 }
 
 export const REGIONES: Record<IdRegion, Region> = {
-  peru: { nombre: "Costa del Perú", frase: "la costa del Perú", mar: "el mar del Perú", lat: [-2, -20], lon: [-86, -70], pov: { lat: -12, lng: -80, altitude: 0.95 } },
-  antartida: { nombre: "Península Antártica", frase: "la Península Antártica", mar: "el mar de la Península Antártica", lat: [-58, -68], lon: [-72, -52], pov: { lat: -58, lng: -62, altitude: 1.0 } },
+  peru: { nombre: "Peruvian coast", frase: "the Peruvian coast", mar: "the Peruvian sea", lat: [-2, -20], lon: [-86, -70], pov: { lat: -12, lng: -80, altitude: 0.95 } },
+  antartida: { nombre: "Antarctic Peninsula", frase: "the Antarctic Peninsula", mar: "the sea off the Antarctic Peninsula", lat: [-58, -68], lon: [-72, -52], pov: { lat: -58, lng: -62, altitude: 1.0 } },
 };
 
 export interface DatosPunto {

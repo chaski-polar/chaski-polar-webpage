@@ -239,7 +239,7 @@ export class Modelo {
       if (a == null) return null;
       return v.indice === "hielo"
         ? { corto: `${signo(a)}${nf(1).format(Math.abs(a))}`, frase: `${nf(2).format(Math.abs(a))} million km² ${a >= 0 ? "above" : "below"} normal`, valor: a }
-        : { corto: `${signo(a)}${nf(v.dec).format(Math.abs(a))}`, frase: `${nf(v.dec).format(Math.abs(a))} puntos del índice SAM/AAO`, valor: a };
+        : { corto: `${signo(a)}${nf(v.dec).format(Math.abs(a))}`, frase: `${nf(v.dec).format(Math.abs(a))} SAM/AAO index points`, valor: a };
     }
     const x = this.valorZona(z, v, i);
     if (x == null) return null;
@@ -254,10 +254,10 @@ export class Modelo {
     const mes = MESES_LARGOS[this.mes(i).mes];
     if (v.modo === "log") {
       const p = (x / c - 1) * 100;
-      return { corto: `${signo(p)}${nf(0).format(Math.abs(p))} %`, frase: `${nf(0).format(Math.abs(p))} % ${p >= 0 ? "más" : "menos"} que un ${mes} normal`, valor: p };
+      return { corto: `${signo(p)}${nf(0).format(Math.abs(p))} %`, frase: `${nf(0).format(Math.abs(p))} % ${p >= 0 ? "more" : "less"} than a normal ${mes}`, valor: p };
     }
     const d = x - c;
-    return { corto: `${signo(d)}${nf(v.dec).format(Math.abs(d))} ${v.unidad}`, frase: `${nf(v.dec).format(Math.abs(d))} ${v.unidad} ${d >= 0 ? "sobre" : "bajo"} lo normal para ${mes}`, valor: d };
+    return { corto: `${signo(d)}${nf(v.dec).format(Math.abs(d))} ${v.unidad}`, frase: `${nf(v.dec).format(Math.abs(d))} ${v.unidad} ${d >= 0 ? "above" : "below"} normal for ${mes}`, valor: d };
   }
 
   /** Color de la zona en un mes (la misma escala que la leyenda) */
