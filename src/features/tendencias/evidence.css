@@ -1,0 +1,16 @@
+/* Reglas limitadas al explorador; no afectan la interfaz del juego. */
+.app-header { background: rgba(7,30,51,.92); border-bottom: 1px solid rgba(163,188,203,.12); backdrop-filter: blur(12px); }
+.app-header .app-nav a { min-height: 44px; display: inline-flex; align-items: center; }
+.seccion[id], #contenido { scroll-margin-top: 88px; }
+.method { margin-top: 36px; padding: 28px 0; border-top: 1px solid var(--linea); max-width: 78ch; }
+.method p { color: var(--niebla); }
+.resultados .estado-no_robusto { background: rgba(240,138,75,.12); color: var(--nino); }
+.resultados .resultado h4 { text-wrap: balance; }
+.seccion .tabla-envoltura { max-width: 100%; }
+@media (max-width: 640px) {
+  .app-header { gap: 4px; padding-left: 10px; padding-right: 10px; }
+  .app-header .app-brand img { width: 36px; height: 32px; }
+  .app-header .app-nav { gap: 0; font-size: .86rem; }
+  .app-header .app-nav a { padding-left: 7px; padding-right: 7px; }
+}
+@media (prefers-reduced-transparency: reduce) { .app-header { background: var(--abismo); backdrop-filter: none; } }

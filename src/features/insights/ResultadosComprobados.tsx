@@ -3,14 +3,7 @@ import { nf, signo } from '../../lib/formato'
 import { useExplorer } from '../explorer/ExplorerContext'
 import type { AsimetriaZona, ClaveZonaMonitor } from '../explorer/lib/tipos'
 
-const ESTADOS: Record<string, string> = { comprobado: 'Confirmed', pendiente: 'Pending' }
-const HALLAZGO_EN: Record<string, { titulo: string; resumen?: string }> = {
-  asimetria: { titulo: 'Warming reduces phytoplankton; cooling barely restores it' },
-  zonas_vulnerables: { titulo: 'The central coast is most vulnerable to El Niño', resumen: 'With Niño 1+2 >= +1 °C, chlorophyll falls by about 45% in Chimbote and Callao, 20–23% in Pisco and Ilo, and barely changes in Paita-Sechura.' },
-  sin_tendencias: { titulo: 'No significant chlorophyll trends since 1998' },
-  antartida: { titulo: 'No robust relationship between the Southern Ocean and Peruvian phytoplankton', resumen: 'More than 900 tests found no significant relationship after FDR correction; positive controls confirm the method.' },
-  prediccion_2026: { titulo: 'Prediction of the phytoplankton decline during El Niño 2026' },
-}
+const ESTADOS: Record<string, string> = { comprobado: 'Confirmed', pendiente: 'Pending', no_robusto: 'Not robust' }
 const pct = (x: number) => `${signo(x)}${nf(1).format(Math.abs(x))} %`
 
 /** Resultados del análisis con su estado; la asimetría muestra el detalle por zona */
@@ -33,10 +26,11 @@ export default function ResultadosComprobados() {
         const centrales = filas?.filter((f) => f.calido <= -10) ?? []
         return <article key={h.id} className={`resultado${filas ? ' con-grafico' : ''}`}>
           <span className={`estado estado-${h.estado}`}>{ESTADOS[h.estado] ?? h.estado}</span>
-          <h4>{HALLAZGO_EN[h.id]?.titulo ?? h.titulo}</h4>
-          {(HALLAZGO_EN[h.id]?.resumen ?? h.resumen) && <p>{HALLAZGO_EN[h.id]?.resumen ?? h.resumen}</p>}
+          <h4>{h.titulo}</h4>
+          {h.resumen && <p>{h.resumen}</p>}
+          {['sin_tendencias', 'calentamiento_antartico'].includes(h.id) && <a href="/explorer?trend=antarctic#trends">Test Antarctic warming, then compare the longer record</a>}
           {filas && <>
-            <p>For each degree the sea warms, chlorophyll falls between {nf(0).format(Math.min(...centrales.map((f) => -f.calido)))}% and {nf(0).format(Math.max(...centrales.map((f) => -f.calido)))}% in {centrales.map((f) => f.zona).join(', ')}. When it cools, it barely recovers.</p>
+            <p>For each degree the sea warms, chlorophyll falls between {nf(0).format(Math.min(...centrales.map((f) => -f.calido)))}% and {nf(0).format(Math.max(...centrales.map((f) => -f.calido)))}% in {centrales.map((f) => f.zona).join(', ')}. Cooling responses are near zero in Chimbote and Pisco, but about −14% per degree in Callao and Ilo. This asymmetry is descriptive, not predictive.</p>
             <div className="resultado-grafico" role="img" aria-label="Chlorophyll change per warmer and colder degree in each zone">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={filas} margin={{ top: 6, right: 6, bottom: 0, left: -10 }}>

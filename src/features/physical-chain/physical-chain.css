@@ -1,0 +1,24 @@
+.physical-chain { scroll-margin-top: 90px; }
+.chain-ocean { border: 1px solid var(--linea); border-radius: 14px; overflow: clip; margin: 28px 0; background: var(--panel-lateral); }
+.chain-origin { display: flex; align-items: baseline; gap: 20px; padding: 20px 24px; background: var(--panel-medio); border-bottom: 2px solid var(--frio); }
+.chain-origin span { font: 1.8rem var(--serif); color: var(--nino); }
+.chain-origin p { margin: 0; color: var(--niebla); }
+.chain-layer { padding: 24px; }
+.chain-layer h3 { display: flex; gap: 20px; align-items: baseline; }
+.chain-layer h3 span { font: .9rem var(--sans); color: var(--niebla); }
+.chain-deep { background: var(--abismo); border-top: 1px dashed var(--linea); }
+.chain-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.chain-links button { display: grid; gap: 6px; text-align: left; border: 1px solid transparent; border-radius: 6px; padding: 16px; background: var(--panel-suave); color: var(--hielo); font: inherit; cursor: pointer; min-height: 120px; }
+.chain-links button:hover { background: var(--corriente); }
+.chain-links button[aria-pressed=true] { background: var(--hielo); color: var(--abismo); }
+.chain-links strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.chain-links small { font-size: .85rem; }
+.chain-series { min-width: 0; padding: 24px; background: var(--panel-suave); border-radius: 14px; border: 1px solid var(--linea); }
+.chain-legend { color: var(--niebla); font-size: .9rem; }
+.chain-table { max-height: 350px; overflow: auto; margin: 16px 0; }
+.chain-table table { width: 100%; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.chain-table th, .chain-table td { text-align: left; padding: 8px; border-bottom: 1px solid var(--linea); }
+.physical-chain summary { padding: 12px 0; cursor: pointer; }
+.chain-pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0; }
+.chain-pagination button { min-height: 44px; }
+@media (max-width: 600px) { .chain-layer, .chain-series { padding: 16px; } .chain-layer h3 { display: grid; gap: 4px; } .chain-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } .chain-links button { padding: 12px; overflow-wrap: anywhere; } }

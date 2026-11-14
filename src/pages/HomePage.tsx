@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import '../App.css'
 import '../estilos.css'
 import '../features/explorer/explorer.css'
+import '../features/tendencias/evidence.css'
 import { DataState } from '../components/ui/DataState'
 import { DataProvider, useData } from '../contexts/DataContext'
 import { ExplorerProvider } from '../features/explorer/ExplorerContext'
@@ -15,11 +16,17 @@ const GlobePanel = lazy(() => import('../features/explorer/components/GlobePanel
 const InsightsSection = lazy(() => import('../features/insights/InsightsSection'))
 const EventosNinoSection = lazy(() => import('../features/eventos/EventosNinoSection'))
 const CrucerosSection = lazy(() => import('../features/cruceros/CrucerosSection'))
+const PhysicalChainSection = lazy(() => import('../features/physical-chain/PhysicalChainSection'))
 const TendenciasSection = lazy(() => import('../features/tendencias/TendenciasSection'))
 
 /** Explorador: los datos se cargan solo al entrar a esta página */
 export default function HomePage() {
-  useEffect(() => { document.title = 'Chaski Polar · Explorer' }, [])
+  useEffect(() => {
+    document.title = 'Chaski Polar · Explorer'
+    const previous = document.documentElement.lang
+    document.documentElement.lang = 'en'
+    return () => { document.documentElement.lang = previous }
+  }, [])
   return <DataProvider><Explorador /></DataProvider>
 }
 
@@ -30,7 +37,7 @@ function Explorador() {
       <DataState loading={loading} error={error}>
         <ExplorerProvider>
           <Suspense fallback={<div className="data-state">
-            <p>Preparando el globo interactivo…</p>
+            <p>Preparing the interactive globe…</p>
           </div>}>
             <GlobePanel />
           </Suspense>
@@ -39,7 +46,7 @@ function Explorador() {
             <div className="puente-copy">
               <p className="puente-kicker">The view is only the beginning</p>
               <h2>From a living ocean to evidence we can compare</h2>
-              <p>Keep the question from the globe in mind. Below, the same signal is followed through time, place and biological response.</p>
+              <p>Explore Earth system change across time and place. Is the change real? <a href="#trends">Test a trend yourself</a>, then compare it with the evidence.</p>
             </div>
             <div className="puente-steps" aria-hidden="true">
               <span><i>01</i>Observe</span>
@@ -66,6 +73,7 @@ function Explorador() {
             </section>
             <CargarAlVer id="hallazgos" alto={2600}><InsightsSection /></CargarAlVer>
             <CargarAlVer id="eventos-nino" alto={760}><EventosNinoSection /></CargarAlVer>
+            <CargarAlVer id="physical-chain" alto={1100}><PhysicalChainSection /></CargarAlVer>
             <CargarAlVer id="cruceros" alto={820}><CrucerosSection /></CargarAlVer>
             <CargarAlVer id="trends" alto={1100}><TendenciasSection /></CargarAlVer>
             <section className="seccion">

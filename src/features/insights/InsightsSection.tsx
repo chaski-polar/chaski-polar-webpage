@@ -9,7 +9,7 @@ import ResultadosComprobados from './ResultadosComprobados'
 const eje = { tick: { fill: '#a3bccb', fontSize: 12 }, stroke: 'rgba(36,80,122,.55)' }
 const tip = { contentStyle: { background: 'rgba(7,30,51,.96)', border: '1px solid #24507a', borderRadius: 8 } }
 const leyenda = { verticalAlign: 'bottom' as const, wrapperStyle: { fontSize: 12, color: '#a3bccb' } }
-const n1 = (x: unknown) => (typeof x === 'number' ? nf(Math.abs(x) < 10 ? 2 : 1).format(x) : 'sin dato')
+const n1 = (x: unknown) => (typeof x === 'number' ? nf(Math.abs(x) < 10 ? 2 : 1).format(x) : 'Not available')
 
 function Hallazgo({ titulo, cifra, detalle, texto, children, etiqueta }: { titulo: string; cifra: string; detalle: string; texto: string; children: ReactNode; etiqueta: string }) {
   return <article className="hallazgo">
@@ -53,13 +53,13 @@ export default function InsightsSection() {
     </div>
 
     <Hallazgo titulo="The coast leads: El Niño off Peru" cifra={`r = ${fmtR(d.r1)}`} detalle="Niño 1+2 temperature versus anchoveta landings"
-      texto="When the sea off Peru warms (orange bars), less cold, nutrient-rich water rises, phytoplankton declines and anchoveta landings fall. This appears in 1998, 2015–2016 and 2023. Fishing also depends on quotas and closures."
+      texto="When the sea off Peru warms (orange bars), less cold, nutrient-rich water rises, phytoplankton declines and anchoveta landings fall. These exploratory landings associations depend strongly on 1998. Fishing also depends on quotas and closures; landings are not biomass."
       etiqueta="Chart: Niño 1+2 temperature anomaly bars and Peruvian anchoveta landings line, 1998 to 2024">
       <ComposedChart data={d.anual} margin={{ top: 6, right: 0, bottom: 0, left: -8 }}>
         <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
         <XAxis dataKey="anio" {...eje} minTickGap={16} />
         <YAxis yAxisId="t" {...eje} label={{ value: '°C', angle: -90, fill: '#a3bccb', position: 'insideLeft' }} />
-        <YAxis yAxisId="p" orientation="right" {...eje} label={{ value: 'millones de t', angle: 90, fill: '#a3bccb', position: 'insideRight' }} />
+        <YAxis yAxisId="p" orientation="right" {...eje} label={{ value: 'million t', angle: 90, fill: '#a3bccb', position: 'insideRight' }} />
         <Tooltip {...tip} formatter={(x, n) => [n1(x), String(n)]} />
         <Legend {...leyenda} />
         <Bar yAxisId="t" dataKey="nino12" name="Niño 1+2 (°C above normal)" radius={3} isAnimationActive={false}>{d.anual.map((r) => <Cell key={r.anio} fill={(r.nino12 ?? 0) > 0 ? '#f08a4b' : '#2b6cb0'} />)}</Bar>
@@ -68,7 +68,7 @@ export default function InsightsSection() {
     </Hallazgo>
 
     <Hallazgo titulo="Antarctica follows its own rhythm" cifra={`r = ${fmtR(d.r2)}`} detalle="Rey Jorge phytoplankton versus Chimbote"
-      texto="Years with high phytoplankton on Rey Jorge do not match Peru. In 2023 Antarctica peaked while Peru fell during El Niño. If there is a link, it is neither direct nor from the same year."
+      texto="Years with high phytoplankton on Rey Jorge do not match Peru. In 2023 Antarctica peaked while Peru fell during El Niño. More than 1,100 tests found no robust Southern Ocean–Peru link; the apparent 3–4-year lag reflected El Niño."
       etiqueta="Chart: chlorophyll anomaly on Rey Jorge and Chimbote, 1998 to 2024">
       <ComposedChart data={d.anual} margin={{ top: 6, right: 8, bottom: 0, left: -8 }}>
         <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
@@ -76,8 +76,8 @@ export default function InsightsSection() {
         <YAxis {...eje} label={{ value: '%', angle: -90, fill: '#a3bccb', position: 'insideLeft' }} />
         <Tooltip {...tip} formatter={(x, n) => [n1(x), String(n)]} />
         <Legend {...leyenda} />
-        <Line dataKey="chl_rj" name="Rey Jorge (% sobre lo normal)" stroke="#63cde8" strokeWidth={2.4} dot={{ r: 2.5 }} isAnimationActive={false} />
-        <Line dataKey="chl_cn" name="Chimbote (% sobre lo normal)" stroke="#3fc28c" strokeWidth={2.4} dot={{ r: 2.5 }} isAnimationActive={false} />
+        <Line dataKey="chl_rj" name="Rey Jorge (% from normal)" stroke="#63cde8" strokeWidth={2.4} dot={{ r: 2.5 }} isAnimationActive={false} />
+        <Line dataKey="chl_cn" name="Chimbote (% from normal)" stroke="#3fc28c" strokeWidth={2.4} dot={{ r: 2.5 }} isAnimationActive={false} />
       </ComposedChart>
     </Hallazgo>
 
@@ -87,8 +87,8 @@ export default function InsightsSection() {
       <ComposedChart data={d.anual} margin={{ top: 6, right: 0, bottom: 0, left: -8 }}>
         <CartesianGrid vertical={false} stroke="rgba(36,80,122,.4)" />
         <XAxis dataKey="anio" {...eje} minTickGap={16} />
-        <YAxis yAxisId="h" {...eje} label={{ value: 'millones de km²', angle: -90, fill: '#a3bccb', position: 'insideLeft' }} />
-        <YAxis yAxisId="k" orientation="right" {...eje} label={{ value: 'miles de t', angle: 90, fill: '#a3bccb', position: 'insideRight' }} />
+        <YAxis yAxisId="h" {...eje} label={{ value: 'million km²', angle: -90, fill: '#a3bccb', position: 'insideLeft' }} />
+        <YAxis yAxisId="k" orientation="right" {...eje} label={{ value: 'thousand t', angle: 90, fill: '#a3bccb', position: 'insideRight' }} />
         <Tooltip {...tip} formatter={(x, n) => [n1(x), String(n)]} />
         <Legend {...leyenda} />
         <Bar yAxisId="h" dataKey="hielo" name="Sea ice (million km² from normal)" radius={3} isAnimationActive={false}>{d.anual.map((r) => <Cell key={r.anio} fill={(r.hielo ?? 0) < 0 ? 'rgba(99,205,232,0.45)' : '#63cde8'} />)}</Bar>
