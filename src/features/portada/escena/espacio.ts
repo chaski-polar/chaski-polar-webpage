@@ -89,7 +89,7 @@ export function crearEspacio(escena: THREE.Scene, C: Calidad): Capa & { globo: T
       nubes.rotation.y += 0.00012;
       // Encuadre ilustrativo frente al globo: visible también en pantallas estrechas.
       const tiempo = movimiento.matches ? 0 : t;
-      const lateral = Math.max(0, Math.min(6, 7.29 * innerWidth / innerHeight - 2.2));
+      const lateral = Math.max(0, Math.min(6, 7.29 * innerWidth / innerHeight - 3.2));
       satelite.position.set(lateral + Math.sin(tiempo * 0.18) * 0.25, Y_ESPACIO + 5 + Math.sin(tiempo * 0.2) * 0.25, -8);
       satelite.rotation.set(0.85, -0.35 + Math.sin(tiempo * 0.12) * 0.2, -0.12);
       estrellas.material.opacity = THREE.MathUtils.clamp((y - 40) / 18, 0, 1);
