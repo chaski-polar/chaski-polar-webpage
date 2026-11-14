@@ -18,6 +18,8 @@ const EventosNinoSection = lazy(() => import('../features/eventos/EventosNinoSec
 const CrucerosSection = lazy(() => import('../features/cruceros/CrucerosSection'))
 const PhysicalChainSection = lazy(() => import('../features/physical-chain/PhysicalChainSection'))
 const TendenciasSection = lazy(() => import('../features/tendencias/TendenciasSection'))
+const MapaTendencias = lazy(() => import('../features/tendencias/MapaTendencias'))
+const PrediccionSection = lazy(() => import('../features/prediccion/PrediccionSection'))
 
 /** Explorador: los datos se cargan solo al entrar a esta página */
 export default function HomePage() {
@@ -76,6 +78,8 @@ function Explorador() {
             <CargarAlVer id="physical-chain" alto={1100}><PhysicalChainSection /></CargarAlVer>
             <CargarAlVer id="cruceros" alto={820}><CrucerosSection /></CargarAlVer>
             <CargarAlVer id="trends" alto={1100}><TendenciasSection /></CargarAlVer>
+            <CargarAlVer id="trend-map" alto={900}><MapaTendencias /></CargarAlVer>
+            <CargarAlVer id="prediction" alto={1000}><PrediccionSection /></CargarAlVer>
             <section className="seccion">
               <div className="llamada">
                 <div>
