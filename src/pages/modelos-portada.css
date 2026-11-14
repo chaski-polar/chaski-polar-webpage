@@ -1,0 +1,35 @@
+.modelos-pagina { min-height: 100dvh; background: #071e33; color: #eaf3f5; padding: 30px clamp(20px, 5vw, 84px); }
+.modelos-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.modelos-cabecera a { color: #c7e6ef; text-decoration: none; }
+.modelos-cabecera a:first-child { font-family: 'Newsreader', serif; font-size: 25px; }
+.modelos-intro { margin: 60px 0 32px; }
+.modelos-intro h1 { font: 400 clamp(34px, 4vw, 60px)/1.08 'Newsreader', serif; margin: 0 0 12px; }
+.modelos-intro p, .modelos-ayuda { color: #a3bccb; }
+.modelos-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: center; }
+.modelos-visor { position: relative; overflow: hidden; border: 1px solid #28475e; border-radius: 16px; background: radial-gradient(ellipse at 50% 45%, #19445e, #0a2339 70%); box-shadow: 0 18px 50px #0002; }
+.modelos-canvas { height: clamp(360px, 53vh, 620px); width: 100%; }
+.modelos-canvas canvas { display: block; touch-action: none; }
+.modelos-controles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 16px; background: #0b243bc9; backdrop-filter: blur(10px); }
+.modelos-pagina button { cursor: pointer; min-height: 44px; border: 1px solid #426179; background: #112e45; color: #eaf3f5; border-radius: 6px; padding: 9px 14px; font: inherit; }
+.modelos-pagina button:hover { background: #1b425e; }
+.modelos-pagina :focus-visible { outline: 3px solid #63cde8; outline-offset: 4px; }
+.modelos-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
+.modelos-selector button { text-align: left; }
+.modelos-selector button[aria-pressed=true] { border-color: var(--frio, #63cde8); background: var(--hielo, #eaf3f5); color: var(--abismo, #071e33); }
+.modelos-ubicacion { color: #63cde8; margin-bottom: 10px; }
+.modelos-detalle h2 { font: 400 32px/1.1 'Newsreader', serif; margin: 0 0 16px; }
+.modelos-detalle p { line-height: 1.65; }
+.modelos-nota { font-size: 14px; color: #a3bccb; margin: 24px 0; }
+.modelos-descarga { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid #426179; color: #eaf3f5; text-decoration: none; }
+.modelos-descarga span { color: #63cde8; }
+.modelos-ayuda { margin: 22px 0; font-size: 14px; }
+.modelos-estado { position: absolute; top: 20px; left: 20px; right: 20px; padding: 12px; background: #071e33e8; border-radius: 6px; }
+@media (max-width: 760px) {
+  .modelos-pagina { padding: 22px 20px; }
+  .modelos-cabecera a:last-child { font-size: 13px; }
+  .modelos-intro { margin: 42px 0 24px; }
+  .modelos-layout { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .modelos-canvas { height: 330px; }
+  .modelos-controles { gap: 6px; padding: 10px; }
+  .modelos-controles button { padding: 8px 10px; font-size: 14px; }
+}

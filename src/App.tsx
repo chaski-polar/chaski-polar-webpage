@@ -6,6 +6,7 @@ const PortadaPage = lazy(() => import('./pages/PortadaPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
 const JuegoPage = lazy(() => import('./pages/JuegoPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const ModelosPortadaPage = lazy(() => import('./pages/ModelosPortadaPage'))
 
 function AppRoutes() {
   return (
@@ -13,6 +14,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<PortadaPage />} />
         <Route path="/explorer" element={<HomePage />} />
+        <Route path="/modelos-portada" element={<ModelosPortadaPage />} />
         <Route path="/juego" element={<JuegoPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

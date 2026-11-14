@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { crearBoyaOceanografica } from "../modelos/instrumentos";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
 import { DIR_SOL } from "./ambiente";
@@ -136,6 +137,11 @@ export function crearSuperficie(escena: THREE.Scene, C: Calidad): Capa {
   const tiempoAgua = agua.material.uniforms.time!;
 
   let barco = crearBolichera();
+  const boya = crearBoyaOceanografica();
+  const movimientoBoya = matchMedia('(prefers-reduced-motion: reduce)');
+  boya.position.set(-5, 0, -12);
+  boya.rotation.y = -0.4;
+  grupo.add(boya);
   let aves = Array.from({ length: C.aves }, crearAve);
   grupo.add(agua, crearCerros(), barco, ...aves.map((a) => a.ave));
   escena.add(grupo);
@@ -198,6 +204,11 @@ export function crearSuperficie(escena: THREE.Scene, C: Calidad): Capa {
       const debajo = y < 0;
       agua.visible = !debajo;
       tiempoAgua.value = t * 0.6;
+      const tiempoBoya = movimientoBoya.matches ? 0 : t;
+      boya.position.x = -Math.min(5, Math.max(1, 7 * innerWidth / innerHeight - 1.2));
+      boya.position.y = Math.sin(tiempoBoya * 1.05 + 1) * 0.09;
+      boya.rotation.z = Math.sin(tiempoBoya * 0.8) * 0.045;
+      boya.rotation.x = Math.cos(tiempoBoya * 0.65) * 0.025;
       barco.position.y = Math.sin(t * 1.1) * 0.08;
       barco.rotation.z = Math.sin(t * 0.9) * 0.035;
       barco.rotation.x = Math.sin(t * 0.7) * 0.02;
