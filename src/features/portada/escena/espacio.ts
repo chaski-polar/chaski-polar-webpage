@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { crearSateliteObservacion } from "../modelos/instrumentos";
 import { GIRO_INICIAL, INCLINACION, RADIO_GLOBO } from "../../../lib/encuadre";
 import { Y_ESPACIO } from "../scroll";
 import { DIR_SOL_ESPACIO } from "./ambiente";
@@ -51,36 +52,6 @@ function crearTierra(C: Calidad): { tierra: THREE.Group; nubes: THREE.Mesh } {
   return { tierra, nubes };
 }
 
-/** Satélite con paneles solares y cuerpo dorado (aislante térmico) */
-function crearSatelite(): THREE.Group {
-  const satelite = new THREE.Group();
-  const oro = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 1, roughness: 0.35 });
-  const c = lienzo(128, 64), x = contexto(c);
-  x.fillStyle = "#0b1f4a"; x.fillRect(0, 0, 128, 64);
-  x.strokeStyle = "#4b6ea8"; x.lineWidth = 1.5;
-  for (let i = 0; i <= 128; i += 16) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 64); x.stroke(); }
-  for (let j = 0; j <= 64; j += 16) { x.beginPath(); x.moveTo(0, j); x.lineTo(128, j); x.stroke(); }
-  const texturaPanel = new THREE.CanvasTexture(c);
-  texturaPanel.colorSpace = THREE.SRGBColorSpace;
-  const panel = new THREE.MeshStandardMaterial({ map: texturaPanel, metalness: 0.6, roughness: 0.25 });
-  const metal = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 1, roughness: 0.4 });
-  satelite.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 0.7), oro));
-  for (const lado of [-1, 1]) {
-    const p = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.03, 0.75), panel);
-    p.position.x = lado * 1.6;
-    const brazo = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5), metal);
-    brazo.rotation.z = Math.PI / 2;
-    brazo.position.x = lado * 0.55;
-    satelite.add(p, brazo);
-  }
-  const antena = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2.6),
-    new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 0.3, roughness: 0.4, side: THREE.DoubleSide }));
-  antena.position.y = -0.55;
-  antena.rotation.x = Math.PI;
-  satelite.add(antena);
-  return satelite;
-}
-
 /** Estrellas de distintos tamaños y colores */
 function crearEstrellas(): THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial> {
   const n = 2500, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
@@ -103,7 +74,9 @@ export function crearEspacio(escena: THREE.Scene, C: Calidad): Capa & { globo: T
   const { tierra, nubes } = crearTierra(C);
   tierra.position.set(0, Y_ESPACIO, -28);
   tierra.rotation.set(INCLINACION, GIRO_INICIAL, 0);
-  const satelite = crearSatelite();
+  const satelite = crearSateliteObservacion();
+  satelite.scale.setScalar(0.55);
+  const movimiento = matchMedia('(prefers-reduced-motion: reduce)');
   const estrellas = crearEstrellas();
   grupo.add(tierra, satelite, estrellas);
   escena.add(grupo);
@@ -114,8 +87,11 @@ export function crearEspacio(escena: THREE.Scene, C: Calidad): Capa & { globo: T
       grupo.visible = y > 28;
       tierra.rotation.y += 0.0002;
       nubes.rotation.y += 0.00012;
-      satelite.position.set(Math.cos(t * 0.25) * 15, Y_ESPACIO + 4 + Math.sin(t * 0.25) * 2, -26 + Math.sin(t * 0.25) * 9);
-      satelite.rotation.set(0.3, t * 0.25, 0.1);
+      // Encuadre ilustrativo frente al globo: visible también en pantallas estrechas.
+      const tiempo = movimiento.matches ? 0 : t;
+      const lateral = Math.max(0, Math.min(6, 7.29 * innerWidth / innerHeight - 2.2));
+      satelite.position.set(lateral + Math.sin(tiempo * 0.18) * 0.25, Y_ESPACIO + 5 + Math.sin(tiempo * 0.2) * 0.25, -8);
+      satelite.rotation.set(0.85, -0.35 + Math.sin(tiempo * 0.12) * 0.2, -0.12);
       estrellas.material.opacity = THREE.MathUtils.clamp((y - 40) / 18, 0, 1);
     },
   };
