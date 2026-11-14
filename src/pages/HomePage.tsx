@@ -16,6 +16,7 @@ const InsightsSection = lazy(() => import('../features/insights/InsightsSection'
 const EventosNinoSection = lazy(() => import('../features/eventos/EventosNinoSection'))
 const CrucerosSection = lazy(() => import('../features/cruceros/CrucerosSection'))
 const TendenciasSection = lazy(() => import('../features/tendencias/TendenciasSection'))
+const PrediccionSection = lazy(() => import('../features/prediccion/PrediccionSection'))
 
 /** Explorador: los datos se cargan solo al entrar a esta página */
 export default function HomePage() {
@@ -68,6 +69,7 @@ function Explorador() {
             <CargarAlVer id="eventos-nino" alto={760}><EventosNinoSection /></CargarAlVer>
             <CargarAlVer id="cruceros" alto={820}><CrucerosSection /></CargarAlVer>
             <CargarAlVer id="trends" alto={1100}><TendenciasSection /></CargarAlVer>
+            <CargarAlVer id="prediction" alto={1000}><PrediccionSection /></CargarAlVer>
             <section className="seccion">
               <div className="llamada">
                 <div>
