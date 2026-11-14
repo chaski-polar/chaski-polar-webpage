@@ -13,6 +13,8 @@ export type ResultadoTendencia = {
   z: number
   /** valor p de dos colas (aproximación normal) */
   p: number
+  intervalo95: [number, number]
+  pLineal: number
 }
 
 /** Función de distribución normal estándar (aproximación de Abramowitz y Stegun, error < 1e-7) */
@@ -31,7 +33,7 @@ const mediana = (v: number[]): number => {
 
 /** Mann-Kendall y pendiente de Sen sobre puntos (año, valor). Devuelve null si hay menos de 8 puntos. */
 export function tendencia(puntos: Punto[]): ResultadoTendencia | null {
-  const pts = puntos.filter((p) => Number.isFinite(p.y)).sort((a, b) => a.x - b.x)
+  const pts = puntos.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y)).sort((a, b) => a.x - b.x)
   const n = pts.length
   if (n < 8) return null
   let s = 0
@@ -48,7 +50,13 @@ export function tendencia(puntos: Punto[]): ResultadoTendencia | null {
   let varS = (n * (n - 1) * (2 * n + 5)) / 18
   for (const t of empates.values()) if (t > 1) varS -= (t * (t - 1) * (2 * t + 5)) / 18
   const z = varS > 0 ? (s - Math.sign(s)) / Math.sqrt(varS) : 0
+  if (!pendientes.length) return null
   const pendiente = mediana(pendientes)
+  pendientes.sort((a, b) => a - b)
+  // Sen (1968), ecuación 2.6; índices como scipy.stats.theilslopes.
+  const c = 1.959963984540054 * Math.sqrt(varS)
+  const inferior = Math.max(0, Math.round((pendientes.length - c) / 2) - 1)
+  const superior = Math.min(pendientes.length - 1, Math.round((pendientes.length + c) / 2))
   return {
     n,
     pendiente,
@@ -56,7 +64,51 @@ export function tendencia(puntos: Punto[]): ResultadoTendencia | null {
     tau: s / ((n * (n - 1)) / 2),
     z,
     p: Math.min(1, 2 * (1 - normalCdf(Math.abs(z)))),
+    intervalo95: [pendientes[inferior]!, pendientes[superior]!],
+    pLineal: pRegresion(pts),
   }
+}
+
+/** Log-gamma de Lanczos e integral beta para el test t bilateral de la pendiente OLS. */
+function logGamma(z: number): number {
+  const coef = [676.5203681218851, -1259.1392167224028, 771.3234287776531, -176.6150291621406, 12.507343278686905, -0.13857109526572012, 9.984369578019572e-6, 1.5056327351493116e-7]
+  let x = 0.9999999999998099
+  z -= 1
+  coef.forEach((v, i) => { x += v / (z + i + 1) })
+  const t = z + 7.5
+  return 0.9189385332046727 + (z + 0.5) * Math.log(t) - t + Math.log(x)
+}
+
+function betaFraccion(a: number, b: number, x: number): number {
+  const seguro = (v: number) => Math.abs(v) < 1e-30 ? 1e-30 : v
+  let c = 1, d = 1 / seguro(1 - (a + b) * x / (a + 1)), h = d
+  for (let m = 1; m <= 200; m++) {
+    const par = 2 * m
+    let aa = m * (b - m) * x / ((a + par - 1) * (a + par))
+    d = 1 / seguro(1 + aa * d); c = seguro(1 + aa / c); h *= d * c
+    aa = -(a + m) * (a + b + m) * x / ((a + par) * (a + par + 1))
+    d = 1 / seguro(1 + aa * d); c = seguro(1 + aa / c)
+    const delta = d * c
+    h *= delta
+    if (Math.abs(delta - 1) < 3e-14) break
+  }
+  return h
+}
+
+function betaRegularizada(x: number, a: number, b: number): number {
+  if (x <= 0) return 0
+  if (x >= 1) return 1
+  const bt = Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log1p(-x))
+  return x < (a + 1) / (a + b + 2) ? bt * betaFraccion(a, b, x) / a : 1 - bt * betaFraccion(b, a, 1 - x) / b
+}
+
+function pRegresion(pts: Punto[]): number {
+  const n = pts.length, mx = pts.reduce((s, p) => s + p.x, 0) / n, my = pts.reduce((s, p) => s + p.y, 0) / n
+  let xx = 0, yy = 0, xy = 0
+  for (const p of pts) { xx += (p.x - mx) ** 2; yy += (p.y - my) ** 2; xy += (p.x - mx) * (p.y - my) }
+  if (!xx || !yy) return 1
+  const r2 = Math.min(1, xy * xy / (xx * yy))
+  return Math.max(0, Math.min(1, betaRegularizada(1 - r2, (n - 2) / 2, 0.5)))
 }
 
 export type Estacion = 'year' | 'summer' | 'winter'
