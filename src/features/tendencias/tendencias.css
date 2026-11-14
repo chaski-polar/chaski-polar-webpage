@@ -20,3 +20,8 @@
 .tend-sens-graficos figcaption { font-size: .82rem; color: var(--niebla); padding: 0 8px 4px; }
 .tend-mapa { margin: 14px 0; padding: 10px; border-radius: 6px; background: var(--panel-suave); }
 .tend-mapa canvas { display: block; height: auto; max-width: 100%; max-height: 78vh; width: auto; margin: 0 auto; background: rgba(7, 30, 51, .6); border-radius: 4px; }
+.tend-pruebas { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 12px 0 6px; }
+.tend-pruebas > div { padding: 12px 14px; border-radius: 6px; background: var(--panel-suave); }
+.tend-pruebas h3 { margin: 0 0 6px; font-size: .95rem; color: var(--niebla); font-weight: 600; }
+.tend-pruebas p { margin: 3px 0; font-size: .92rem; }
+.tend-pruebas b { font-family: var(--serif); font-size: 1.15rem; font-weight: 400; }

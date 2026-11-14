@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CartesianGrid, ComposedChart, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useData } from '../../contexts/DataContext'
-import { promediosAnuales, sensibilidadInicio, tendencia, type Estacion } from '../../lib/tendencias'
+import { promediosAnuales, regresion, sensibilidadInicio, tendencia, type Estacion } from '../../lib/tendencias'
 import './tendencias.css'
 
 type Variable = 'chl' | 'sst'
@@ -42,6 +42,7 @@ const EJEMPLOS: Ejemplo[] = [
 
 const nf = (d: number) => new Intl.NumberFormat('en', { maximumFractionDigits: d, minimumFractionDigits: d })
 const signo = (x: number) => (x > 0 ? '+' : x < 0 ? '−' : '')
+const intervalo = (a: number, b: number, d: number) => `${signo(a)}${nf(d).format(Math.abs(a))} to ${signo(b)}${nf(d).format(Math.abs(b))}`
 const textoP = (p: number) => (p < 0.001 ? 'p < 0.001' : `p = ${nf(3).format(p)}`)
 
 /** Panel de tendencias: elegir variable, región y periodo, y comprobar si el cambio es estadísticamente significativo */
@@ -88,6 +89,7 @@ export default function TendenciasSection() {
   const fi = Math.min(ultimo, Math.max(fin, ini))
   const puntos = useMemo(() => todos.filter((p) => p.x >= ini && p.x <= fi), [todos, ini, fi])
   const res = useMemo(() => tendencia(puntos), [puntos])
+  const reg = useMemo(() => regresion(puntos), [puntos])
   const sens = useMemo(() => sensibilidadInicio(todos.filter((p) => p.x <= fi)), [todos, fi])
   const anios = Array.from({ length: ultimo - primero + 1 }, (_, i) => primero + i)
 
@@ -163,6 +165,21 @@ export default function TendenciasSection() {
           </span>
         </div>
         {!significativa && <p className="tend-nota">Not significant does not mean there is no change: a longer series can make a trend significant, or confirm that there is none.</p>}
+        {reg && <div className="tend-pruebas">
+          <div>
+            <h3>Mann-Kendall test and Sen slope</h3>
+            <p><b>{signo(res.pendiente)}{nf(dec).format(Math.abs(res.pendiente * 10))} {UNIDAD[variable]}</b> per decade</p>
+            <p>95% confidence interval: {intervalo(res.ic95[0] * 10, res.ic95[1] * 10, dec)}</p>
+            <p>{textoP(res.p)} · {res.p < 0.05 ? 'significant' : 'not significant'}</p>
+          </div>
+          <div>
+            <h3>Linear regression and t-test</h3>
+            <p><b>{signo(reg.pendiente)}{nf(dec).format(Math.abs(reg.pendiente * 10))} {UNIDAD[variable]}</b> per decade</p>
+            <p>95% confidence interval: {intervalo(reg.ic95[0] * 10, reg.ic95[1] * 10, dec)}</p>
+            <p>t = {nf(2).format(reg.t)} ({reg.n - 2} degrees of freedom) · {textoP(reg.p)} · {reg.p < 0.05 ? 'significant' : 'not significant'}</p>
+          </div>
+        </div>}
+        {reg && <p className="tend-nota">The two tests answer the same question in different ways. If the 95% interval includes zero, the trend is not significant. Mann-Kendall does not assume a straight line or normal data; the t-test does, so it is less reliable on short, uneven series.</p>}
 
         <div className="tend-grafico" role="img" aria-label={`Yearly averages of ${variable === 'chl' ? 'chlorophyll' : 'sea surface temperature'} with the trend line`}>
           <ResponsiveContainer width="100%" height={300}>
